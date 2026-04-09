@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
+import { CommonActions } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
@@ -131,9 +132,18 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
       setProcessingStep(4);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setTimeout(() => {
-        navigation.navigate('Success', {
-          recipientName, recipientMethod, amount, receiveAmount, recvCurrency, sendCurrency,
-        });
+        // Go straight to receipt — no separate success screen
+        const tabs = navigation.getParent();
+        if (tabs) {
+          // Reset send stack so it's clean when user returns
+          navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Recipient' }] }));
+          setTimeout(() => {
+            tabs.navigate('ActivityTab', {
+              screen: 'TransferDetail',
+              params: { transferId: '1', status: 'delivered' },
+            });
+          }, 100);
+        }
       }, 1500);
     }, 10000);
   };
