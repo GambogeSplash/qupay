@@ -27,6 +27,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   web: {
     favicon: './assets/favicon.png',
+    bundler: 'metro',
+    output: 'single',
+    themeColor: '#0A0A0C',
+    backgroundColor: '#0A0A0C',
+    name: 'Qupay',
+    shortName: 'Qupay',
+    description: 'Send crypto. They get cash.',
   },
   extra: {
     apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
