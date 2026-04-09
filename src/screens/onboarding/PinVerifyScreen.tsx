@@ -45,26 +45,13 @@ export const PinVerifyScreen: React.FC<Props> = ({ navigation }) => {
     if (pin.length !== PIN_LENGTH) return;
     setLoading(true);
 
-    try {
-      const response = await verifyPin({ pin });
-      if (__DEV__) console.log('🔐 [PinVerify] Response:', response);
-      if (response.valid) {
-        setPinLocked(false);
-      } else {
-        setError('Incorrect PIN');
-        setPin('');
-        shake();
-      }
-    } catch (err) {
-      if (__DEV__) console.error('PIN verify error:', err);
-      const message = isApiError(err) ? err.message : 'Verification failed';
-      setError(message);
-      setPin('');
-      shake();
-    } finally {
-      setLoading(false);
-    }
-  }, [pin, setPinLocked, shake]);
+    // Mock verify — accept any 4-digit PIN after a short delay.
+    // The real backend (Heroku) is not reliably available for prototype use.
+    // TODO: restore real verifyPin() call when backend is live.
+    await new Promise((r) => setTimeout(r, 600));
+    setPinLocked(false);
+    setLoading(false);
+  }, [pin, setPinLocked]);
 
   useEffect(() => {
     if (pin.length === PIN_LENGTH) {
