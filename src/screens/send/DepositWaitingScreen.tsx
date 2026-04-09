@@ -142,15 +142,36 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
   if (stage === 'detecting') {
     const currentStep = RADAR_STEPS[processingStep] || RADAR_STEPS[0];
     const isDone = processingStep >= 4;
+    const ringColor = isDone ? '#4ADE80' : '#38BDF8';
     return (
       <SafeAreaView style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]} edges={['top']}>
-        {/* Radar pulse rings */}
+        {/* Radar pulse rings — animated scale + opacity */}
         <View style={styles.radarWrap}>
-          <Animated.View style={[styles.radarRing3, { opacity: pulse, borderColor: isDone ? 'rgba(74,222,128,0.15)' : 'rgba(56,189,248,0.1)' }]} />
-          <Animated.View style={[styles.radarRing2, { opacity: pulse, borderColor: isDone ? 'rgba(74,222,128,0.25)' : 'rgba(56,189,248,0.2)', transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.1, 1] }) }] }]} />
-          <View style={[styles.radarCenter, isDone && { backgroundColor: 'rgba(74,222,128,0.12)' }]}>
+          {/* Outer ring — slow pulse */}
+          <Animated.View style={[styles.radarRing3, {
+            borderColor: ringColor,
+            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.08, 0.2] }),
+            transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.15, 1] }) }],
+          }]} />
+          {/* Middle ring — medium pulse */}
+          <Animated.View style={[styles.radarRing2, {
+            borderColor: ringColor,
+            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.15, 0.35] }),
+            transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.08, 1] }) }],
+          }]} />
+          {/* Inner ring — strong pulse */}
+          <Animated.View style={[styles.radarRing1, {
+            borderColor: ringColor,
+            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.25, 0.5] }),
+          }]} />
+          {/* Center icon — spins when not done */}
+          <Animated.View style={[
+            styles.radarCenter,
+            isDone && { backgroundColor: 'rgba(74,222,128,0.15)' },
+            !isDone && { transform: [{ rotate: spinRotate }] },
+          ]}>
             <Ionicons name={currentStep.icon as any} size={32} color={isDone ? '#4ADE80' : '#38BDF8'} />
-          </View>
+          </Animated.View>
         </View>
 
         {/* Status text — updates progressively */}
@@ -283,14 +304,18 @@ const styles = StyleSheet.create({
   },
 
   // Radar detecting
-  radarWrap: { width: 160, height: 160, alignItems: 'center', justifyContent: 'center', marginBottom: 32 },
+  radarWrap: { width: 180, height: 180, alignItems: 'center', justifyContent: 'center', marginBottom: 32 },
   radarRing3: {
-    position: 'absolute', width: 160, height: 160, borderRadius: 80,
+    position: 'absolute', width: 180, height: 180, borderRadius: 90,
     borderWidth: 1, borderColor: 'rgba(56,189,248,0.1)',
   },
   radarRing2: {
-    position: 'absolute', width: 110, height: 110, borderRadius: 55,
-    borderWidth: 1, borderColor: 'rgba(56,189,248,0.2)',
+    position: 'absolute', width: 120, height: 120, borderRadius: 60,
+    borderWidth: 1.5, borderColor: 'rgba(56,189,248,0.2)',
+  },
+  radarRing1: {
+    position: 'absolute', width: 85, height: 85, borderRadius: 42.5,
+    borderWidth: 2, borderColor: 'rgba(56,189,248,0.3)',
   },
   radarCenter: {
     width: 64, height: 64, borderRadius: 32,
