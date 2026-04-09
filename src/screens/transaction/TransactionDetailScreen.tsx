@@ -127,7 +127,7 @@ export const TransactionDetailScreen: React.FC<Props> = ({ navigation, route }) 
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
         {/* Hero — big check circle, label, amount, sub */}
         <View style={styles.hero}>
           <View style={[styles.checkCircle, { backgroundColor: config.color + '22' }]}>

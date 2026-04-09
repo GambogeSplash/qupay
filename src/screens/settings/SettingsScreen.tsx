@@ -96,7 +96,7 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
         style={styles.glow}
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
         {/* Identity hero */}
         <View style={styles.identity}>
           <View style={styles.bigAvatar}>
