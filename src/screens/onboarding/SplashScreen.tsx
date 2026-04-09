@@ -43,10 +43,13 @@ export const SplashScreen: React.FC<Props> = ({ navigation }) => {
         <Animated.View style={[styles.hero, { opacity: heroFade, transform: [{ translateY: heroFade.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>
           {/* Paper plane brand mark — large, iconic */}
           <View style={styles.brandMark}>
+            <Animated.View style={[styles.brandGlow, {
+              transform: [{ scale: heroFade.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }],
+              opacity: heroFade.interpolate({ inputRange: [0, 1], outputRange: [0, 0.5] }),
+            }]} />
             <View style={styles.brandCircle}>
-              <Text style={styles.mascot}>{'\u{1F406}'}</Text>
+              <Ionicons name="flash" size={52} color="#FFFFFF" />
             </View>
-            <View style={styles.brandGlow} />
           </View>
 
           <Text style={styles.headline}>
@@ -112,7 +115,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     zIndex: 2,
   },
-  mascot: { fontSize: 52 },
   brandGlow: {
     position: 'absolute', width: 140, height: 140, borderRadius: 70,
     backgroundColor: 'rgba(56,189,248,0.12)',
