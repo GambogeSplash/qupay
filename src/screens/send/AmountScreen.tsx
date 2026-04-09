@@ -131,51 +131,54 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
         </TouchableOpacity>
       )}
 
-      {/* Top card: You send */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardLabel}>You send</Text>
-        </View>
-        <View style={styles.cardRow}>
-          <Animated.Text style={[styles.cardAmount, { transform: [{ scale: amountPulse }] }]} numberOfLines={1}>
-            <Text style={styles.dollar}>$</Text>{sendStr}
-          </Animated.Text>
-          <TouchableOpacity style={styles.sourceBadge} onPress={() => setShowCoinPicker(true)} activeOpacity={0.7}>
-            <CryptoIcon token={selectedCoin.token} network={selectedCoin.network} size={22} ringColor="#17171A" />
-            <Text style={styles.sourceText}>{selectedCoin.token}</Text>
-            <View style={[styles.chainTag, { backgroundColor: selectedCoin.color }]}>
-              <Text style={styles.chainTagText}>{selectedCoin.networkShort}</Text>
-            </View>
-            <Ionicons name="chevron-down" size={12} color="rgba(255,255,255,0.42)" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Arrow divider */}
-      <View style={styles.dividerWrap}>
-        <Ionicons name="arrow-down" size={20} color="rgba(255,255,255,0.25)" />
-      </View>
-
-      {/* Bottom card: They receive */}
-      <View style={[styles.card, { marginTop: -2 }]}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardLabel}>They receive</Text>
-          <Text style={styles.cardAvailable}>
-            ~{corridor.speedSeconds}s delivery
-          </Text>
-        </View>
-        <View style={styles.cardRow}>
-          <Text style={[styles.cardAmount, { color: '#38BDF8' }]} numberOfLines={1}>
-            {formatMoney(receiveNum, corridor.toCurrency)}
-          </Text>
-          <View style={styles.currencyChip}>
-            <Text style={styles.currencyFlag}>{corridor.toFlag}</Text>
-            <Text style={styles.sourceText}>{corridor.toCurrency}</Text>
+      {/* Swap card — both sections in one card */}
+      <View style={styles.swapCard}>
+        {/* You send */}
+        <View style={styles.swapSection}>
+          <Text style={styles.swapLabel}>You send</Text>
+          <View style={styles.swapRow}>
+            <Animated.Text style={[styles.swapAmount, { transform: [{ scale: amountPulse }] }]} numberOfLines={1}>
+              {sendStr === '0' ? '0' : sendStr}
+            </Animated.Text>
+            <TouchableOpacity style={styles.coinPill} onPress={() => setShowCoinPicker(true)} activeOpacity={0.7}>
+              <CryptoIcon token={selectedCoin.token} network={selectedCoin.network} size={20} ringColor="#1F1F23" />
+              <Text style={styles.coinPillText}>{selectedCoin.token}</Text>
+              <View style={[styles.chainTag, { backgroundColor: selectedCoin.color }]}>
+                <Text style={styles.chainTagText}>{selectedCoin.networkShort}</Text>
+              </View>
+              <Ionicons name="chevron-down" size={11} color="rgba(255,255,255,0.35)" />
+            </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.feeInline}>
-          1 USD = {liveRate.toFixed(2)} {corridor.toCurrency} · {formatMoney(fee, 'USD')} fee
-        </Text>
+
+        {/* Divider with rate */}
+        <View style={styles.swapDivider}>
+          <View style={styles.swapDividerLine} />
+          <View style={styles.swapRatePill}>
+            <Text style={styles.swapRateText}>1 USD = {liveRate.toFixed(0)} {corridor.toCurrency}</Text>
+          </View>
+          <View style={styles.swapDividerLine} />
+        </View>
+
+        {/* They receive */}
+        <View style={styles.swapSection}>
+          <View style={styles.swapLabelRow}>
+            <Text style={styles.swapLabel}>They receive</Text>
+            <Text style={styles.swapSpeed}>~{corridor.speedSeconds}s</Text>
+          </View>
+          <View style={styles.swapRow}>
+            <Text style={[styles.swapAmount, { color: '#38BDF8' }]} numberOfLines={1}>
+              {sendNum > 0 ? formatMoney(receiveNum, corridor.toCurrency) : '0'}
+            </Text>
+            <View style={styles.coinPill}>
+              <Text style={styles.currencyFlag}>{corridor.toFlag}</Text>
+              <Text style={styles.coinPillText}>{corridor.toCurrency}</Text>
+            </View>
+          </View>
+          {sendNum > 0 && (
+            <Text style={styles.feeText}>{formatMoney(fee, 'USD')} fee included</Text>
+          )}
+        </View>
       </View>
 
       {/* Validation pills */}
@@ -272,46 +275,37 @@ const styles = StyleSheet.create({
   recipientName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
   recipientSub: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)', marginTop: 1 },
 
-  card: {
+  // Unified swap card
+  swapCard: {
     backgroundColor: '#17171A', borderRadius: 16,
-    paddingHorizontal: 18, paddingVertical: 20,
-    marginHorizontal: 20,
+    marginHorizontal: 20, overflow: 'hidden',
   },
-  cardHeader: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    marginBottom: 12,
+  swapSection: { paddingHorizontal: 18, paddingVertical: 16 },
+  swapLabel: { fontFamily: 'Inter_500Medium', fontSize: 12, color: 'rgba(255,255,255,0.42)', marginBottom: 8 },
+  swapLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  swapSpeed: { fontFamily: 'Inter_500Medium', fontSize: 11, color: 'rgba(255,255,255,0.3)' },
+  swapRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  swapAmount: {
+    fontFamily: 'Inter_700Bold', fontSize: 36, color: '#FFFFFF',
+    letterSpacing: -0.8, flex: 1, fontVariant: ['tabular-nums'],
   },
-  cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  cardLabel: { fontFamily: 'Inter_500Medium', fontSize: 13, color: 'rgba(255,255,255,0.58)' },
-  cardAvailable: { fontFamily: 'Inter_500Medium', fontSize: 12, color: 'rgba(255,255,255,0.42)' },
-  maxPill: {
-    backgroundColor: 'rgba(56,189,248,0.12)', borderRadius: 6,
-    paddingHorizontal: 8, paddingVertical: 3,
-  },
-  maxText: { fontFamily: 'Inter_700Bold', fontSize: 11, color: '#38BDF8', letterSpacing: 0.5 },
-  feeInline: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.42)', marginTop: 8 },
-
-  cardRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cardAmount: {
-    fontFamily: 'Inter_700Bold', fontSize: 42, color: '#FFFFFF',
-    letterSpacing: -1, flex: 1, marginRight: 8, fontVariant: ['tabular-nums'],
-  },
-  dollar: { color: 'rgba(255,255,255,0.42)', fontSize: 32 },
-
-  sourceBadge: {
+  coinPill: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: '#1F1F23', borderRadius: 999,
+    backgroundColor: '#26262A', borderRadius: 999,
     paddingHorizontal: 10, paddingVertical: 6,
   },
-  sourceText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFFF' },
-  currencyChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: '#1F1F23', borderRadius: 999,
-    paddingHorizontal: 10, paddingVertical: 6,
-  },
-  currencyFlag: { fontSize: 16 },
+  coinPillText: { fontFamily: 'Inter_600SemiBold', fontSize: 12, color: '#FFFFFF' },
+  currencyFlag: { fontSize: 15 },
+  feeText: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 6 },
 
-  dividerWrap: { alignItems: 'center', paddingVertical: 6 },
+  // Swap divider
+  swapDivider: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18 },
+  swapDividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
+  swapRatePill: {
+    backgroundColor: '#0A0A0C', borderRadius: 999,
+    paddingHorizontal: 10, paddingVertical: 4, marginHorizontal: 8,
+  },
+  swapRateText: { fontFamily: 'Inter_500Medium', fontSize: 10, color: '#38BDF8', fontVariant: ['tabular-nums'] },
 
   errorPill: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
