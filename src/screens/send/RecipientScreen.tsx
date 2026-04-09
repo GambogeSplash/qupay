@@ -270,12 +270,7 @@ export const RecipientScreen: React.FC<Props> = ({ navigation, route }) => {
                   onPress={() => selectWalletContact(w)}
                   activeOpacity={0.7}
                 >
-                  <Avatar seed={c.name} bankBadge={c.method}
-                    initials={w.initials}
-                    size={44}
-                    colors={w.colors}
-                    fontSize={13}
-                  />
+                  <Avatar seed={w.name} initials={w.initials} size={44} />
                   <View style={styles.ciInfo}>
                     <Text style={styles.ciName}>{w.name}</Text>
                     <View style={styles.walletSubRow}>
@@ -330,12 +325,7 @@ export const RecipientScreen: React.FC<Props> = ({ navigation, route }) => {
                   activeOpacity={0.7}
                 >
                   <View style={styles.resolvedCard}>
-                    <Avatar seed={c.name} bankBadge={c.method}
-                      initials={resolvedContact.initials}
-                      size={36}
-                      colors={resolvedContact.colors}
-                      fontSize={12}
-                    />
+                    <Avatar seed={resolvedContact.name} initials={resolvedContact.initials} size={36} bankBadge={resolvedContact.method} />
                     <View style={styles.rcInfo}>
                       <Text style={styles.rcName}>{resolvedContact.name}</Text>
                       <Text style={styles.rcSub}>
@@ -380,12 +370,7 @@ export const RecipientScreen: React.FC<Props> = ({ navigation, route }) => {
                   activeOpacity={0.7}
                 >
                   <View style={styles.ciAvWrap}>
-                    <Avatar seed={c.name} bankBadge={c.method}
-                      initials={c.initials}
-                      size={44}
-                      colors={c.colors}
-                      fontSize={13}
-                    />
+                    <Avatar seed={c.name} initials={c.initials} size={44} bankBadge={c.method} />
                     <View style={styles.ciFlag}>
                       <Text style={styles.ciFlagText}>{c.flag}</Text>
                     </View>

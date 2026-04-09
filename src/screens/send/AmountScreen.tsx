@@ -81,57 +81,60 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Amount display area — both amounts always visible above numpad */}
       <View style={styles.displayArea}>
-        {/* You send */}
-        <View style={styles.sendSection}>
-          <Text style={styles.label}>You send</Text>
-          <View style={styles.amountRow}>
-            <Text style={[styles.amountText, !amountStr && styles.amountPlaceholder]}>
-              {amountStr || '0'}
-            </Text>
-            <View style={styles.currBadge}>
-              <CryptoIcon token="USDT" network="Polygon" size={24} ringColor="#1F1F23" />
-              <Text style={styles.currCode}>USDT</Text>
+        {/* Card container — visual grouping for the swap area */}
+        <View style={styles.swapCard}>
+          {/* You send */}
+          <View style={styles.sendSection}>
+            <Text style={styles.label}>You send</Text>
+            <View style={styles.amountRow}>
+              <Text style={[styles.amountText, !amountStr && styles.amountPlaceholder]}>
+                {amountStr || '0'}
+              </Text>
+              <View style={styles.currBadge}>
+                <CryptoIcon token="USDT" network="Polygon" size={24} ringColor="#17171A" />
+                <Text style={styles.currCode}>USDT</Text>
+              </View>
+            </View>
+            {/* Balance + MAX */}
+            <View style={styles.balanceRow}>
+              <Text style={[styles.balanceText, overBalance && styles.balanceError]}>
+                Balance: {WALLET_BALANCE} USDT
+              </Text>
+              <TouchableOpacity onPress={setMax} activeOpacity={0.7}>
+                <Text style={styles.maxBtn}>MAX</Text>
+              </TouchableOpacity>
             </View>
           </View>
-          {/* Balance + MAX */}
-          <View style={styles.balanceRow}>
-            <Text style={[styles.balanceText, overBalance && styles.balanceError]}>
-              Balance: {WALLET_BALANCE} USDT
-            </Text>
-            <TouchableOpacity onPress={setMax} activeOpacity={0.7}>
-              <Text style={styles.maxBtn}>MAX</Text>
-            </TouchableOpacity>
+
+          {/* Rate divider */}
+          <View style={styles.rateDivider}>
+            <View style={styles.rateLine} />
+            <View style={styles.ratePill}>
+              <Ionicons name="swap-horizontal" size={12} color="#38BDF8" />
+              <Text style={styles.rateText}>
+                1 USDT = {receiveCurrency.symbol}{rate.toLocaleString()} {receiveCurrency.code}
+              </Text>
+            </View>
+            <View style={styles.rateLine} />
+          </View>
+
+          {/* They receive */}
+          <View style={styles.recvSection}>
+            <Text style={styles.label}>They receive</Text>
+            <View style={styles.amountRow}>
+              <Text style={[styles.recvText, !numAmount && styles.amountPlaceholder]}>
+                {numAmount > 0 ? `${receiveCurrency.symbol}${receiveAmount.toLocaleString()}` : '0'}
+              </Text>
+              <TouchableOpacity style={styles.recvCurrBadge} onPress={() => setShowRecvPicker(true)} activeOpacity={0.7}>
+                <Text style={styles.currFlag}>{receiveCurrency.flag}</Text>
+                <Text style={styles.currCode}>{receiveCurrency.code}</Text>
+                <Ionicons name="chevron-down" size={12} color="rgba(255,255,255,0.42)" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
-        {/* Rate divider */}
-        <View style={styles.rateDivider}>
-          <View style={styles.rateLine} />
-          <View style={styles.ratePill}>
-            <Ionicons name="swap-horizontal" size={12} color="#38BDF8" />
-            <Text style={styles.rateText}>
-              1 USDT = {receiveCurrency.symbol}{rate.toLocaleString()} {receiveCurrency.code}
-            </Text>
-          </View>
-          <View style={styles.rateLine} />
-        </View>
-
-        {/* They receive */}
-        <View style={styles.recvSection}>
-          <Text style={styles.label}>They receive</Text>
-          <View style={styles.amountRow}>
-            <Text style={[styles.recvText, !numAmount && styles.amountPlaceholder]}>
-              {numAmount > 0 ? `${receiveCurrency.symbol}${receiveAmount.toLocaleString()}` : '0'}
-            </Text>
-            <TouchableOpacity style={styles.recvCurrBadge} onPress={() => setShowRecvPicker(true)} activeOpacity={0.7}>
-              <Text style={styles.currFlag}>{receiveCurrency.flag}</Text>
-              <Text style={styles.currCode}>{receiveCurrency.code}</Text>
-              <Ionicons name="chevron-down" size={12} color="rgba(255,255,255,0.42)" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Inline fee */}
+        {/* Inline fee — outside the card for breathing room */}
         {numAmount > 0 && (
           <View style={styles.feeRow}>
             <Text style={styles.feeLabel}>Fee</Text>
@@ -206,6 +209,14 @@ const styles = StyleSheet.create({
 
   // Display area — grows to fill space above numpad
   displayArea: { flex: 1, paddingHorizontal: 20, paddingTop: 8, justifyContent: 'center' },
+
+  // Card container wrapping the send/receive swap area
+  swapCard: {
+    backgroundColor: '#17171A',
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
 
   label: {
     fontFamily: 'Inter_600SemiBold', fontSize: 11, letterSpacing: 0.8,

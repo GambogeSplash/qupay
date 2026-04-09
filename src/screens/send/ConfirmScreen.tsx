@@ -53,6 +53,9 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
   const [countdown, setCountdown] = useState(RATE_LOCK_SECONDS);
   const rateExpired = countdown <= 0;
   const rateUrgent = countdown <= 5 && countdown > 0;
+  // Ref so PanResponder closure always reads current value
+  const rateExpiredRef = useRef(false);
+  rateExpiredRef.current = rateExpired;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -82,8 +85,8 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => !rateExpired,
-      onMoveShouldSetPanResponder: () => !rateExpired,
+      onStartShouldSetPanResponder: () => !rateExpiredRef.current,
+      onMoveShouldSetPanResponder: () => !rateExpiredRef.current,
       onPanResponderGrant: () => {
         setSliding(true);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
