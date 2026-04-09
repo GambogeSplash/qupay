@@ -106,6 +106,9 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
           <Text style={styles.name}>{displayName}</Text>
           <Text style={styles.handle}>{handle}</Text>
           <Text style={styles.email}>{displayEmail}</Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => Alert.alert('Edit profile', 'Coming soon.')}>
+            <Text style={styles.editProfileLink}>Edit profile</Text>
+          </TouchableOpacity>
 
           {/* Verified pill */}
           <View style={styles.verifiedPill}>
@@ -137,6 +140,13 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
             icon="card"
             label="Wallets & cards"
             sub="Linked payout sources"
+            onPress={() => go('Wallets')}
+          />
+          <Divider />
+          <LinkRow
+            icon="business"
+            label="Linked banks"
+            sub="3 banks saved"
             onPress={() => go('Wallets')}
           />
           <Divider />
@@ -262,6 +272,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'rgba(255,255,255,0.58)',
     marginTop: 2,
+  },
+  editProfileLink: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 12,
+    color: '#38BDF8',
+    marginTop: 6,
   },
   verifiedPill: {
     flexDirection: 'row',

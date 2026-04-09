@@ -120,6 +120,12 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
         <View style={{ width: 36 }} />
       </View>
 
+      {/* Total sent stat card */}
+      <View style={styles.totalSentCard}>
+        <Text style={styles.totalSentLabel}>Total sent · <Text style={styles.totalSentValue}>$450.00</Text></Text>
+        <Text style={styles.totalSentCount}>5 transfers</Text>
+      </View>
+
       {/* Search bar */}
       <View style={styles.searchWrap}>
         <SearchInput
@@ -220,6 +226,34 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: 'Inter_700Bold', fontSize: 20, color: '#FFFFFF',
     flex: 1, textAlign: 'center',
+  },
+
+  // Total sent stat card
+  totalSentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#17171A',
+    borderRadius: 16,
+    marginHorizontal: 20,
+    marginTop: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  totalSentLabel: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.58)',
+  },
+  totalSentValue: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 13,
+    color: '#FFFFFF',
+  },
+  totalSentCount: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.58)',
   },
 
   // Search bar

@@ -1,21 +1,51 @@
-// DepositWaitingScreen — 4-step progress tracker showing transfer status.
-// Consistent with app visual language: borderless cards, Inter fonts, brand colors.
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+// DepositWaitingScreen — deposit address with QR, copy, detection, processing.
+// Ported from /qupay/src/screens/remittance/DepositAddressScreen.tsx.
+// Flow: safety interstitial → QR + address → user sends from external wallet →
+// detection → processing steps → navigate to Success.
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
+import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<SendFlowParamList, 'DepositWaiting'>;
-type StepState = 'waiting' | 'active' | 'done';
+type Stage = 'warning' | 'address' | 'processing';
 
-interface Step { label: string; desc: string; state: StepState; }
+const ADDRESS_TTL = 15 * 60; // 15 min
+const DEPOSIT_ADDRESS = '0x4c2A9f8E3d7B6a1C0e5F2d8A9b4C7e6F3a1D5b';
 
 const currencySymbols: Record<string, string> = {
-  USDT: '', NGN: '\u20A6', GHS: '\u20B5', KES: 'KSh', INR: '\u20B9', PHP: '\u20B1', MXN: '$', PKR: 'Rs', ZAR: 'R',
+  USDT: '', NGN: '\u20A6', GHS: '\u20B5', KES: 'KSh', INR: '\u20B9', PHP: '\u20B1', PKR: 'Rs',
 };
+
+function formatCountdown(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+// Fake QR grid (real app would use react-native-qrcode-svg)
+const FakeQR: React.FC = () => (
+  <View style={styles.qrBox}>
+    <View style={styles.qrGrid}>
+      {Array.from({ length: 169 }).map((_, i) => (
+        <View
+          key={i}
+          style={[
+            styles.qrCell,
+            (i * 7 + i * i * 3) % 3 !== 0 && styles.qrCellFilled,
+            ((i % 13 < 3 && Math.floor(i / 13) < 3) ||
+             (i % 13 > 9 && Math.floor(i / 13) < 3) ||
+             (i % 13 < 3 && Math.floor(i / 13) > 9)) && styles.qrCellFilled,
+          ]}
+        />
+      ))}
+    </View>
+  </View>
+);
 
 export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   const {
@@ -28,22 +58,28 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
     network = 'Polygon',
   } = route.params || {};
 
-  const isCryptoOut = recvCurrency === 'USDT';
   const recvSymbol = currencySymbols[recvCurrency] || '';
   const firstName = recipientName.split(' ')[0];
 
-  const initialSteps: Step[] = useMemo(() => [
-    { label: 'Listening for deposit', desc: `Watching ${network} for your ${sendCurrency} transfer`, state: 'active' },
-    { label: 'Deposit confirmed', desc: `${amount} ${sendCurrency} received and locked`, state: 'waiting' },
-    { label: 'Converting & sending', desc: `Releasing ${recvSymbol}${receiveAmount.toLocaleString()} to ${recipientMethod}`, state: 'waiting' },
-    { label: 'Delivered', desc: `${firstName} received ${recvSymbol}${receiveAmount.toLocaleString()} via ${recipientMethod}`, state: 'waiting' },
-  ], [network, sendCurrency, amount, recvSymbol, receiveAmount, recipientMethod, firstName]);
+  const [stage, setStage] = useState<Stage>('warning');
+  const [secondsLeft, setSecondsLeft] = useState(ADDRESS_TTL);
+  const [copied, setCopied] = useState(false);
+  const [processingStep, setProcessingStep] = useState(0);
 
-  const [steps, setSteps] = useState(initialSteps);
-  const [currentStep, setCurrentStep] = useState(0);
+  const pulse = useRef(new Animated.Value(1)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
 
-  // Spinner animation
+  // Pulse for waiting dot
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 0.4, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 900, useNativeDriver: true }),
+      ]),
+    ).start();
+  }, [pulse]);
+
+  // Spinner for processing
   useEffect(() => {
     const spin = Animated.loop(
       Animated.timing(spinAnim, { toValue: 1, duration: 1200, easing: Easing.linear, useNativeDriver: true })
@@ -51,142 +87,293 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
     spin.start();
     return () => spin.stop();
   }, [spinAnim]);
-
   const spinRotate = spinAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
-  // Simulate step progression
+  // Countdown
   useEffect(() => {
-    const timings = [4000, 3000, 5000]; // ms between steps
-    let timer: ReturnType<typeof setTimeout>;
+    if (stage !== 'address' || secondsLeft <= 0) return;
+    const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [secondsLeft, stage]);
 
-    const advance = (step: number) => {
-      if (step >= 3) {
-        // Done — navigate to success
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTimeout(() => {
-          navigation.navigate('Success', {
-            recipientName, recipientMethod, amount, receiveAmount,
-            recvCurrency, sendCurrency,
-          });
-        }, 1200);
-        return;
-      }
+  const handleCopy = async () => {
+    await Clipboard.setStringAsync(DEPOSIT_ADDRESS);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
-      timer = setTimeout(() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        setSteps((prev) =>
-          prev.map((s, i) =>
-            i === step ? { ...s, state: 'done' } :
-            i === step + 1 ? { ...s, state: 'active' } : s
-          )
-        );
-        setCurrentStep(step + 1);
-        advance(step + 1);
-      }, timings[step] || 3000);
-    };
+  // Demo: user taps "I sent it" → processing → success
+  const handleMarkSent = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    setStage('processing');
+    // Simulate 3-step processing
+    setTimeout(() => { setProcessingStep(1); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 2000);
+    setTimeout(() => { setProcessingStep(2); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 4000);
+    setTimeout(() => {
+      setProcessingStep(3);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      navigation.navigate('Success', {
+        recipientName, recipientMethod, amount, receiveAmount, recvCurrency, sendCurrency,
+      });
+    }, 6000);
+  };
 
-    advance(0);
-    return () => clearTimeout(timer);
-  }, []);
+  // ─── Safety interstitial ───
+  if (stage === 'warning') {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <View style={styles.headerBar}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
+            <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Send {sendCurrency}</Text>
+          <View style={{ width: 24 }} />
+        </View>
 
-  return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Sending...</Text>
-        <Text style={styles.headerSub}>
-          {amount} {sendCurrency} {'\u2192'} {recvSymbol}{receiveAmount.toLocaleString()} {recvCurrency}
-        </Text>
-      </View>
-
-      {/* Steps */}
-      <View style={styles.stepsCard}>
-        {steps.map((step, i) => (
-          <View key={i} style={styles.stepRow}>
-            {/* Icon column */}
-            <View style={styles.stepIconCol}>
-              {step.state === 'done' ? (
-                <View style={styles.stepDone}>
-                  <Ionicons name="checkmark" size={14} color="#0A0A0C" />
-                </View>
-              ) : step.state === 'active' ? (
-                <Animated.View style={[styles.stepActive, { transform: [{ rotate: spinRotate }] }]}>
-                  <View style={styles.stepSpinnerCut} />
-                </Animated.View>
-              ) : (
-                <View style={styles.stepWaiting} />
-              )}
-              {/* Connector line */}
-              {i < steps.length - 1 && (
-                <View style={[styles.connector, step.state === 'done' && styles.connectorDone]} />
-              )}
-            </View>
-
-            {/* Text */}
-            <View style={styles.stepTextCol}>
-              <Text style={[
-                styles.stepLabel,
-                step.state === 'done' && styles.stepLabelDone,
-                step.state === 'waiting' && styles.stepLabelWaiting,
-              ]}>
-                {step.label}
-              </Text>
-              <Text style={styles.stepDesc}>{step.desc}</Text>
-            </View>
+        <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+          <View style={styles.warningHero}>
+            <Ionicons name="alert-circle" size={48} color="#0A0A0C" />
           </View>
-        ))}
+          <Text style={styles.warningTitle}>Read this carefully</Text>
+
+          <View style={styles.warningCard}>
+            {[
+              { icon: 'alert-circle', title: 'Send only on the right network', body: `We're expecting ${sendCurrency} on ${network}. Sending from any other chain will lose your funds permanently.`, accent: true },
+              { icon: 'cash', title: 'Send the exact amount', body: `We need ${amount} ${sendCurrency}. Small variations are OK; significantly less will refund.` },
+              { icon: 'time', title: 'Address expires in 15 minutes', body: 'The exchange rate is locked for 15 minutes. After that you\'ll need to start over.' },
+            ].map((w, i) => (
+              <View key={i}>
+                <View style={styles.warningRow}>
+                  <View style={[styles.warningIcon, w.accent && styles.warningIconAccent]}>
+                    <Ionicons name={w.icon as any} size={18} color={w.accent ? '#FFFFFF' : '#38BDF8'} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.warningRowTitle}>{w.title}</Text>
+                    <Text style={styles.warningRowBody}>{w.body}</Text>
+                  </View>
+                </View>
+                {i < 2 && <View style={styles.divider} />}
+              </View>
+            ))}
+          </View>
+
+          <TouchableOpacity
+            style={styles.proceedCta}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setStage('address'); }}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.proceedCtaText}>I understand · Show address</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  // ─── Processing stage ───
+  if (stage === 'processing') {
+    const steps = [
+      { label: 'Deposit detected', desc: `${amount} ${sendCurrency} received on ${network}` },
+      { label: 'Converting', desc: `Converting to ${recvSymbol}${receiveAmount.toLocaleString()} ${recvCurrency}` },
+      { label: 'Sending to recipient', desc: `Releasing to ${recipientMethod} for ${firstName}` },
+    ];
+    return (
+      <SafeAreaView style={[styles.safe, { justifyContent: 'center' }]} edges={['top']}>
+        <View style={{ alignItems: 'center', marginBottom: 32 }}>
+          <Text style={styles.processingTitle}>Processing...</Text>
+          <Text style={styles.processingSub}>{amount} {sendCurrency} {'\u2192'} {recvSymbol}{receiveAmount.toLocaleString()}</Text>
+        </View>
+        <View style={styles.stepsCard}>
+          {steps.map((s, i) => (
+            <View key={i} style={styles.stepRow}>
+              <View style={styles.stepIconCol}>
+                {i < processingStep ? (
+                  <View style={styles.stepDone}><Ionicons name="checkmark" size={14} color="#0A0A0C" /></View>
+                ) : i === processingStep ? (
+                  <Animated.View style={[styles.stepActive, { transform: [{ rotate: spinRotate }] }]} />
+                ) : (
+                  <View style={styles.stepWaiting} />
+                )}
+                {i < steps.length - 1 && <View style={[styles.connector, i < processingStep && styles.connectorDone]} />}
+              </View>
+              <View style={styles.stepTextCol}>
+                <Text style={[styles.stepLabel, i < processingStep && styles.stepLabelDone, i > processingStep && styles.stepLabelWait]}>{s.label}</Text>
+                <Text style={styles.stepDesc}>{s.desc}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ─── Address stage ───
+  const expired = secondsLeft <= 0;
+  return (
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <View style={styles.headerBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
+          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Send {sendCurrency}</Text>
+        <View style={{ width: 24 }} />
       </View>
 
-      {/* Reassurance footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>
-          You can close this screen — we'll notify you when {firstName} receives the money.
+      <ScrollView contentContainerStyle={{ paddingBottom: 24, alignItems: 'center' }}>
+        {/* Instruction */}
+        <Text style={styles.instrTitle}>
+          Send <Text style={{ color: '#38BDF8' }}>{amount} {sendCurrency}</Text>
         </Text>
-      </View>
+        <Text style={styles.instrSub}>to the address below</Text>
+
+        {/* Network pill */}
+        <View style={styles.networkPill}>
+          <Ionicons name="globe" size={14} color="#FFFFFF" />
+          <Text style={styles.networkText}>Network: {network} only</Text>
+        </View>
+
+        {/* QR code */}
+        <FakeQR />
+
+        {/* Address with copy */}
+        <View style={styles.addressCard}>
+          <Text style={styles.addressLabel}>Deposit address</Text>
+          <TouchableOpacity style={styles.addressRow} onPress={handleCopy} activeOpacity={0.7}>
+            <Text style={styles.addressText} numberOfLines={1}>{DEPOSIT_ADDRESS}</Text>
+            <Ionicons name={copied ? 'checkmark-circle' : 'copy'} size={18} color={copied ? '#4ADE80' : '#38BDF8'} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Status + countdown */}
+        <View style={styles.statusCard}>
+          <Animated.View style={[styles.statusDot, { opacity: pulse }]} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.statusTitle}>{expired ? 'Address expired' : 'Waiting for deposit...'}</Text>
+            <Text style={styles.statusSub}>
+              {expired ? 'Go back and generate a fresh address.' : `Send ${amount} ${sendCurrency} on ${network}`}
+            </Text>
+          </View>
+          {!expired && (
+            <View style={styles.countdownPill}>
+              <Ionicons name="time" size={11} color="#38BDF8" />
+              <Text style={styles.countdownText}>{formatCountdown(secondsLeft)}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Demo helper */}
+        {!expired && (
+          <TouchableOpacity style={styles.demoBtn} onPress={handleMarkSent} activeOpacity={0.7}>
+            <Ionicons name="flash" size={14} color="rgba(255,255,255,0.42)" />
+            <Text style={styles.demoBtnText}>I sent the deposit (demo)</Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0A0A0C', justifyContent: 'center' },
-
-  header: { alignItems: 'center', marginBottom: 32 },
-  headerTitle: { fontFamily: 'Inter_700Bold', fontSize: 24, color: '#FFFFFF', letterSpacing: -0.3 },
-  headerSub: { fontFamily: 'Inter_500Medium', fontSize: 13, color: 'rgba(255,255,255,0.58)', marginTop: 6, fontVariant: ['tabular-nums'] },
-
-  stepsCard: {
-    backgroundColor: '#17171A', borderRadius: 16,
-    marginHorizontal: 20, padding: 20,
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
+  headerBar: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12,
   },
-  stepRow: { flexDirection: 'row', minHeight: 64 },
-  stepIconCol: { width: 28, alignItems: 'center' },
-  stepDone: {
-    width: 24, height: 24, borderRadius: 12,
-    backgroundColor: '#4ADE80',
+  iconBtn: { padding: 4 },
+  headerTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 17, color: '#FFFFFF' },
+  divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
+
+  // Warning interstitial
+  warningHero: {
+    width: 96, height: 96, borderRadius: 48,
+    backgroundColor: '#FFD60A', alignSelf: 'center', marginTop: 16,
     alignItems: 'center', justifyContent: 'center',
   },
-  stepActive: {
-    width: 24, height: 24, borderRadius: 12,
-    borderWidth: 2.5, borderColor: '#38BDF8',
-    borderTopColor: 'transparent',
+  warningTitle: {
+    fontFamily: 'Inter_700Bold', fontSize: 24, color: '#FFFFFF',
+    textAlign: 'center', marginTop: 16, letterSpacing: -0.3,
   },
-  stepSpinnerCut: {},
-  stepWaiting: {
-    width: 24, height: 24, borderRadius: 12,
-    borderWidth: 2, borderColor: 'rgba(255,255,255,0.12)',
+  warningCard: {
+    backgroundColor: '#17171A', borderRadius: 16,
+    paddingHorizontal: 16, marginHorizontal: 20, marginTop: 24,
   },
-  connector: {
-    width: 2, flex: 1, backgroundColor: 'rgba(255,255,255,0.08)',
-    marginVertical: 4,
+  warningRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 14 },
+  warningIcon: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(56,189,248,0.12)',
+    alignItems: 'center', justifyContent: 'center',
   },
-  connectorDone: { backgroundColor: '#4ADE80' },
+  warningIconAccent: { backgroundColor: '#EF4444' },
+  warningRowTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
+  warningRowBody: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)', marginTop: 2, lineHeight: 17 },
+  proceedCta: {
+    backgroundColor: '#38BDF8', borderRadius: 999,
+    paddingVertical: 18, alignItems: 'center',
+    marginHorizontal: 20, marginTop: 24,
+  },
+  proceedCtaText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#0A0A0C' },
 
+  // Address stage
+  instrTitle: { fontFamily: 'Inter_700Bold', fontSize: 26, color: '#FFFFFF', marginTop: 8, letterSpacing: -0.3 },
+  instrSub: { fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.58)', marginTop: 4 },
+  networkPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#8247E5', borderRadius: 999,
+    paddingHorizontal: 14, paddingVertical: 8, marginTop: 16,
+  },
+  networkText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: '#FFFFFF' },
+  qrBox: {
+    backgroundColor: '#FFFFFF', borderRadius: 20, padding: 16,
+    marginTop: 20, alignItems: 'center', justifyContent: 'center',
+  },
+  qrGrid: { flexDirection: 'row', flexWrap: 'wrap', width: 195, height: 195 },
+  qrCell: { width: 15, height: 15 },
+  qrCellFilled: { backgroundColor: '#0A0A0C' },
+  addressCard: {
+    backgroundColor: '#17171A', borderRadius: 16,
+    paddingHorizontal: 16, paddingVertical: 14,
+    marginHorizontal: 20, marginTop: 16, width: '100%',
+    paddingLeft: 36, paddingRight: 36,
+  },
+  addressLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.58)', marginBottom: 6 },
+  addressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  addressText: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 12, color: '#FFFFFF', fontVariant: ['tabular-nums'] },
+  statusCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: '#17171A', borderRadius: 16,
+    paddingHorizontal: 14, paddingVertical: 14,
+    marginHorizontal: 20, marginTop: 12, width: '100%',
+    paddingLeft: 36, paddingRight: 36,
+  },
+  statusDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#38BDF8' },
+  statusTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
+  statusSub: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)', marginTop: 2, lineHeight: 17 },
+  countdownPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: 'rgba(56,189,248,0.12)', borderRadius: 999,
+    paddingHorizontal: 8, paddingVertical: 4,
+  },
+  countdownText: { fontFamily: 'Inter_600SemiBold', fontSize: 11, color: '#38BDF8', fontVariant: ['tabular-nums'] },
+  demoBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    paddingVertical: 14, marginTop: 8,
+  },
+  demoBtnText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: 'rgba(255,255,255,0.42)' },
+
+  // Processing stage
+  processingTitle: { fontFamily: 'Inter_700Bold', fontSize: 24, color: '#FFFFFF', letterSpacing: -0.3 },
+  processingSub: { fontFamily: 'Inter_500Medium', fontSize: 13, color: 'rgba(255,255,255,0.58)', marginTop: 6, fontVariant: ['tabular-nums'] },
+  stepsCard: { backgroundColor: '#17171A', borderRadius: 16, marginHorizontal: 20, padding: 20 },
+  stepRow: { flexDirection: 'row', minHeight: 64 },
+  stepIconCol: { width: 28, alignItems: 'center' },
+  stepDone: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#4ADE80', alignItems: 'center', justifyContent: 'center' },
+  stepActive: { width: 24, height: 24, borderRadius: 12, borderWidth: 2.5, borderColor: '#38BDF8', borderTopColor: 'transparent' },
+  stepWaiting: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: 'rgba(255,255,255,0.12)' },
+  connector: { width: 2, flex: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 4 },
+  connectorDone: { backgroundColor: '#4ADE80' },
   stepTextCol: { flex: 1, marginLeft: 12, paddingBottom: 16 },
   stepLabel: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
   stepLabelDone: { color: '#4ADE80' },
-  stepLabelWaiting: { color: 'rgba(255,255,255,0.42)' },
+  stepLabelWait: { color: 'rgba(255,255,255,0.42)' },
   stepDesc: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.42)', marginTop: 2, lineHeight: 18 },
-
-  footer: { position: 'absolute', bottom: 40, left: 20, right: 20, alignItems: 'center' },
-  footerText: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 18 },
 });

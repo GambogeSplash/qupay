@@ -1,10 +1,7 @@
 // ConfirmScreen — clean review + slide-to-send with rate-lock countdown.
 // Two paths: fiat-out (USDT→NGN) shows deposit address, crypto-out shows recipient wallet.
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import {
-  View, Text, TouchableOpacity, ScrollView, StyleSheet,
-  Animated, PanResponder, Dimensions,
-} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import * as Clipboard from 'expo-clipboard';
@@ -16,9 +13,6 @@ import type { SendFlowParamList } from '../../navigation/AppNavigator';
 type Props = NativeStackScreenProps<SendFlowParamList, 'Confirm'>;
 
 const RATE_LOCK_SECONDS = 30;
-const SLIDER_WIDTH = Dimensions.get('window').width - 40; // 20px margins
-const THUMB_SIZE = 56;
-const SLIDE_THRESHOLD = 0.85;
 
 const currencySymbols: Record<string, string> = {
   USDT: '', NGN: '\u20A6', GHS: '\u20B5', KES: 'KSh', INR: '\u20B9', PHP: '\u20B1', MXN: '$', PKR: 'Rs', ZAR: 'R',
@@ -78,58 +72,23 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   }, [isCryptoOut, recipientWalletAddress]);
 
-  // Slide-to-send
-  const slideX = useRef(new Animated.Value(0)).current;
-  const [sliding, setSliding] = useState(false);
-  const maxSlide = SLIDER_WIDTH - THUMB_SIZE;
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => !rateExpiredRef.current,
-      onMoveShouldSetPanResponder: () => !rateExpiredRef.current,
-      onPanResponderGrant: () => {
-        setSliding(true);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      },
-      onPanResponderMove: (_, gs) => {
-        const clamped = Math.max(0, Math.min(gs.dx, maxSlide));
-        slideX.setValue(clamped);
-      },
-      onPanResponderRelease: (_, gs) => {
-        const pct = gs.dx / maxSlide;
-        if (pct >= SLIDE_THRESHOLD) {
-          // Send!
-          Animated.timing(slideX, { toValue: maxSlide, duration: 100, useNativeDriver: false }).start(() => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            navigation.navigate('DepositWaiting', {
-              recipientName,
-              recipientMethod,
-              recipientFlag,
-              amount,
-              receiveAmount,
-              sendCurrency,
-              recvCurrency: receiveCurrency,
-              walletAddress: DEPOSIT_ADDRESS,
-              network,
-              recipientWalletAddress,
-              recipientNetwork,
-            });
-          });
-        } else {
-          // Spring back
-          Animated.spring(slideX, { toValue: 0, tension: 80, friction: 10, useNativeDriver: false }).start();
-        }
-        setSliding(false);
-      },
-    })
-  ).current;
-
-  // Slider fill width for the progress track
-  const fillWidth = slideX.interpolate({
-    inputRange: [0, maxSlide],
-    outputRange: [THUMB_SIZE, SLIDER_WIDTH],
-    extrapolate: 'clamp',
-  });
+  const handleProceed = () => {
+    if (rateExpired) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    navigation.navigate('DepositWaiting', {
+      recipientName,
+      recipientMethod,
+      recipientFlag,
+      amount,
+      receiveAmount,
+      sendCurrency,
+      recvCurrency: receiveCurrency,
+      walletAddress: DEPOSIT_ADDRESS,
+      network,
+      recipientWalletAddress,
+      recipientNetwork,
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -217,23 +176,19 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
         )}
       </ScrollView>
 
-      {/* Slide-to-send — pinned to bottom */}
-      <View style={styles.sliderWrap}>
-        <View style={styles.sliderTrack}>
-          {/* Fill */}
-          <Animated.View style={[styles.sliderFill, { width: fillWidth }]} />
-          {/* Thumb */}
-          <Animated.View
-            style={[styles.sliderThumb, { transform: [{ translateX: slideX }] }]}
-            {...panResponder.panHandlers}
-          >
-            <Ionicons name="arrow-forward" size={22} color="#0A0A0C" />
-          </Animated.View>
-          {/* Label */}
-          <Text style={styles.sliderLabel}>
-            {rateExpired ? 'Refresh rate first' : `Slide to send ${recvSymbol}${receiveAmount.toLocaleString()}`}
+      {/* CTA — generate deposit address */}
+      <View style={styles.ctaWrap}>
+        <TouchableOpacity
+          style={[styles.cta, rateExpired && styles.ctaDisabled]}
+          onPress={handleProceed}
+          disabled={rateExpired}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="qr-code" size={18} color={rateExpired ? 'rgba(255,255,255,0.25)' : '#0A0A0C'} />
+          <Text style={[styles.ctaText, rateExpired && styles.ctaTextDisabled]}>
+            {rateExpired ? 'Refresh rate first' : 'Generate deposit address'}
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -303,28 +258,14 @@ const styles = StyleSheet.create({
   warnRow: { flexDirection: 'row', gap: 6, alignItems: 'flex-start' },
   warnText: { flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,214,10,0.7)', lineHeight: 16 },
 
-  // Slide-to-send
-  sliderWrap: { paddingHorizontal: 20, paddingBottom: 24, paddingTop: 8 },
-  sliderTrack: {
-    height: THUMB_SIZE, borderRadius: THUMB_SIZE / 2,
-    backgroundColor: '#17171A', overflow: 'hidden',
-    justifyContent: 'center',
+  // CTA
+  ctaWrap: { paddingHorizontal: 20, paddingBottom: 24, paddingTop: 8 },
+  cta: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#38BDF8', borderRadius: 999,
+    paddingVertical: 18,
   },
-  sliderFill: {
-    position: 'absolute', left: 0, top: 0, bottom: 0,
-    backgroundColor: 'rgba(56,189,248,0.15)', borderRadius: THUMB_SIZE / 2,
-  },
-  sliderThumb: {
-    position: 'absolute', left: 4, top: 4,
-    width: THUMB_SIZE - 8, height: THUMB_SIZE - 8,
-    borderRadius: (THUMB_SIZE - 8) / 2,
-    backgroundColor: '#38BDF8',
-    alignItems: 'center', justifyContent: 'center',
-    zIndex: 2,
-  },
-  sliderLabel: {
-    fontFamily: 'Inter_600SemiBold', fontSize: 14,
-    color: 'rgba(255,255,255,0.42)', textAlign: 'center',
-    marginLeft: THUMB_SIZE,
-  },
+  ctaDisabled: { backgroundColor: '#1F1F23' },
+  ctaText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#0A0A0C' },
+  ctaTextDisabled: { color: 'rgba(255,255,255,0.25)' },
 });

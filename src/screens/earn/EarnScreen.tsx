@@ -9,10 +9,10 @@ import * as Clipboard from 'expo-clipboard';
 const REFERRAL_CODE = 'QUPAY-FUBA-2026';
 
 const rewards = [
-  { icon: 'gift', label: 'Invite a friend', sub: 'You both earn $5 USDT when they complete their first send', value: '$5', earned: false },
-  { icon: 'flame', label: '5-send streak', sub: 'Send 5 transfers in a month to earn a bonus', value: '$2', earned: true },
-  { icon: 'trending-up', label: 'Rate alert save', sub: 'Set a rate alert and send when it triggers — earn $1', value: '$1', earned: false },
-  { icon: 'people', label: 'Refer 5 friends', sub: 'Hit 5 successful referrals to unlock premium corridors', value: 'Unlock', earned: false },
+  { icon: 'gift', label: 'Invite a friend', sub: 'You both earn $5 USDT when they complete their first send', value: '$5', earned: false, progress: 0.2, progressLabel: '1/5 referrals' },
+  { icon: 'flame', label: '5-send streak', sub: 'Send 5 transfers in a month to earn a bonus', value: '$2', earned: true, progress: 1, progressLabel: '5/5 sends' },
+  { icon: 'trending-up', label: 'Rate alert save', sub: 'Set a rate alert and send when it triggers — earn $1', value: '$1', earned: false, progress: 0, progressLabel: '0/1 alerts' },
+  { icon: 'people', label: 'Refer 5 friends', sub: 'Hit 5 successful referrals to unlock premium corridors', value: 'Unlock', earned: false, progress: 0.6, progressLabel: '3/5 referrals' },
 ];
 
 export const EarnScreen: React.FC = () => {
@@ -67,6 +67,18 @@ export const EarnScreen: React.FC = () => {
           <Text style={styles.shareCtaText}>Share invite link</Text>
         </TouchableOpacity>
 
+        {/* Streak counter */}
+        <View style={styles.streakCard}>
+          <View style={styles.streakIcon}>
+            <Ionicons name="flame" size={18} color="#FFD60A" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.streakTitle}>Current streak</Text>
+            <Text style={styles.streakSub}>3 sends this month</Text>
+          </View>
+          <Text style={styles.streakCount}>3</Text>
+        </View>
+
         {/* Rewards list */}
         <Text style={styles.sectionLabel}>Rewards</Text>
         <View style={styles.rewardsCard}>
@@ -79,6 +91,10 @@ export const EarnScreen: React.FC = () => {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.rewardLabel}>{r.label}</Text>
                   <Text style={styles.rewardSub}>{r.sub}</Text>
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: `${Math.round(r.progress * 100)}%` }, r.earned && styles.progressFillEarned]} />
+                  </View>
+                  <Text style={styles.progressLabel}>{r.progressLabel}</Text>
                 </View>
                 <View style={[styles.rewardBadge, r.earned && styles.rewardBadgeEarned]}>
                   <Text style={[styles.rewardBadgeText, r.earned && styles.rewardBadgeTextEarned]}>
@@ -176,6 +192,10 @@ const styles = StyleSheet.create({
   rewardIconEarned: { backgroundColor: 'rgba(74,222,128,0.12)' },
   rewardLabel: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
   rewardSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.58)', marginTop: 2, lineHeight: 16 },
+  progressTrack: { height: 4, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 2, marginTop: 8 },
+  progressFill: { height: 4, backgroundColor: '#38BDF8', borderRadius: 2 },
+  progressFillEarned: { backgroundColor: '#4ADE80' },
+  progressLabel: { fontFamily: 'Inter_400Regular', fontSize: 10, color: 'rgba(255,255,255,0.42)', marginTop: 4 },
   rewardBadge: {
     backgroundColor: 'rgba(56,189,248,0.12)', borderRadius: 999,
     paddingHorizontal: 10, paddingVertical: 5,
@@ -184,6 +204,21 @@ const styles = StyleSheet.create({
   rewardBadgeText: { fontFamily: 'Inter_700Bold', fontSize: 11, color: '#38BDF8' },
   rewardBadgeTextEarned: { color: '#4ADE80' },
   divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
+
+  // Streak card
+  streakCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: '#17171A', borderRadius: 16,
+    marginHorizontal: 20, marginBottom: 4, padding: 16,
+  },
+  streakIcon: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(255,214,10,0.12)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  streakTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
+  streakSub: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)', marginTop: 2 },
+  streakCount: { fontFamily: 'Inter_700Bold', fontSize: 24, color: '#FFD60A' },
 
   stepsCard: { backgroundColor: '#17171A', borderRadius: 16, marginHorizontal: 20, paddingHorizontal: 14 },
   stepRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },

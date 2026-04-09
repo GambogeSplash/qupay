@@ -9,7 +9,11 @@ export interface Recipient {
   country: string;
   flag: string;
   corridorId: string;
-  payout: { kind: 'mobile_money' | 'bank' | 'wallet'; provider: string };
+  payout: { kind: 'mobile_money' | 'bank' | 'wallet'; provider: string; accountTail?: string };
+  handle?: string; // Qupay handle, e.g., '@emeka'
+  hasQupayAccount?: boolean;
+  lastSendUsd?: number; // last amount sent in USD
+  lastSendDate?: string; // e.g., '2 days ago'
 }
 
 export interface Corridor {
@@ -37,12 +41,12 @@ export const getCorridor = (id: string): Corridor =>
   CORRIDORS.find((c) => c.id === id) ?? CORRIDORS[0];
 
 export const MOCK_RECIPIENTS: Recipient[] = [
-  { id: 'r1', name: 'Emeka Johnson', initials: 'EJ', phone: '0812 456 7890', country: 'Nigeria', flag: '\u{1F1F3}\u{1F1EC}', corridorId: 'sg-ng', payout: { kind: 'mobile_money', provider: 'OPay' } },
-  { id: 'r2', name: 'Kofi Mensah', initials: 'KM', phone: '0541 234 567', country: 'Ghana', flag: '\u{1F1EC}\u{1F1ED}', corridorId: 'sg-gh', payout: { kind: 'mobile_money', provider: 'MTN Momo' } },
-  { id: 'r3', name: 'Adaeze Obi', initials: 'AO', phone: '0813 567 8901', country: 'Nigeria', flag: '\u{1F1F3}\u{1F1EC}', corridorId: 'sg-ng', payout: { kind: 'bank', provider: 'GTBank' } },
-  { id: 'r4', name: 'Chidi Nwosu', initials: 'CN', phone: '0813 456 7890', country: 'Nigeria', flag: '\u{1F1F3}\u{1F1EC}', corridorId: 'sg-ng', payout: { kind: 'mobile_money', provider: 'PalmPay' } },
-  { id: 'r5', name: 'Tunde Kareem', initials: 'TK', phone: '0901 234 5678', country: 'Nigeria', flag: '\u{1F1F3}\u{1F1EC}', corridorId: 'sg-ng', payout: { kind: 'bank', provider: 'Kuda' } },
-  { id: 'r6', name: 'Faith Mwangi', initials: 'FM', phone: '+254 712 345 678', country: 'Kenya', flag: '\u{1F1F0}\u{1F1EA}', corridorId: 'sg-ke', payout: { kind: 'mobile_money', provider: 'M-Pesa' } },
+  { id: 'r1', name: 'Emeka Johnson', initials: 'EJ', phone: '0812 456 7890', country: 'Nigeria', flag: '\u{1F1F3}\u{1F1EC}', corridorId: 'sg-ng', payout: { kind: 'mobile_money', provider: 'OPay', accountTail: '7890' }, handle: '@emeka', hasQupayAccount: true, lastSendUsd: 200, lastSendDate: '2 days ago' },
+  { id: 'r2', name: 'Kofi Mensah', initials: 'KM', phone: '0541 234 567', country: 'Ghana', flag: '\u{1F1EC}\u{1F1ED}', corridorId: 'sg-gh', payout: { kind: 'mobile_money', provider: 'MTN Momo', accountTail: '4567' }, lastSendUsd: 50, lastSendDate: '5 days ago' },
+  { id: 'r3', name: 'Adaeze Obi', initials: 'AO', phone: '0813 567 8901', country: 'Nigeria', flag: '\u{1F1F3}\u{1F1EC}', corridorId: 'sg-ng', payout: { kind: 'bank', provider: 'GTBank', accountTail: '8901' }, handle: '@adaeze', hasQupayAccount: true, lastSendUsd: 100, lastSendDate: '3 hours ago' },
+  { id: 'r4', name: 'Chidi Nwosu', initials: 'CN', phone: '0813 456 7890', country: 'Nigeria', flag: '\u{1F1F3}\u{1F1EC}', corridorId: 'sg-ng', payout: { kind: 'mobile_money', provider: 'PalmPay', accountTail: '7890' }, lastSendUsd: 30, lastSendDate: '2 weeks ago' },
+  { id: 'r5', name: 'Tunde Kareem', initials: 'TK', phone: '0901 234 5678', country: 'Nigeria', flag: '\u{1F1F3}\u{1F1EC}', corridorId: 'sg-ng', payout: { kind: 'bank', provider: 'Kuda', accountTail: '5678' } },
+  { id: 'r6', name: 'Faith Mwangi', initials: 'FM', phone: '+254 712 345 678', country: 'Kenya', flag: '\u{1F1F0}\u{1F1EA}', corridorId: 'sg-ke', payout: { kind: 'mobile_money', provider: 'M-Pesa', accountTail: '5678' }, lastSendUsd: 75, lastSendDate: '1 week ago' },
 ];
 
 export function formatMoney(amount: number, currency: string): string {

@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
-import { CTAButton } from '../../components';
+import { CTAButton, Avatar } from '../../components';
 import { CommonActions } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -59,8 +59,11 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.content}>
+        {/* Recipient avatar */}
+        <Avatar seed={recipientName} size={44} />
+
         {/* Animated check circle */}
-        <Animated.View style={[styles.checkCircle, { transform: [{ scale: iconScale }] }]}>
+        <Animated.View style={[styles.checkCircle, { transform: [{ scale: iconScale }], marginTop: 16 }]}>
           <Ionicons name="checkmark" size={48} color="#4ADE80" />
         </Animated.View>
 
@@ -70,6 +73,7 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.sub}>
             {firstName} received {symbol}{receiveAmount.toLocaleString()} via {recipientMethod}
           </Text>
+          <Text style={styles.corridor}>{'\u{1F1F8}\u{1F1EC}'} {'\u2192'} {'\u{1F1F3}\u{1F1EC}'} Singapore {'\u2192'} Nigeria</Text>
         </Animated.View>
       </View>
 
@@ -83,6 +87,11 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
         <TouchableOpacity style={styles.shareBtn} onPress={() => {}} activeOpacity={0.7}>
           <Ionicons name="share" size={16} color="#38BDF8" />
           <Text style={styles.shareText}>Share with {firstName}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.sendAgainBtn} onPress={goHome} activeOpacity={0.7}>
+          <Ionicons name="arrow-redo" size={16} color="#FFFFFF" />
+          <Text style={styles.sendAgainText}>Send to {firstName} again</Text>
         </TouchableOpacity>
 
         <CTAButton title="Done" onPress={goHome} style={{ marginTop: 8 }} />
@@ -123,4 +132,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#1F1F23', borderRadius: 999, paddingVertical: 14,
   },
   shareText: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#38BDF8' },
+  corridor: {
+    fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.42)',
+    textAlign: 'center', marginTop: 8,
+  },
+  sendAgainBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 999, paddingVertical: 14,
+  },
+  sendAgainText: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
 });

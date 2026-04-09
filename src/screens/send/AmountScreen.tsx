@@ -7,12 +7,28 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
-import { Avatar, CryptoIcon } from '../../components';
+import { Avatar, CryptoIcon, BottomSheet } from '../../components';
 import { Recipient, getCorridor, formatMoney } from '../../data/remittance';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<SendFlowParamList, 'Amount'>;
+
+interface StablecoinOption {
+  token: string;
+  network: string;
+  networkShort: string;
+  balance: number;
+  color: string;
+}
+
+const STABLECOINS: StablecoinOption[] = [
+  { token: 'USDT', network: 'Polygon', networkShort: 'POL', balance: 450, color: '#8247E5' },
+  { token: 'USDT', network: 'Ethereum', networkShort: 'ETH', balance: 0, color: '#627EEA' },
+  { token: 'USDC', network: 'Solana', networkShort: 'SOL', balance: 125, color: '#9945FF' },
+  { token: 'USDC', network: 'Base', networkShort: 'BASE', balance: 0, color: '#0052FF' },
+  { token: 'USDT', network: 'BSC', networkShort: 'BNB', balance: 0, color: '#F0B90B' },
+];
 
 const KEYS = [
   ['1', '2', '3'],
@@ -21,7 +37,6 @@ const KEYS = [
   ['.', '0', '\u232B'],
 ];
 
-const WALLET_BALANCE = 450; // Mock USDT balance
 const FEE_OVERRIDE = 1.50; // Fixed USD fee per corridor
 
 export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
@@ -30,6 +45,11 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
     () => (recipient ? getCorridor(recipient.corridorId) : getCorridor('sg-ng')),
     [recipient],
   );
+
+  // Stablecoin + blockchain selection
+  const [selectedCoin, setSelectedCoin] = useState(STABLECOINS[0]);
+  const [showCoinPicker, setShowCoinPicker] = useState(false);
+  const WALLET_BALANCE = selectedCoin.balance;
 
   const [sendStr, setSendStr] = useState('0');
   const sendNum = parseFloat(sendStr) || 0;
@@ -59,7 +79,7 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
   const handleContinue = () => {
     navigation.navigate('Confirm', {
       amount: sendNum,
-      sendCurrency: 'USDT',
+      sendCurrency: selectedCoin.token,
       receiveCurrency: corridor.toCurrency,
       receiveAmount: Math.round(receiveNum),
       recipientName: recipient?.name ?? 'Recipient',
@@ -110,10 +130,14 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.cardAmount} numberOfLines={1}>
             <Text style={styles.dollar}>$</Text>{sendStr}
           </Text>
-          <View style={styles.sourceBadge}>
-            <CryptoIcon token="USDT" network="Polygon" size={22} ringColor="#17171A" />
-            <Text style={styles.sourceText}>USDT</Text>
-          </View>
+          <TouchableOpacity style={styles.sourceBadge} onPress={() => setShowCoinPicker(true)} activeOpacity={0.7}>
+            <CryptoIcon token={selectedCoin.token} network={selectedCoin.network} size={22} ringColor="#17171A" />
+            <Text style={styles.sourceText}>{selectedCoin.token}</Text>
+            <View style={[styles.chainTag, { backgroundColor: selectedCoin.color }]}>
+              <Text style={styles.chainTagText}>{selectedCoin.networkShort}</Text>
+            </View>
+            <Ionicons name="chevron-down" size={12} color="rgba(255,255,255,0.42)" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -195,6 +219,27 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={[styles.ctaText, !canNext && styles.ctaTextDisabled]}>Continue</Text>
         </TouchableOpacity>
       </View>
+      {/* Stablecoin + blockchain picker */}
+      <BottomSheet visible={showCoinPicker} onClose={() => setShowCoinPicker(false)} title="Pay with">
+        {STABLECOINS.map((c, i) => (
+          <TouchableOpacity
+            key={`${c.token}-${c.network}`}
+            style={[styles.coinItem, selectedCoin.token === c.token && selectedCoin.network === c.network && styles.coinItemSel]}
+            onPress={() => { setSelectedCoin(c); setShowCoinPicker(false); }}
+            activeOpacity={0.7}
+          >
+            <CryptoIcon token={c.token} network={c.network} size={36} ringColor="#17171A" />
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.coinName}>{c.token} on {c.network}</Text>
+              <Text style={styles.coinBalance}>{c.balance > 0 ? `${c.balance} ${c.token} available` : 'No balance'}</Text>
+            </View>
+            {selectedCoin.token === c.token && selectedCoin.network === c.network && (
+              <Ionicons name="checkmark-circle" size={20} color="#38BDF8" />
+            )}
+          </TouchableOpacity>
+        ))}
+        <View style={{ height: 40 }} />
+      </BottomSheet>
     </SafeAreaView>
   );
 };
@@ -292,4 +337,18 @@ const styles = StyleSheet.create({
   ctaDisabled: { backgroundColor: '#1F1F23' },
   ctaText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#0A0A0C' },
   ctaTextDisabled: { color: 'rgba(255,255,255,0.25)' },
+
+  // Chain tag on source badge
+  chainTag: { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 },
+  chainTagText: { fontFamily: 'Inter_700Bold', fontSize: 9, color: '#FFFFFF' },
+
+  // Coin picker
+  coinItem: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingVertical: 14, paddingHorizontal: 20,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  coinItemSel: { backgroundColor: 'rgba(56,189,248,0.08)' },
+  coinName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
+  coinBalance: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.58)', marginTop: 2 },
 });

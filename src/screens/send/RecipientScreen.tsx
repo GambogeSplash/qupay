@@ -123,8 +123,24 @@ export const RecipientScreen: React.FC<Props> = ({ navigation }) => {
             >
               <Avatar seed={r.name} initials={r.initials} size={44} bankBadge={r.payout.provider} />
               <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.rowName}>{r.name}</Text>
-                <Text style={styles.rowSub}>{r.payout.provider} · {r.country}</Text>
+                <View style={styles.rowNameRow}>
+                  <Text style={styles.rowName}>{r.name}</Text>
+                  {r.hasQupayAccount && (
+                    <View style={styles.handlePill}>
+                      <Text style={styles.handleText}>{r.handle}</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.rowSub}>
+                  {r.payout.provider}
+                  {r.payout.accountTail ? ` · ****${r.payout.accountTail}` : ''}
+                  {' · '}{r.country}
+                </Text>
+                {r.lastSendUsd && (
+                  <Text style={styles.rowLastSend}>
+                    ${r.lastSendUsd} sent · {r.lastSendDate}
+                  </Text>
+                )}
               </View>
               <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.42)" />
             </TouchableOpacity>
@@ -184,8 +200,15 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' },
+  rowNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   rowName: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#FFFFFF' },
+  handlePill: {
+    backgroundColor: 'rgba(56,189,248,0.1)', borderRadius: 999,
+    paddingHorizontal: 6, paddingVertical: 2,
+  },
+  handleText: { fontFamily: 'Inter_500Medium', fontSize: 10, color: '#38BDF8' },
   rowSub: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)', marginTop: 2 },
+  rowLastSend: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 },
   empty: { alignItems: 'center', paddingVertical: 24 },
   emptyText: { fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.42)' },
 });
