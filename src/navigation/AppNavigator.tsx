@@ -195,8 +195,9 @@ function SendTabNavigator() {
     <SendFlowStack.Navigator
       screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
     >
-      <SendFlowStack.Screen name="Amount" component={AmountScreen} />
+      {/* Flow: Recipient (who) → Amount (how much) → Confirm → Deposit → Success */}
       <SendFlowStack.Screen name="Recipient" component={RecipientScreen} />
+      <SendFlowStack.Screen name="Amount" component={AmountScreen} />
       <SendFlowStack.Screen name="Confirm" component={ConfirmScreen} />
       <SendFlowStack.Screen name="DepositWaiting" component={DepositWaitingScreen} options={{ animation: 'fade_from_bottom', gestureEnabled: false }} />
       <SendFlowStack.Screen name="Success" component={SuccessScreen} options={{ animation: 'fade_from_bottom', gestureEnabled: false }} />

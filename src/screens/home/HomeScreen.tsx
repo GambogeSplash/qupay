@@ -59,7 +59,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const goSend = () => {
     const root = navigation.getParent()?.getParent();
-    if (root) root.navigate('SendFlow' as never, { screen: 'Amount' } as never);
+    if (root) root.navigate('SendFlow' as never, { screen: 'Recipient' } as never);
   };
 
   const goProfile = () => {

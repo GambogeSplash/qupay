@@ -1,310 +1,295 @@
-// AmountScreen — custom numpad keeps both amounts visible simultaneously.
-// Inline fee, balance validation, quick-amount chips, MAX button.
-import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+// AmountScreen — ported from /qupay/src/screens/remittance/SendAmountScreen.tsx
+// Swap-style layout: "You send" card + arrow + "They receive" card.
+// Custom 4x3 numpad always visible, both amounts update live.
+// Recipient locked from upstream (PickRecipient). Includes: inline fee,
+// balance + MAX, quick chips, KYC/balance validation pills.
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
-import { Numpad, BottomSheet, CryptoIcon } from '../../components';
+import { Avatar, CryptoIcon } from '../../components';
+import { Recipient, getCorridor, formatMoney } from '../../data/remittance';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<SendFlowParamList, 'Amount'>;
 
-const currencies = [
-  { code: 'USDT', name: 'Tether (Polygon)', flag: '', color: '#26A17B', symbol: '' },
-  { code: 'NGN', name: 'Nigerian Naira', flag: '\u{1F1F3}\u{1F1EC}', color: '#008751', symbol: '\u20A6' },
-  { code: 'GHS', name: 'Ghanaian Cedi', flag: '\u{1F1EC}\u{1F1ED}', color: '#CE1126', symbol: '\u20B5' },
-  { code: 'KES', name: 'Kenyan Shilling', flag: '\u{1F1F0}\u{1F1EA}', color: '#006600', symbol: 'KSh' },
-  { code: 'INR', name: 'Indian Rupee', flag: '\u{1F1EE}\u{1F1F3}', color: '#FF9933', symbol: '\u20B9' },
-  { code: 'PHP', name: 'Philippine Peso', flag: '\u{1F1F5}\u{1F1ED}', color: '#0038A8', symbol: '\u20B1' },
-  { code: 'PKR', name: 'Pakistani Rupee', flag: '\u{1F1F5}\u{1F1F0}', color: '#01411C', symbol: 'Rs' },
+const KEYS = [
+  ['1', '2', '3'],
+  ['4', '5', '6'],
+  ['7', '8', '9'],
+  ['.', '0', '\u232B'],
 ];
 
-const usdtRates: Record<string, number> = {
-  USDT: 1, NGN: 1645, GHS: 15.16, KES: 128.7, INR: 83.5, PHP: 56.78, PKR: 278.5,
-};
-
 const WALLET_BALANCE = 450; // Mock USDT balance
-const FEE_PCT = 0.008; // 0.8%
-const QUICK_AMOUNTS = [25, 50, 100, 250];
+const FEE_OVERRIDE = 1.50; // Fixed USD fee per corridor
 
-export const AmountScreen: React.FC<Props> = ({ navigation }) => {
-  const [sendCurrency] = useState(currencies[0]); // USDT — the wallet currency
-  const [receiveCurrency, setReceiveCurrency] = useState(currencies[1]); // NGN default
-  const [showRecvPicker, setShowRecvPicker] = useState(false);
-  const [amountStr, setAmountStr] = useState('');
+export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
+  const recipient: Recipient | undefined = (route.params as any)?.recipient;
+  const corridor = useMemo(
+    () => (recipient ? getCorridor(recipient.corridorId) : getCorridor('sg-ng')),
+    [recipient],
+  );
 
-  const numAmount = parseFloat(amountStr) || 0;
-  const rate = usdtRates[receiveCurrency.code] || 1;
-  const receiveAmount = Math.round(numAmount * rate);
-  const fee = Math.round(numAmount * FEE_PCT * 100) / 100;
-  const totalDebit = numAmount + fee;
-  const overBalance = totalDebit > WALLET_BALANCE;
-  const canContinue = numAmount > 0 && !overBalance;
+  const [sendStr, setSendStr] = useState('0');
+  const sendNum = parseFloat(sendStr) || 0;
+  const receiveNum = sendNum * corridor.rate;
+  const fee = FEE_OVERRIDE;
+  const maxSendable = Math.max(0, WALLET_BALANCE - fee);
+  const overBalance = sendNum + fee > WALLET_BALANCE;
+  const canNext = sendNum > 0 && !overBalance;
 
-  const handleKey = useCallback((key: string) => {
-    if (key === 'del') {
-      setAmountStr((prev) => prev.slice(0, -1));
-    } else if (key === '.') {
-      if (!amountStr.includes('.')) setAmountStr((prev) => prev + '.');
+  const press = (k: string) => {
+    if (k === '\u232B') {
+      setSendStr((a) => (a.length > 1 ? a.slice(0, -1) : '0'));
+    } else if (k === '.') {
+      if (!sendStr.includes('.')) setSendStr(sendStr + '.');
     } else {
-      // Limit to 2 decimal places
-      const parts = amountStr.split('.');
+      // Limit decimal places to 2
+      const parts = sendStr.split('.');
       if (parts[1] && parts[1].length >= 2) return;
-      // Limit total length
-      if (amountStr.length >= 8) return;
-      setAmountStr((prev) => prev + key);
+      if (sendStr.length >= 8) return;
+      setSendStr((a) => (a === '0' ? k : a + k));
     }
-  }, [amountStr]);
+  };
 
-  const setQuick = (v: number) => setAmountStr(String(v));
-  const setMax = () => setAmountStr(String(Math.floor(WALLET_BALANCE / (1 + FEE_PCT))));
+  const setQuick = (n: number) => setSendStr(String(n));
+  const setMax = () => setSendStr(maxSendable.toFixed(2).replace(/\.00$/, ''));
 
   const handleContinue = () => {
-    navigation.navigate('Recipient', {
-      amount: numAmount,
-      sendCurrency: sendCurrency.code,
-      receiveCurrency: receiveCurrency.code,
-      receiveAmount,
+    navigation.navigate('Confirm', {
+      amount: sendNum,
+      sendCurrency: 'USDT',
+      receiveCurrency: corridor.toCurrency,
+      receiveAmount: Math.round(receiveNum),
+      recipientName: recipient?.name ?? 'Recipient',
+      recipientInitials: recipient?.initials ?? '??',
+      recipientColors: ['#1a6fff', '#38BDF8'] as [string, string],
+      recipientMethod: recipient?.payout.provider ?? 'Bank',
+      recipientFlag: recipient?.flag ?? '',
     });
   };
 
-  // Fiat-only receive currencies (exclude USDT from receive picker)
-  const recvCurrencies = currencies.filter((c) => c.code !== 'USDT');
-
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      {/* No back button — tab handles navigation */}
-      <View style={styles.headerRow}>
+      {/* Header */}
+      <View style={styles.headerBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
+          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Send</Text>
+        <View style={{ width: 24 }} />
       </View>
 
-      {/* Amount display area — both amounts always visible above numpad */}
-      <View style={styles.displayArea}>
-        {/* Card container — visual grouping for the swap area */}
-        <View style={styles.swapCard}>
-          {/* You send */}
-          <View style={styles.sendSection}>
-            <Text style={styles.label}>You send</Text>
-            <View style={styles.amountRow}>
-              <Text style={[styles.amountText, !amountStr && styles.amountPlaceholder]}>
-                {amountStr || '0'}
-              </Text>
-              <View style={styles.currBadge}>
-                <CryptoIcon token="USDT" network="Polygon" size={24} ringColor="#17171A" />
-                <Text style={styles.currCode}>USDT</Text>
-              </View>
-            </View>
-            {/* Balance + MAX */}
-            <View style={styles.balanceRow}>
-              <Text style={[styles.balanceText, overBalance && styles.balanceError]}>
-                Balance: {WALLET_BALANCE} USDT
-              </Text>
-              <TouchableOpacity onPress={setMax} activeOpacity={0.7}>
-                <Text style={styles.maxBtn}>MAX</Text>
-              </TouchableOpacity>
-            </View>
+      {/* Compact recipient strip — tap to go back and change */}
+      {recipient && (
+        <TouchableOpacity style={styles.recipientRow} activeOpacity={0.7} onPress={() => navigation.goBack()}>
+          <Avatar seed={recipient.name} initials={recipient.initials} size={32} bankBadge={recipient.payout.provider} />
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <Text style={styles.recipientName}>To {recipient.name}</Text>
+            <Text style={styles.recipientSub}>
+              {recipient.flag} {recipient.country} · {recipient.payout.provider}
+            </Text>
           </View>
+          <Ionicons name="swap-horizontal" size={16} color="rgba(255,255,255,0.42)" />
+        </TouchableOpacity>
+      )}
 
-          {/* Rate divider */}
-          <View style={styles.rateDivider}>
-            <View style={styles.rateLine} />
-            <View style={styles.ratePill}>
-              <Ionicons name="swap-horizontal" size={12} color="#38BDF8" />
-              <Text style={styles.rateText}>
-                1 USDT = {receiveCurrency.symbol}{rate.toLocaleString()} {receiveCurrency.code}
-              </Text>
-            </View>
-            <View style={styles.rateLine} />
-          </View>
-
-          {/* They receive */}
-          <View style={styles.recvSection}>
-            <Text style={styles.label}>They receive</Text>
-            <View style={styles.amountRow}>
-              <Text style={[styles.recvText, !numAmount && styles.amountPlaceholder]}>
-                {numAmount > 0 ? `${receiveCurrency.symbol}${receiveAmount.toLocaleString()}` : '0'}
-              </Text>
-              <TouchableOpacity style={styles.recvCurrBadge} onPress={() => setShowRecvPicker(true)} activeOpacity={0.7}>
-                <Text style={styles.currFlag}>{receiveCurrency.flag}</Text>
-                <Text style={styles.currCode}>{receiveCurrency.code}</Text>
-                <Ionicons name="chevron-down" size={12} color="rgba(255,255,255,0.42)" />
-              </TouchableOpacity>
-            </View>
+      {/* Top card: You send */}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardLabel}>You send</Text>
+          <View style={styles.cardHeaderRight}>
+            <Text style={styles.cardAvailable}>{WALLET_BALANCE} USDT available</Text>
+            <TouchableOpacity style={styles.maxPill} onPress={setMax} activeOpacity={0.7}>
+              <Text style={styles.maxText}>MAX</Text>
+            </TouchableOpacity>
           </View>
         </View>
-
-        {/* Inline fee — outside the card for breathing room */}
-        {numAmount > 0 && (
-          <View style={styles.feeRow}>
-            <Text style={styles.feeLabel}>Fee</Text>
-            <Text style={styles.feeValue}>{fee} USDT ({(FEE_PCT * 100).toFixed(1)}%)</Text>
+        <View style={styles.cardRow}>
+          <Text style={styles.cardAmount} numberOfLines={1}>
+            <Text style={styles.dollar}>$</Text>{sendStr}
+          </Text>
+          <View style={styles.sourceBadge}>
+            <CryptoIcon token="USDT" network="Polygon" size={22} ringColor="#17171A" />
+            <Text style={styles.sourceText}>USDT</Text>
           </View>
-        )}
+        </View>
+      </View>
 
-        {/* Validation error */}
-        {overBalance && (
-          <View style={styles.errorPill}>
-            <Ionicons name="alert-circle" size={14} color="#EF4444" />
-            <Text style={styles.errorText}>Exceeds balance — max send is {Math.floor(WALLET_BALANCE / (1 + FEE_PCT))} USDT</Text>
+      {/* Arrow divider */}
+      <View style={styles.dividerWrap}>
+        <Ionicons name="arrow-down" size={20} color="rgba(255,255,255,0.25)" />
+      </View>
+
+      {/* Bottom card: They receive */}
+      <View style={[styles.card, { marginTop: -2 }]}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardLabel}>They receive</Text>
+          <Text style={styles.cardAvailable}>
+            ~{corridor.speedSeconds}s delivery
+          </Text>
+        </View>
+        <View style={styles.cardRow}>
+          <Text style={[styles.cardAmount, { color: '#38BDF8' }]} numberOfLines={1}>
+            {formatMoney(receiveNum, corridor.toCurrency)}
+          </Text>
+          <View style={styles.currencyChip}>
+            <Text style={styles.currencyFlag}>{corridor.toFlag}</Text>
+            <Text style={styles.sourceText}>{corridor.toCurrency}</Text>
           </View>
-        )}
+        </View>
+        <Text style={styles.feeInline}>
+          1 USD = {corridor.rate.toFixed(2)} {corridor.toCurrency} · {formatMoney(fee, 'USD')} fee
+        </Text>
+      </View>
 
-        {/* Quick amount chips — shown when amount is empty */}
-        {!amountStr && (
-          <View style={styles.quickRow}>
-            {QUICK_AMOUNTS.map((v) => (
-              <TouchableOpacity key={v} style={styles.quickChip} onPress={() => setQuick(v)} activeOpacity={0.7}>
-                <Text style={styles.quickText}>${v}</Text>
+      {/* Validation pills */}
+      {sendNum > 0 && overBalance && (
+        <View style={styles.errorPill}>
+          <Ionicons name="alert-circle" size={14} color="#EF4444" />
+          <Text style={styles.errorText}>
+            Not enough USDT. Max {formatMoney(maxSendable, 'USD')}
+          </Text>
+        </View>
+      )}
+
+      {/* Quick chips — shown when amount is 0 */}
+      {sendNum === 0 && (
+        <View style={styles.quickRow}>
+          {[25, 50, 100, 250].map((v) => (
+            <TouchableOpacity key={v} style={styles.quickPill} activeOpacity={0.7} onPress={() => setQuick(v)}>
+              <Text style={styles.quickText}>${v}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      <View style={{ flex: 1 }} />
+
+      {/* Custom numpad */}
+      <View style={styles.numpad}>
+        {KEYS.map((row, ri) => (
+          <View key={ri} style={styles.numRow}>
+            {row.map((k) => (
+              <TouchableOpacity key={k} style={styles.key} activeOpacity={0.6} onPress={() => press(k)}>
+                {k === '\u232B' ? (
+                  <Ionicons name="backspace" size={24} color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.keyText}>{k}</Text>
+                )}
               </TouchableOpacity>
             ))}
           </View>
-        )}
+        ))}
       </View>
 
-      {/* Numpad + CTA pinned to bottom */}
-      <View style={styles.bottom}>
-        <Numpad onKey={handleKey} />
+      {/* Continue CTA */}
+      <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.cta, !canContinue && styles.ctaDisabled]}
+          style={[styles.cta, !canNext && styles.ctaDisabled]}
+          disabled={!canNext}
           onPress={handleContinue}
-          disabled={!canContinue}
           activeOpacity={0.85}
         >
-          <Text style={[styles.ctaText, !canContinue && styles.ctaTextDisabled]}>Continue</Text>
+          <Text style={[styles.ctaText, !canNext && styles.ctaTextDisabled]}>Continue</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Receive currency picker */}
-      <BottomSheet visible={showRecvPicker} onClose={() => setShowRecvPicker(false)} title="Receive currency">
-        {recvCurrencies.map((c) => (
-          <TouchableOpacity
-            key={c.code}
-            style={[styles.cpItem, receiveCurrency.code === c.code && styles.cpItemSel]}
-            onPress={() => { setReceiveCurrency(c); setShowRecvPicker(false); }}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.cpIconWrap, { backgroundColor: c.color + '20' }]}>
-              <Text style={{ fontSize: 18 }}>{c.flag}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cpName}>{c.code}</Text>
-              <Text style={styles.cpSub}>{c.name} · {c.symbol}{usdtRates[c.code]?.toLocaleString()}/USDT</Text>
-            </View>
-            {receiveCurrency.code === c.code && <Ionicons name="checkmark-circle" size={20} color="#38BDF8" />}
-          </TouchableOpacity>
-        ))}
-        <View style={{ height: 40 }} />
-      </BottomSheet>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0A0A0C' },
-
-  // Header
-  headerRow: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 12 },
-  headerTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, color: '#FFFFFF' },
-
-  // Display area — grows to fill space above numpad
-  displayArea: { flex: 1, paddingHorizontal: 20, paddingTop: 8, justifyContent: 'center' },
-
-  // Card container wrapping the send/receive swap area
-  swapCard: {
-    backgroundColor: '#17171A',
-    borderRadius: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+  headerBar: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8,
   },
+  iconBtn: { padding: 4 },
+  headerTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 17, color: '#FFFFFF' },
 
-  label: {
-    fontFamily: 'Inter_600SemiBold', fontSize: 11, letterSpacing: 0.8,
-    textTransform: 'uppercase', color: 'rgba(255,255,255,0.58)', marginBottom: 6,
+  recipientRow: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#17171A', borderRadius: 16,
+    paddingHorizontal: 14, paddingVertical: 10,
+    marginHorizontal: 20, marginBottom: 12,
   },
-  sendSection: { marginBottom: 4 },
-  amountRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  amountText: {
-    fontFamily: 'Inter_700Bold', fontSize: 42, color: '#FFFFFF',
-    letterSpacing: -1, fontVariant: ['tabular-nums'],
-  },
-  amountPlaceholder: { color: 'rgba(255,255,255,0.2)' },
-  currBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: '#1F1F23', borderRadius: 999,
-    paddingHorizontal: 12, paddingVertical: 8,
-  },
-  currFlag: { fontSize: 16 },
-  currCode: { fontFamily: 'Inter_700Bold', fontSize: 13, color: '#FFFFFF' },
-  balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
-  balanceText: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.42)', fontVariant: ['tabular-nums'] },
-  balanceError: { color: '#EF4444' },
-  maxBtn: { fontFamily: 'Inter_700Bold', fontSize: 11, color: '#38BDF8', letterSpacing: 0.5 },
+  recipientName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
+  recipientSub: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)', marginTop: 1 },
 
-  // Rate divider
-  rateDivider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 12 },
-  rateLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
-  ratePill: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: '#17171A', borderRadius: 999,
-    paddingHorizontal: 10, paddingVertical: 5,
+  card: {
+    backgroundColor: '#17171A', borderRadius: 16,
+    paddingHorizontal: 18, paddingVertical: 20,
+    marginHorizontal: 20,
   },
-  rateText: { fontFamily: 'Inter_500Medium', fontSize: 11, color: '#38BDF8', fontVariant: ['tabular-nums'] },
-
-  // Receive section
-  recvSection: { marginBottom: 8 },
-  recvText: {
-    fontFamily: 'Inter_700Bold', fontSize: 36, color: '#38BDF8',
-    letterSpacing: -0.8, fontVariant: ['tabular-nums'],
-  },
-  recvCurrBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: '#1F1F23', borderRadius: 999,
-    paddingHorizontal: 12, paddingVertical: 8,
-  },
-
-  // Fee
-  feeRow: {
+  cardHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 8,
+    marginBottom: 12,
   },
-  feeLabel: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.42)' },
-  feeValue: { fontFamily: 'Inter_500Medium', fontSize: 12, color: 'rgba(255,255,255,0.58)', fontVariant: ['tabular-nums'] },
+  cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  cardLabel: { fontFamily: 'Inter_500Medium', fontSize: 13, color: 'rgba(255,255,255,0.58)' },
+  cardAvailable: { fontFamily: 'Inter_500Medium', fontSize: 12, color: 'rgba(255,255,255,0.42)' },
+  maxPill: {
+    backgroundColor: 'rgba(56,189,248,0.12)', borderRadius: 6,
+    paddingHorizontal: 8, paddingVertical: 3,
+  },
+  maxText: { fontFamily: 'Inter_700Bold', fontSize: 11, color: '#38BDF8', letterSpacing: 0.5 },
+  feeInline: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.42)', marginTop: 8 },
 
-  // Error
+  cardRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  cardAmount: {
+    fontFamily: 'Inter_700Bold', fontSize: 42, color: '#FFFFFF',
+    letterSpacing: -1, flex: 1, marginRight: 8, fontVariant: ['tabular-nums'],
+  },
+  dollar: { color: 'rgba(255,255,255,0.42)', fontSize: 32 },
+
+  sourceBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#1F1F23', borderRadius: 999,
+    paddingHorizontal: 10, paddingVertical: 6,
+  },
+  sourceText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFFF' },
+  currencyChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#1F1F23', borderRadius: 999,
+    paddingHorizontal: 10, paddingVertical: 6,
+  },
+  currencyFlag: { fontSize: 16 },
+
+  dividerWrap: { alignItems: 'center', paddingVertical: 6 },
+
   errorPill: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 999,
-    paddingHorizontal: 12, paddingVertical: 8, marginTop: 4,
+    backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 8,
+    marginHorizontal: 20, marginTop: 12,
   },
-  errorText: { fontFamily: 'Inter_500Medium', fontSize: 11, color: '#EF4444', flex: 1 },
+  errorText: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 12, color: '#EF4444', lineHeight: 16 },
 
-  // Quick amounts
-  quickRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  quickChip: {
+  quickRow: {
+    flexDirection: 'row', justifyContent: 'center', gap: 10,
+    paddingHorizontal: 20, marginTop: 16,
+  },
+  quickPill: {
     backgroundColor: '#17171A', borderRadius: 999,
-    paddingHorizontal: 16, paddingVertical: 10,
+    paddingHorizontal: 16, paddingVertical: 8,
   },
   quickText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFFF' },
 
-  // Bottom — numpad + CTA
-  bottom: { paddingHorizontal: 20, paddingBottom: 12 },
+  numpad: { paddingTop: 4, paddingBottom: 4 },
+  numRow: { flexDirection: 'row' },
+  key: {
+    flex: 1, paddingVertical: 12,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  keyText: { fontFamily: 'Inter_400Regular', fontSize: 26, color: '#FFFFFF' },
+
+  footer: { paddingHorizontal: 20, paddingBottom: 24, paddingTop: 4 },
   cta: {
     backgroundColor: '#38BDF8', borderRadius: 999,
-    paddingVertical: 18, alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 18, alignItems: 'center',
   },
   ctaDisabled: { backgroundColor: '#1F1F23' },
   ctaText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#0A0A0C' },
   ctaTextDisabled: { color: 'rgba(255,255,255,0.25)' },
-
-  // Currency picker
-  cpItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingVertical: 12, paddingHorizontal: 20,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)',
-  },
-  cpItemSel: { backgroundColor: 'rgba(56,189,248,0.08)' },
-  cpIconWrap: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  cpName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
-  cpSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.58)', marginTop: 1 },
 });
