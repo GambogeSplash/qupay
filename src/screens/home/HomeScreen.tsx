@@ -1,39 +1,19 @@
-// HomeScreen — hybrid of local Activity-first layout and clone's corridor/send capabilities.
-// Local influence: greeting header with avatar, activity feed, pull-to-refresh.
-// Clone additions: corridor selector, quick send contacts, send CTA.
-import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl } from 'react-native';
+// HomeScreen — gradient hero with balance, corridor picker, animated send entry,
+// recent contacts carousel, recent activity preview.
+import React, { useState, useCallback, useRef } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '../../components/Icon';
-import { useNavigation } from '@react-navigation/native';
-import { Avatar, BottomSheet, BankLogo } from '../../components';
+import { Avatar, BottomSheet } from '../../components';
 import { userProfile } from '../../data/mockData';
 import { useAuthStore } from '../../store/authStore';
-
-export interface DestInfo {
-  flag: string; name: string; code: string; symbol: string; rate: number; providers: string;
-}
-
-const destinationList: DestInfo[] = [
-  { flag: '\u{1F1F3}\u{1F1EC}', name: 'Nigeria', code: 'NGN', symbol: '\u20A6', rate: 1645, providers: 'OPay \u00B7 GTBank \u00B7 PalmPay' },
-  { flag: '\u{1F1EC}\u{1F1ED}', name: 'Ghana', code: 'GHS', symbol: '\u20B5', rate: 13.8, providers: 'MTN Momo \u00B7 Vodafone Cash' },
-  { flag: '\u{1F1F0}\u{1F1EA}', name: 'Kenya', code: 'KES', symbol: 'KSh', rate: 143, providers: 'M-Pesa \u00B7 Airtel Money' },
-  { flag: '\u{1F1F5}\u{1F1ED}', name: 'Philippines', code: 'PHP', symbol: '\u20B1', rate: 58.5, providers: 'GCash \u00B7 Maya' },
-  { flag: '\u{1F1EE}\u{1F1F3}', name: 'India', code: 'INR', symbol: '\u20B9', rate: 83.2, providers: 'UPI \u00B7 Bank' },
-  { flag: '\u{1F1F5}\u{1F1F0}', name: 'Pakistan', code: 'PKR', symbol: '\u20A8', rate: 278, providers: 'EasyPaisa \u00B7 JazzCash' },
-];
-
-const recentContacts = [
-  { name: 'Emeka Johnson', first: 'Emeka', initials: 'EJ', method: 'OPay', flag: '\u{1F1F3}\u{1F1EC}', amount: 200 },
-  { name: 'Adaeze Obi', first: 'Adaeze', initials: 'AO', method: 'GTBank', flag: '\u{1F1F3}\u{1F1EC}', amount: 100 },
-  { name: 'Kofi Mensah', first: 'Kofi', initials: 'KM', method: 'MTN Momo', flag: '\u{1F1EC}\u{1F1ED}', amount: 50 },
-  { name: 'Chidi Nwosu', first: 'Chidi', initials: 'CN', method: 'PalmPay', flag: '\u{1F1F3}\u{1F1EC}', amount: 30 },
-];
+import { MOCK_RECIPIENTS, CORRIDORS, formatMoney } from '../../data/remittance';
 
 const recentActivity = [
-  { id: '1', name: 'Emeka Johnson', initials: 'EJ', method: 'OPay', status: 'delivered' as const, amount: '\u20A6329,000', sent: '200 USDT', time: '2 days ago' },
-  { id: '2', name: 'Kofi Mensah', initials: 'KM', method: 'MTN Momo', status: 'delivered' as const, amount: '\u20B5690', sent: '50 USDT', time: '5 days ago' },
-  { id: '3', name: 'Adaeze Obi', initials: 'AO', method: 'GTBank', status: 'pending' as const, amount: '\u20A6164,500', sent: '100 USDT', time: '3 hours ago' },
+  { id: '1', name: 'Emeka Johnson', initials: 'EJ', method: 'OPay', status: 'delivered', amount: '\u20A6329,000', sent: '200 USDT', time: '2 days ago' },
+  { id: '2', name: 'Kofi Mensah', initials: 'KM', method: 'MTN Momo', status: 'delivered', amount: '\u20B5690', sent: '50 USDT', time: '5 days ago' },
+  { id: '3', name: 'Adaeze Obi', initials: 'AO', method: 'GTBank', status: 'pending', amount: '\u20A6164,500', sent: '100 USDT', time: '3 hours ago' },
 ];
 
 const statusColor = (s: string) => s === 'delivered' ? '#4ADE80' : s === 'pending' ? '#38BDF8' : '#EF4444';
@@ -43,9 +23,12 @@ const statusLabel = (s: string) => s === 'delivered' ? 'Delivered' : s === 'pend
 export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const user = useAuthStore((s) => s.user);
   const displayName = user?.firstName || userProfile.name.split(' ')[0];
-  const [selectedDest, setSelectedDest] = useState(destinationList[0]);
-  const [showSheet, setShowSheet] = useState(false);
+  const [selectedCorridor, setSelectedCorridor] = useState(CORRIDORS[0]);
+  const [showCorridorSheet, setShowCorridorSheet] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Animated send button scale
+  const sendScale = useRef(new Animated.Value(1)).current;
 
   const greeting = useCallback(() => {
     const h = new Date().getHours();
@@ -57,15 +40,28 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
-  const goSend = () => {
-    const root = navigation.getParent()?.getParent();
-    if (root) root.navigate('SendFlow' as never, { screen: 'Recipient' } as never);
-  };
-
   const goProfile = () => {
     const parent = navigation.getParent();
     if (parent) parent.navigate('ProfileTab');
   };
+
+  const goSend = () => {
+    // Animated press feedback then navigate
+    Animated.sequence([
+      Animated.spring(sendScale, { toValue: 0.92, useNativeDriver: true, friction: 5 }),
+      Animated.spring(sendScale, { toValue: 1, useNativeDriver: true, friction: 5 }),
+    ]).start(() => {
+      const parent = navigation.getParent();
+      if (parent) parent.navigate('SendTab');
+    });
+  };
+
+  const goActivity = () => {
+    const parent = navigation.getParent();
+    if (parent) parent.navigate('ActivityTab');
+  };
+
+  const recents = MOCK_RECIPIENTS.slice(0, 4);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -84,52 +80,65 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               <Text style={styles.headerName}>{displayName} {'\u{1F44B}'}</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn} activeOpacity={0.7}>
-            <Ionicons name="notifications" size={22} color="rgba(255,255,255,0.6)" />
+          <TouchableOpacity style={styles.bellBtn} activeOpacity={0.7}>
+            <Ionicons name="notifications" size={22} color="rgba(255,255,255,0.58)" />
           </TouchableOpacity>
         </View>
 
-        {/* Balance + corridor card */}
-        <View style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>Available balance</Text>
-          <Text style={styles.balanceAmount}>$450.00</Text>
-          <TouchableOpacity style={styles.corridorPill} onPress={() => setShowSheet(true)} activeOpacity={0.7}>
-            <Text style={styles.corridorFlags}>{'\u{1F1F8}\u{1F1EC}'} {'\u2192'} {selectedDest.flag}</Text>
-            <Text style={styles.corridorRate}>{selectedDest.symbol}{selectedDest.rate.toLocaleString()}/USDT</Text>
-            <Ionicons name="chevron-down" size={14} color="rgba(255,255,255,0.42)" />
-          </TouchableOpacity>
+        {/* Gradient hero card — balance + corridor */}
+        <View style={styles.heroWrap}>
+          <LinearGradient
+            colors={['#17171A', '#0A0A0C']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.hero}
+          >
+            <Text style={styles.balanceLabel}>Available to send</Text>
+            <Text style={styles.balanceAmount}>$450.00</Text>
+            <Text style={styles.balanceSub}>USDT on Polygon</Text>
+
+            {/* Corridor selector */}
+            <TouchableOpacity style={styles.corridorPill} onPress={() => setShowCorridorSheet(true)} activeOpacity={0.7}>
+              <Text style={styles.corridorFlags}>{'\u{1F1F8}\u{1F1EC}'} {'\u2192'} {selectedCorridor.toFlag}</Text>
+              <Text style={styles.corridorRate}>
+                1 USD = {selectedCorridor.rate.toLocaleString()} {selectedCorridor.toCurrency}
+              </Text>
+              <Ionicons name="chevron-down" size={14} color="rgba(255,255,255,0.42)" />
+            </TouchableOpacity>
+          </LinearGradient>
         </View>
 
-        {/* Send CTA */}
-        <TouchableOpacity style={styles.sendBtn} onPress={goSend} activeOpacity={0.85}>
-          <Ionicons name="send" size={18} color="#0A0A0C" />
-          <Text style={styles.sendBtnText}>Send Money</Text>
-        </TouchableOpacity>
+        {/* Animated Send button — the primary action */}
+        <Animated.View style={{ transform: [{ scale: sendScale }] }}>
+          <TouchableOpacity style={styles.sendBtn} onPress={goSend} activeOpacity={0.85}>
+            <Ionicons name="send" size={20} color="#0A0A0C" />
+            <Text style={styles.sendBtnText}>Send Money</Text>
+          </TouchableOpacity>
+        </Animated.View>
 
         {/* Send again — horizontal scroll */}
         <Text style={styles.sectionLabel}>Send again</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.recentsScroll}>
-          {recentContacts.map((c) => (
-            <TouchableOpacity key={c.initials} style={styles.recentItem} onPress={goSend} activeOpacity={0.7}>
-              <Avatar seed={c.name} initials={c.initials} size={48} bankBadge={c.method} />
-              <Text style={styles.recentName}>{c.first}</Text>
+          {recents.map((r) => (
+            <TouchableOpacity key={r.id} style={styles.recentItem} onPress={goSend} activeOpacity={0.7}>
+              <Avatar seed={r.name} initials={r.initials} size={48} bankBadge={r.payout.provider} />
+              <Text style={styles.recentName}>{r.name.split(' ')[0]}</Text>
+              {r.lastSendUsd && <Text style={styles.recentAmount}>${r.lastSendUsd}</Text>}
             </TouchableOpacity>
           ))}
         </ScrollView>
 
         {/* Recent activity */}
-        <Text style={styles.sectionLabel}>Recent activity</Text>
+        <View style={styles.activityHeader}>
+          <Text style={styles.sectionLabel}>Recent activity</Text>
+          <TouchableOpacity onPress={goActivity} activeOpacity={0.7}>
+            <Text style={styles.viewAll}>View all</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.activityCard}>
           {recentActivity.map((tx, i) => (
             <View key={tx.id}>
-              <TouchableOpacity
-                style={styles.actRow}
-                activeOpacity={0.6}
-                onPress={() => {
-                  const parent = navigation.getParent();
-                  if (parent) parent.navigate('HistoryTab');
-                }}
-              >
+              <TouchableOpacity style={styles.actRow} activeOpacity={0.6} onPress={goActivity}>
                 <Avatar seed={tx.name} initials={tx.initials} size={44} bankBadge={tx.method} />
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={styles.actName}>{tx.name}</Text>
@@ -150,36 +159,24 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           ))}
         </View>
 
-        <TouchableOpacity
-          style={styles.viewAll}
-          activeOpacity={0.7}
-          onPress={() => {
-            const parent = navigation.getParent();
-            if (parent) parent.navigate('HistoryTab');
-          }}
-        >
-          <Text style={styles.viewAllText}>View all activity</Text>
-          <Ionicons name="arrow-forward" size={16} color="#38BDF8" />
-        </TouchableOpacity>
-
         <View style={{ height: 24 }} />
       </ScrollView>
 
       {/* Corridor picker sheet */}
-      <BottomSheet visible={showSheet} onClose={() => setShowSheet(false)} title="Send to">
-        {destinationList.map((d) => (
+      <BottomSheet visible={showCorridorSheet} onClose={() => setShowCorridorSheet(false)} title="Send to">
+        {CORRIDORS.map((c) => (
           <TouchableOpacity
-            key={d.name}
-            style={[styles.cpItem, selectedDest.name === d.name && styles.cpItemSel]}
-            onPress={() => { setSelectedDest(d); setShowSheet(false); }}
+            key={c.id}
+            style={[styles.cpItem, selectedCorridor.id === c.id && styles.cpItemSel]}
+            onPress={() => { setSelectedCorridor(c); setShowCorridorSheet(false); }}
             activeOpacity={0.7}
           >
-            <Text style={styles.cpFlag}>{d.flag}</Text>
+            <Text style={styles.cpFlag}>{c.toFlag}</Text>
             <View style={{ flex: 1 }}>
-              <Text style={styles.cpName}>{d.name}</Text>
-              <Text style={styles.cpSub}>{d.symbol}{d.rate.toLocaleString()}/USDT {'\u00B7'} {d.providers}</Text>
+              <Text style={styles.cpName}>{c.toCountry}</Text>
+              <Text style={styles.cpSub}>1 USD = {c.rate.toLocaleString()} {c.toCurrency} · ~{c.speedSeconds}s</Text>
             </View>
-            {selectedDest.name === d.name && <Ionicons name="checkmark-circle" size={20} color="#38BDF8" />}
+            {selectedCorridor.id === c.id && <Ionicons name="checkmark-circle" size={20} color="#38BDF8" />}
           </TouchableOpacity>
         ))}
         <View style={{ height: 40 }} />
@@ -192,22 +189,24 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0A0A0C' },
 
   // Header
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   greeting: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)' },
   headerName: { fontFamily: 'Inter_700Bold', fontSize: 18, color: '#FFFFFF', letterSpacing: -0.2 },
-  iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  bellBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
 
-  // Balance card
-  balanceCard: { backgroundColor: '#17171A', borderRadius: 16, marginHorizontal: 20, padding: 20, marginBottom: 16 },
+  // Gradient hero
+  heroWrap: { marginHorizontal: 20, marginBottom: 16, borderRadius: 20, overflow: 'hidden' },
+  hero: { padding: 24 },
   balanceLabel: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)' },
-  balanceAmount: { fontFamily: 'Inter_700Bold', fontSize: 36, color: '#FFFFFF', letterSpacing: -1, marginTop: 4, fontVariant: ['tabular-nums'] },
+  balanceAmount: { fontFamily: 'Inter_700Bold', fontSize: 40, color: '#FFFFFF', letterSpacing: -1, marginTop: 4, fontVariant: ['tabular-nums'] },
+  balanceSub: { fontFamily: 'Inter_500Medium', fontSize: 12, color: 'rgba(255,255,255,0.42)', marginTop: 2 },
   corridorPill: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: 'rgba(56,189,248,0.07)', borderRadius: 999,
-    paddingHorizontal: 12, paddingVertical: 8, marginTop: 14, alignSelf: 'flex-start',
+    paddingHorizontal: 12, paddingVertical: 8, marginTop: 16, alignSelf: 'flex-start',
   },
-  corridorFlags: { fontSize: 13 },
+  corridorFlags: { fontSize: 14 },
   corridorRate: { fontFamily: 'Inter_500Medium', fontSize: 12, color: '#38BDF8', fontVariant: ['tabular-nums'] },
 
   // Send CTA
@@ -224,10 +223,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, marginBottom: 10,
   },
   recentsScroll: { paddingHorizontal: 20, gap: 16, marginBottom: 20 },
-  recentItem: { alignItems: 'center', width: 60, gap: 6 },
+  recentItem: { alignItems: 'center', width: 64, gap: 6 },
   recentName: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.58)' },
+  recentAmount: { fontFamily: 'Inter_600SemiBold', fontSize: 10, color: '#38BDF8' },
 
-  // Recent activity
+  // Activity
+  activityHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingRight: 20,
+  },
+  viewAll: { fontFamily: 'Inter_500Medium', fontSize: 12, color: '#38BDF8' },
   activityCard: { backgroundColor: '#17171A', borderRadius: 16, marginHorizontal: 20, paddingHorizontal: 12 },
   actRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
   actName: { fontFamily: 'Inter_600SemiBold', fontSize: 15, color: '#FFFFFF' },
@@ -236,13 +241,6 @@ const styles = StyleSheet.create({
   actAmount: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
   actSent: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.58)', marginTop: 2 },
   actDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
-
-  // View all
-  viewAll: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    marginHorizontal: 20, marginTop: 12, paddingVertical: 12,
-  },
-  viewAllText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: '#38BDF8' },
 
   // Corridor picker
   cpItem: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' },

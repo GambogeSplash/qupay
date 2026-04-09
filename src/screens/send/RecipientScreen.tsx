@@ -7,8 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { Avatar } from '../../components';
 import { MOCK_RECIPIENTS, Recipient } from '../../data/remittance';
-import { useAuthStore } from '../../store/authStore';
-import { userProfile } from '../../data/mockData';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
@@ -22,16 +20,8 @@ const PLACEHOLDERS = [
 ];
 
 export const RecipientScreen: React.FC<Props> = ({ navigation }) => {
-  const user = useAuthStore((s) => s.user);
-  const displayName = user?.firstName || userProfile.name.split(' ')[0];
   const [query, setQuery] = useState('');
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
-
-  const goProfile = () => {
-    try {
-      (navigation as any).getParent()?.getParent()?.navigate('ProfileStack');
-    } catch {}
-  };
 
   // Rotate placeholder text while user hasn't typed
   useEffect(() => {
@@ -56,15 +46,11 @@ export const RecipientScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Header — avatar left + title + bell right */}
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={goProfile} activeOpacity={0.8}>
-          <Avatar seed={displayName} size={36} />
-        </TouchableOpacity>
+        <View style={{ width: 36 }} />
         <Text style={styles.title}>Send</Text>
-        <TouchableOpacity style={styles.bellBtn} activeOpacity={0.7}>
-          <Ionicons name="notifications" size={20} color="rgba(255,255,255,0.58)" />
-        </TouchableOpacity>
+        <View style={{ width: 36 }} />
       </View>
 
       {/* Search bar with rotating placeholder */}
@@ -88,7 +74,7 @@ export const RecipientScreen: React.FC<Props> = ({ navigation }) => {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
         {/* Add new recipient */}
-        <TouchableOpacity style={styles.addRow} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.addRow} activeOpacity={0.7} onPress={() => navigation.navigate('AddRecipient' as any)}>
           <View style={styles.addIcon}>
             <Ionicons name="person" size={20} color="#38BDF8" />
           </View>
@@ -163,7 +149,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12,
   },
   title: { fontFamily: 'Inter_700Bold', fontSize: 20, color: '#FFFFFF', flex: 1, textAlign: 'center' },
-  bellBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
 
   searchBar: {
     flexDirection: 'row', alignItems: 'center', gap: 8,

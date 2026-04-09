@@ -38,8 +38,11 @@ import { ConfirmScreen } from '../screens/send/ConfirmScreen';
 import { DepositWaitingScreen } from '../screens/send/DepositWaitingScreen';
 import { SuccessScreen } from '../screens/send/SuccessScreen';
 
-// Earn
-import { EarnScreen } from '../screens/earn/EarnScreen';
+// Home
+import { HomeScreen } from '../screens/home/HomeScreen';
+
+// New recipient flow
+import { AddRecipientScreen } from '../screens/send/AddRecipientScreen';
 
 // ─── Param lists ───
 export type OnboardingStackParamList = {
@@ -198,6 +201,7 @@ function SendTabNavigator() {
     >
       {/* Flow: Recipient (who) → Amount (how much) → Confirm → Deposit → Success */}
       <SendFlowStack.Screen name="Recipient" component={RecipientScreen} />
+      <SendFlowStack.Screen name="AddRecipient" component={AddRecipientScreen} />
       <SendFlowStack.Screen name="Amount" component={AmountScreen} />
       <SendFlowStack.Screen name="Confirm" component={ConfirmScreen} />
       <SendFlowStack.Screen name="DepositWaiting" component={DepositWaitingScreen} options={{ animation: 'fade_from_bottom', gestureEnabled: false }} />
@@ -206,10 +210,19 @@ function SendTabNavigator() {
   );
 }
 
+function HomeStackNavigator() {
+  const HomeStack = createNativeStackNavigator();
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="Home" component={HomeScreen} />
+    </HomeStack.Navigator>
+  );
+}
+
 function MainTabs() {
   return (
     <Tab.Navigator
-      initialRouteName="SendTab"
+      initialRouteName="HomeTab"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
@@ -231,29 +244,19 @@ function MainTabs() {
         tabBarIcon: ({ focused, color }) => {
           let iconName = 'ellipse';
           switch (route.name) {
+            case 'HomeTab': iconName = 'home'; break;
             case 'SendTab': iconName = 'send'; break;
             case 'ActivityTab': iconName = 'time'; break;
-            case 'EarnTab': iconName = 'gift'; break;
+            case 'ProfileTab': iconName = 'person'; break;
           }
           return <Ionicons name={iconName} size={20} color={color} />;
         },
       })}
     >
-      <Tab.Screen
-        name="SendTab"
-        component={SendTabNavigator}
-        options={{ tabBarLabel: 'SEND' }}
-      />
-      <Tab.Screen
-        name="ActivityTab"
-        component={HistoryStackNavigator}
-        options={{ tabBarLabel: 'ACTIVITY' }}
-      />
-      <Tab.Screen
-        name="EarnTab"
-        component={EarnScreen}
-        options={{ tabBarLabel: 'EARN' }}
-      />
+      <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ tabBarLabel: 'HOME' }} />
+      <Tab.Screen name="SendTab" component={SendTabNavigator} options={{ tabBarLabel: 'SEND' }} />
+      <Tab.Screen name="ActivityTab" component={HistoryStackNavigator} options={{ tabBarLabel: 'ACTIVITY' }} />
+      <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: 'PROFILE' }} />
     </Tab.Navigator>
   );
 }
@@ -290,13 +293,7 @@ export const AppNavigator: React.FC = () => {
       ) : !hasPin ? (
         <RootStack.Screen name="PinSetup" component={PinSetupScreen} />
       ) : (
-        <>
-          <RootStack.Screen name="Main" component={MainTabs} />
-          {/* Profile stack — accessible via avatar tap, not a tab */}
-          <RootStack.Group screenOptions={{ presentation: 'modal', animation: 'slide_from_right' }}>
-            <RootStack.Screen name="ProfileStack" component={ProfileStackNavigator} />
-          </RootStack.Group>
-        </>
+        <RootStack.Screen name="Main" component={MainTabs} />
       )}
     </RootStack.Navigator>
   );
