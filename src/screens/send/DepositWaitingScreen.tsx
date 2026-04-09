@@ -12,7 +12,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<SendFlowParamList, 'DepositWaiting'>;
-type Stage = 'warning' | 'address' | 'processing';
+type Stage = 'address' | 'processing';
 
 const ADDRESS_TTL = 15 * 60; // 15 min
 const DEPOSIT_ADDRESS = '0x4c2A9f8E3d7B6a1C0e5F2d8A9b4C7e6F3a1D5b';
@@ -61,7 +61,7 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
   const recvSymbol = currencySymbols[recvCurrency] || '';
   const firstName = recipientName.split(' ')[0];
 
-  const [stage, setStage] = useState<Stage>('warning');
+  const [stage, setStage] = useState<Stage>('address');
   const [secondsLeft, setSecondsLeft] = useState(ADDRESS_TTL);
   const [copied, setCopied] = useState(false);
   const [processingStep, setProcessingStep] = useState(0);
@@ -127,57 +127,6 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
     }, 6000);
   };
 
-  // ─── Safety interstitial ───
-  if (stage === 'warning') {
-    return (
-      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <View style={styles.headerBar}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
-            <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Send {sendCurrency}</Text>
-          <View style={{ width: 24 }} />
-        </View>
-
-        <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-          <View style={styles.warningHero}>
-            <Ionicons name="alert-circle" size={48} color="#0A0A0C" />
-          </View>
-          <Text style={styles.warningTitle}>Read this carefully</Text>
-
-          <View style={styles.warningCard}>
-            {[
-              { icon: 'alert-circle', title: 'Send only on the right network', body: `We're expecting ${sendCurrency} on ${network}. Sending from any other chain will lose your funds permanently.`, accent: true },
-              { icon: 'cash', title: 'Send the exact amount', body: `We need ${amount} ${sendCurrency}. Small variations are OK; significantly less will refund.` },
-              { icon: 'time', title: 'Address expires in 15 minutes', body: 'The exchange rate is locked for 15 minutes. After that you\'ll need to start over.' },
-            ].map((w, i) => (
-              <View key={i}>
-                <View style={styles.warningRow}>
-                  <View style={[styles.warningIcon, w.accent && styles.warningIconAccent]}>
-                    <Ionicons name={w.icon as any} size={18} color={w.accent ? '#FFFFFF' : '#38BDF8'} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.warningRowTitle}>{w.title}</Text>
-                    <Text style={styles.warningRowBody}>{w.body}</Text>
-                  </View>
-                </View>
-                {i < 2 && <View style={styles.divider} />}
-              </View>
-            ))}
-          </View>
-
-          <TouchableOpacity
-            style={styles.proceedCta}
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setStage('address'); }}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.proceedCtaText}>I understand · Show address</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
-
   // ─── Processing stage ───
   if (stage === 'processing') {
     const steps = [
@@ -227,7 +176,15 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 24, alignItems: 'center' }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24, alignItems: 'center' }}>
+        {/* Compact caution banner */}
+        <View style={styles.cautionBanner}>
+          <Ionicons name="alert-circle" size={16} color="#FFD60A" />
+          <Text style={styles.cautionText}>
+            Only send <Text style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF' }}>{amount} {sendCurrency}</Text> on <Text style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF' }}>{network}</Text>. Wrong network or token = lost funds.
+          </Text>
+        </View>
+
         {/* Instruction */}
         <Text style={styles.instrTitle}>
           Send <Text style={{ color: '#38BDF8' }}>{amount} {sendCurrency}</Text>
@@ -237,7 +194,7 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
         {/* Network pill */}
         <View style={styles.networkPill}>
           <Ionicons name="globe" size={14} color="#FFFFFF" />
-          <Text style={styles.networkText}>Network: {network} only</Text>
+          <Text style={styles.networkText}>{network}</Text>
         </View>
 
         {/* QR code */}
@@ -291,35 +248,17 @@ const styles = StyleSheet.create({
   headerTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 17, color: '#FFFFFF' },
   divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
 
-  // Warning interstitial
-  warningHero: {
-    width: 96, height: 96, borderRadius: 48,
-    backgroundColor: '#FFD60A', alignSelf: 'center', marginTop: 16,
-    alignItems: 'center', justifyContent: 'center',
+  // Compact caution banner
+  cautionBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(255,214,10,0.08)', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 10,
+    marginHorizontal: 20, marginBottom: 16, alignSelf: 'stretch',
   },
-  warningTitle: {
-    fontFamily: 'Inter_700Bold', fontSize: 24, color: '#FFFFFF',
-    textAlign: 'center', marginTop: 16, letterSpacing: -0.3,
+  cautionText: {
+    flex: 1, fontFamily: 'Inter_400Regular', fontSize: 12,
+    color: 'rgba(255,214,10,0.8)', lineHeight: 17,
   },
-  warningCard: {
-    backgroundColor: '#17171A', borderRadius: 16,
-    paddingHorizontal: 16, marginHorizontal: 20, marginTop: 24,
-  },
-  warningRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 14 },
-  warningIcon: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: 'rgba(56,189,248,0.12)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  warningIconAccent: { backgroundColor: '#EF4444' },
-  warningRowTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
-  warningRowBody: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)', marginTop: 2, lineHeight: 17 },
-  proceedCta: {
-    backgroundColor: '#38BDF8', borderRadius: 999,
-    paddingVertical: 18, alignItems: 'center',
-    marginHorizontal: 20, marginTop: 24,
-  },
-  proceedCtaText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#0A0A0C' },
 
   // Address stage
   instrTitle: { fontFamily: 'Inter_700Bold', fontSize: 26, color: '#FFFFFF', marginTop: 8, letterSpacing: -0.3 },
