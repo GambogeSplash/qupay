@@ -3,6 +3,7 @@
 // "Send again" carousel, all recipients in grouped card, new recipient action.
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { Avatar } from '../../components';
@@ -41,6 +42,7 @@ export const RecipientScreen: React.FC<Props> = ({ navigation }) => {
   const recents = MOCK_RECIPIENTS.slice(0, 4);
 
   const goNext = (recipient: Recipient) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate('Amount', { recipient } as any);
   };
 
@@ -70,7 +72,7 @@ export const RecipientScreen: React.FC<Props> = ({ navigation }) => {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
         {/* Add new recipient */}
-        <TouchableOpacity style={styles.addRow} activeOpacity={0.7} onPress={() => navigation.navigate('AddRecipient' as any)}>
+        <TouchableOpacity style={styles.addRow} activeOpacity={0.7} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigation.navigate('AddRecipient' as any); }}>
           <View style={styles.addIcon}>
             <Ionicons name="person" size={20} color="#38BDF8" />
           </View>

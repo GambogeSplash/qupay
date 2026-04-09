@@ -3,12 +3,13 @@
 // Custom 4x3 numpad always visible, both amounts update live.
 // Recipient locked from upstream (PickRecipient). Includes: inline fee,
 // balance + MAX, quick chips, KYC/balance validation pills.
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { Avatar, CryptoIcon, BottomSheet } from '../../components';
 import { Recipient, getCorridor, formatMoney } from '../../data/remittance';
+import { getRate, fetchLiveRates } from '../../data/rates';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
@@ -46,6 +47,15 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
     [recipient],
   );
 
+  // Fetch live rates on mount (non-blocking, falls back to hardcoded)
+  const [liveRate, setLiveRate] = useState(corridor.rate);
+  useEffect(() => {
+    fetchLiveRates().then((rates) => {
+      const r = rates[corridor.toCurrency];
+      if (r) setLiveRate(r);
+    });
+  }, [corridor.toCurrency]);
+
   // Stablecoin + blockchain selection
   const [selectedCoin, setSelectedCoin] = useState(STABLECOINS[0]);
   const [showCoinPicker, setShowCoinPicker] = useState(false);
@@ -53,7 +63,7 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const [sendStr, setSendStr] = useState('0');
   const sendNum = parseFloat(sendStr) || 0;
-  const receiveNum = sendNum * corridor.rate;
+  const receiveNum = sendNum * liveRate;
   const fee = FEE_OVERRIDE;
   const maxSendable = Math.max(0, WALLET_BALANCE - fee);
   const overBalance = sendNum + fee > WALLET_BALANCE;
@@ -164,7 +174,7 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
         </View>
         <Text style={styles.feeInline}>
-          1 USD = {corridor.rate.toFixed(2)} {corridor.toCurrency} · {formatMoney(fee, 'USD')} fee
+          1 USD = {liveRate.toFixed(2)} {corridor.toCurrency} · {formatMoney(fee, 'USD')} fee
         </Text>
       </View>
 

@@ -3,6 +3,7 @@
 // from a list with real logos. Then enter recipient name and proceed to Amount.
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { BankLogo, ScreenHeader, BottomSheet } from '../../components';
@@ -44,6 +45,11 @@ const COUNTRIES: Country[] = [
       { id: 'mtn', name: 'MTN Momo' },
       { id: 'vodafone', name: 'Vodafone Cash' },
       { id: 'airteltigo', name: 'AirtelTigo Money' },
+      { id: 'ecobank-gh', name: 'Ecobank Ghana' },
+      { id: 'gcb', name: 'GCB Bank' },
+      { id: 'calbank', name: 'Calbank' },
+      { id: 'fidelity-gh', name: 'Fidelity Bank Ghana' },
+      { id: 'absa-gh', name: 'Absa Ghana' },
     ],
   },
   {
@@ -53,6 +59,11 @@ const COUNTRIES: Country[] = [
       { id: 'airtel', name: 'Airtel Money' },
       { id: 'equity', name: 'Equity Bank' },
       { id: 'kcb', name: 'KCB Bank' },
+      { id: 'coop', name: 'Co-operative Bank' },
+      { id: 'ncba', name: 'NCBA' },
+      { id: 'stanbic-ke', name: 'Stanbic Kenya' },
+      { id: 'im', name: 'I&M Bank' },
+      { id: 'dtb-ke', name: 'DTB Kenya' },
     ],
   },
   {
@@ -61,6 +72,10 @@ const COUNTRIES: Country[] = [
       { id: 'gcash', name: 'GCash' },
       { id: 'maya', name: 'Maya' },
       { id: 'bpi', name: 'BPI' },
+      { id: 'bdo', name: 'BDO' },
+      { id: 'metrobank', name: 'Metrobank' },
+      { id: 'unionbank-ph', name: 'UnionBank PH' },
+      { id: 'cimb-ph', name: 'CIMB PH' },
     ],
   },
   {
@@ -109,6 +124,7 @@ export const AddRecipientScreen: React.FC<{ navigation: any }> = ({ navigation }
   const [resolving, setResolving] = useState(false);
   const [showBankPicker, setShowBankPicker] = useState(false);
   const [bankSearch, setBankSearch] = useState('');
+  const [resolveError, setResolveError] = useState(false);
 
   // Auto-detect bank as user types account number
   useEffect(() => {
@@ -126,10 +142,13 @@ export const AddRecipientScreen: React.FC<{ navigation: any }> = ({ navigation }
   useEffect(() => {
     if (!selectedBank || accountNumber.length < 10) {
       setAccountName('');
+      setResolveError(false);
       return;
     }
     setResolving(true);
+    setResolveError(false);
     const timer = setTimeout(() => {
+      if (Math.random() < 0.1) { setResolveError(true); setResolving(false); return; }
       setAccountName(mockResolveName(selectedBank.name, accountNumber));
       setResolving(false);
     }, 800);
@@ -146,6 +165,7 @@ export const AddRecipientScreen: React.FC<{ navigation: any }> = ({ navigation }
   const canProceed = selectedCountry && selectedBank && accountNumber.length >= 8 && accountName.length > 0;
 
   const handleProceed = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (!selectedCountry || !selectedBank) return;
     const initials = accountName.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
     const recipient: Recipient = {
@@ -173,7 +193,7 @@ export const AddRecipientScreen: React.FC<{ navigation: any }> = ({ navigation }
               key={c.code}
               style={styles.countryRow}
               activeOpacity={0.7}
-              onPress={() => { setSelectedCountry(c); setStep('details'); }}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSelectedCountry(c); setStep('details'); }}
             >
               <Text style={styles.countryFlag}>{c.flag}</Text>
               <View style={{ flex: 1 }}>
@@ -260,6 +280,14 @@ export const AddRecipientScreen: React.FC<{ navigation: any }> = ({ navigation }
                 <View style={styles.miniSpin} />
                 <Text style={styles.resolvingText}>Looking up account...</Text>
               </View>
+            ) : resolveError ? (
+              <View style={styles.resolvedRow}>
+                <Ionicons name="alert-circle" size={18} color="#EF4444" />
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={[styles.resolvedName, { color: '#EF4444' }]}>Account not found</Text>
+                  <Text style={styles.resolvedSub}>Check the number and try again</Text>
+                </View>
+              </View>
             ) : accountName ? (
               <View style={styles.resolvedRow}>
                 <Ionicons name="checkmark-circle" size={18} color="#4ADE80" />
@@ -302,7 +330,7 @@ export const AddRecipientScreen: React.FC<{ navigation: any }> = ({ navigation }
             <TouchableOpacity
               key={b.id}
               style={[styles.sheetRow, selectedBank?.id === b.id && styles.sheetRowSel]}
-              onPress={() => { setSelectedBank(b); setShowBankPicker(false); setBankSearch(''); }}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSelectedBank(b); setShowBankPicker(false); setBankSearch(''); }}
               activeOpacity={0.7}
             >
               <BankLogo name={b.name} size={36} />

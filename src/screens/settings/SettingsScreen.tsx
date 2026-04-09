@@ -164,6 +164,8 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
         {/* More */}
         <Text style={styles.sectionLabel}>More</Text>
         <View style={styles.linksCard}>
+          <LinkRow icon="gift" label="Earn rewards" sub="Streaks, referrals & bonuses" onPress={() => Alert.alert('Earn', 'Earn screen coming soon — check Profile > Invite friends for now.')} />
+          <Divider />
           <LinkRow
             icon="gift"
             label="Invite friends"

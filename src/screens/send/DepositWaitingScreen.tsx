@@ -103,7 +103,15 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
     setTimeout(() => setCopied(false), 2500);
   };
 
-  // Demo: user taps "I sent it" → processing → success
+  // Auto-advance: simulate blockchain detection after 30s on address stage.
+  // User can also tap "I sent it" to skip the wait.
+  useEffect(() => {
+    if (stage !== 'address') return;
+    const autoDetect = setTimeout(() => handleMarkSent(), 30000);
+    return () => clearTimeout(autoDetect);
+  }, [stage]);
+
+  // Demo: user taps "I sent it" or auto-detected → processing → success
   const handleMarkSent = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     setStage('processing');

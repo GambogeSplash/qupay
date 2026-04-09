@@ -3,6 +3,7 @@
 // date-grouped sections wrapped in P.card containers, status icon+text rows.
 import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { Avatar, SearchInput } from '../../components';
@@ -145,9 +146,10 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
                       key={tx.id}
                       style={[styles.row, i < g.items.length - 1 && styles.itemBorder]}
                       activeOpacity={0.6}
-                      onPress={() =>
-                        navigation.navigate('TransferDetail', { transferId: tx.id, status: tx.status })
-                      }
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        navigation.navigate('TransferDetail', { transferId: tx.id, status: tx.status });
+                      }}
                     >
                       <Avatar
                         seed={tx.name}

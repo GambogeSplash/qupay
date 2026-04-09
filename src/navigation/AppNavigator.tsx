@@ -240,8 +240,8 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="SendTab" component={SendTabNavigator} options={{ tabBarLabel: 'SEND' }} />
       <Tab.Screen name="ActivityTab" component={HistoryStackNavigator} options={{ tabBarLabel: 'ACTIVITY' }} />
+      <Tab.Screen name="SendTab" component={SendTabNavigator} options={{ tabBarLabel: 'SEND' }} />
       <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: 'PROFILE' }} />
     </Tab.Navigator>
   );
