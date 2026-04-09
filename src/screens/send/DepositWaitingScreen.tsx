@@ -12,7 +12,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<SendFlowParamList, 'DepositWaiting'>;
-type Stage = 'address' | 'detecting' | 'processing';
+type Stage = 'address' | 'detecting';
 
 const ADDRESS_TTL = 15 * 60; // 15 min
 const DEPOSIT_ADDRESS = '0x4c2A9f8E3d7B6a1C0e5F2d8A9b4C7e6F3a1D5b';
@@ -111,77 +111,72 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
     return () => clearTimeout(autoDetect);
   }, [stage]);
 
-  // User taps "I sent it" → detecting radar → processing steps → success
+  // Radar status messages — progressive updates shown on the radar screen
+  const RADAR_STEPS = [
+    { label: 'Scanning blockchain...', sub: `Looking for ${amount} ${sendCurrency} on ${network}` },
+    { label: 'Deposit detected', sub: `${amount} ${sendCurrency} confirmed on ${network}` },
+    { label: 'Converting to local currency', sub: `${recvSymbol}${receiveAmount.toLocaleString()} ${recvCurrency} being prepared` },
+    { label: `Sending to ${firstName}`, sub: `Releasing to ${recipientMethod}` },
+    { label: 'Delivered!', sub: `${firstName} received ${recvSymbol}${receiveAmount.toLocaleString()}` },
+  ];
+
   const handleMarkSent = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     setStage('detecting');
-    // Radar detects after 3s → processing
+    // Progressive radar updates — all on one screen
+    setTimeout(() => { setProcessingStep(1); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 3000);
+    setTimeout(() => { setProcessingStep(2); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 5500);
+    setTimeout(() => { setProcessingStep(3); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 8000);
     setTimeout(() => {
+      setProcessingStep(4);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setStage('processing');
-      // Processing steps
-      setTimeout(() => { setProcessingStep(1); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 2000);
-      setTimeout(() => { setProcessingStep(2); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 4000);
       setTimeout(() => {
-        setProcessingStep(3);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         navigation.navigate('Success', {
           recipientName, recipientMethod, amount, receiveAmount, recvCurrency, sendCurrency,
         });
-      }, 6000);
-    }, 3000);
+      }, 1500);
+    }, 10000);
   };
 
-  // ─── Detecting stage — radar animation ───
+  // ─── Radar stage — unified detection + processing ───
   if (stage === 'detecting') {
+    const currentStep = RADAR_STEPS[processingStep] || RADAR_STEPS[0];
+    const isDone = processingStep >= 4;
     return (
       <SafeAreaView style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]} edges={['top']}>
         {/* Radar pulse rings */}
         <View style={styles.radarWrap}>
-          <Animated.View style={[styles.radarRing3, { opacity: pulse }]} />
-          <Animated.View style={[styles.radarRing2, { opacity: pulse, transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.1, 1] }) }] }]} />
-          <View style={styles.radarCenter}>
-            <Ionicons name="search" size={32} color="#38BDF8" />
+          <Animated.View style={[styles.radarRing3, { opacity: pulse, borderColor: isDone ? 'rgba(74,222,128,0.15)' : 'rgba(56,189,248,0.1)' }]} />
+          <Animated.View style={[styles.radarRing2, { opacity: pulse, borderColor: isDone ? 'rgba(74,222,128,0.25)' : 'rgba(56,189,248,0.2)', transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.1, 1] }) }] }]} />
+          <View style={[styles.radarCenter, isDone && { backgroundColor: 'rgba(74,222,128,0.12)' }]}>
+            <Ionicons name={isDone ? 'checkmark' : 'search'} size={32} color={isDone ? '#4ADE80' : '#38BDF8'} />
           </View>
         </View>
-        <Text style={styles.detectingTitle}>Detecting deposit...</Text>
-        <Text style={styles.detectingSub}>Scanning {network} for your {sendCurrency} transfer</Text>
-      </SafeAreaView>
-    );
-  }
 
-  // ─── Processing stage ───
-  if (stage === 'processing') {
-    const steps = [
-      { label: 'Deposit detected', desc: `${amount} ${sendCurrency} received on ${network}` },
-      { label: 'Converting', desc: `Converting to ${recvSymbol}${receiveAmount.toLocaleString()} ${recvCurrency}` },
-      { label: 'Sending to recipient', desc: `Releasing to ${recipientMethod} for ${firstName}` },
-    ];
-    return (
-      <SafeAreaView style={[styles.safe, { justifyContent: 'center' }]} edges={['top']}>
-        <View style={{ alignItems: 'center', marginBottom: 32 }}>
-          <Text style={styles.processingTitle}>Processing...</Text>
-          <Text style={styles.processingSub}>{amount} {sendCurrency} {'\u2192'} {recvSymbol}{receiveAmount.toLocaleString()}</Text>
-        </View>
-        <View style={styles.stepsCard}>
-          {steps.map((s, i) => (
-            <View key={i} style={styles.stepRow}>
-              <View style={styles.stepIconCol}>
-                {i < processingStep ? (
-                  <View style={styles.stepDone}><Ionicons name="checkmark" size={14} color="#0A0A0C" /></View>
-                ) : i === processingStep ? (
-                  <Animated.View style={[styles.stepActive, { transform: [{ rotate: spinRotate }] }]} />
-                ) : (
-                  <View style={styles.stepWaiting} />
-                )}
-                {i < steps.length - 1 && <View style={[styles.connector, i < processingStep && styles.connectorDone]} />}
-              </View>
-              <View style={styles.stepTextCol}>
-                <Text style={[styles.stepLabel, i < processingStep && styles.stepLabelDone, i > processingStep && styles.stepLabelWait]}>{s.label}</Text>
-                <Text style={styles.stepDesc}>{s.desc}</Text>
-              </View>
-            </View>
+        {/* Status text — updates progressively */}
+        <Text style={[styles.detectingTitle, isDone && { color: '#4ADE80' }]}>{currentStep.label}</Text>
+        <Text style={styles.detectingSub}>{currentStep.sub}</Text>
+
+        {/* Step indicators */}
+        <View style={styles.radarDots}>
+          {RADAR_STEPS.map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.radarDot,
+                i <= processingStep && styles.radarDotActive,
+                i <= processingStep && processingStep >= 4 && styles.radarDotDone,
+              ]}
+            />
           ))}
+        </View>
+
+        {/* Transfer summary */}
+        <View style={styles.radarSummary}>
+          <Text style={styles.radarSummaryText}>
+            {amount} {sendCurrency} {'\u2192'} {recvSymbol}{receiveAmount.toLocaleString()} {recvCurrency}
+          </Text>
+          <Text style={styles.radarSummaryRecipient}>to {recipientName} via {recipientMethod}</Text>
         </View>
       </SafeAreaView>
     );
@@ -302,8 +297,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(56,189,248,0.12)',
     alignItems: 'center', justifyContent: 'center',
   },
-  detectingTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, color: '#FFFFFF', marginBottom: 8 },
-  detectingSub: { fontFamily: 'Inter_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.58)' },
+  detectingTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, color: '#FFFFFF', marginBottom: 8, textAlign: 'center' },
+  detectingSub: { fontFamily: 'Inter_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.58)', textAlign: 'center', paddingHorizontal: 40 },
+  radarDots: { flexDirection: 'row', gap: 6, marginTop: 24 },
+  radarDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.12)' },
+  radarDotActive: { backgroundColor: '#38BDF8' },
+  radarDotDone: { backgroundColor: '#4ADE80' },
+  radarSummary: { alignItems: 'center', marginTop: 32, backgroundColor: '#17171A', borderRadius: 16, paddingHorizontal: 24, paddingVertical: 16 },
+  radarSummaryText: { fontFamily: 'Inter_600SemiBold', fontSize: 15, color: '#FFFFFF', fontVariant: ['tabular-nums'] },
+  radarSummaryRecipient: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.58)', marginTop: 4 },
 
   // Address stage — consistent card layout
   qrCard: {
@@ -362,20 +364,4 @@ const styles = StyleSheet.create({
   },
   sentCtaText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#0A0A0C' },
 
-  // Processing stage
-  processingTitle: { fontFamily: 'Inter_700Bold', fontSize: 24, color: '#FFFFFF', letterSpacing: -0.3 },
-  processingSub: { fontFamily: 'Inter_500Medium', fontSize: 13, color: 'rgba(255,255,255,0.58)', marginTop: 6, fontVariant: ['tabular-nums'] },
-  stepsCard: { backgroundColor: '#17171A', borderRadius: 16, marginHorizontal: 20, padding: 20 },
-  stepRow: { flexDirection: 'row', minHeight: 64 },
-  stepIconCol: { width: 28, alignItems: 'center' },
-  stepDone: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#4ADE80', alignItems: 'center', justifyContent: 'center' },
-  stepActive: { width: 24, height: 24, borderRadius: 12, borderWidth: 2.5, borderColor: '#38BDF8', borderTopColor: 'transparent' },
-  stepWaiting: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: 'rgba(255,255,255,0.12)' },
-  connector: { width: 2, flex: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 4 },
-  connectorDone: { backgroundColor: '#4ADE80' },
-  stepTextCol: { flex: 1, marginLeft: 12, paddingBottom: 16 },
-  stepLabel: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
-  stepLabelDone: { color: '#4ADE80' },
-  stepLabelWait: { color: 'rgba(255,255,255,0.42)' },
-  stepDesc: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.42)', marginTop: 2, lineHeight: 18 },
 });

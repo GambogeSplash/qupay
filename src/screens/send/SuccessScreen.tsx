@@ -1,7 +1,6 @@
-// SuccessScreen — delivery confirmation with animated checkmark.
-// Consistent visual language: borderless cards, brand colors, Inter fonts.
+// SuccessScreen — clean delivery confirmation. Two actions: view receipt, done.
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { CTAButton, Avatar } from '../../components';
@@ -13,7 +12,7 @@ import type { SendFlowParamList } from '../../navigation/AppNavigator';
 type Props = NativeStackScreenProps<SendFlowParamList, 'Success'>;
 
 const currencySymbols: Record<string, string> = {
-  USDT: '', NGN: '\u20A6', GHS: '\u20B5', KES: 'KSh', INR: '\u20B9', PHP: '\u20B1', MXN: '$', PKR: 'Rs', ZAR: 'R',
+  USDT: '', NGN: '\u20A6', GHS: '\u20B5', KES: 'KSh', INR: '\u20B9', PHP: '\u20B1', PKR: 'Rs',
 };
 
 export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
@@ -28,22 +27,16 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
   const symbol = currencySymbols[recvCurrency] || '';
   const firstName = recipientName.split(' ')[0];
 
-  const iconScale = useRef(new Animated.Value(0)).current;
-  const contentOpacity = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Animated.sequence([
-      Animated.spring(iconScale, { toValue: 1, damping: 12, stiffness: 200, mass: 0.8, useNativeDriver: true }),
-      Animated.timing(contentOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, damping: 10, stiffness: 180, mass: 0.8, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
     ]).start();
   }, []);
-
-  const goHome = () => {
-    navigation.dispatch(
-      CommonActions.reset({ index: 0, routes: [{ name: 'Recipient' }] })
-    );
-  };
 
   const goReceipt = () => {
     const root = navigation.getParent()?.getParent();
@@ -55,45 +48,34 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  const goDone = () => {
+    navigation.dispatch(
+      CommonActions.reset({ index: 0, routes: [{ name: 'Recipient' }] })
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.content}>
-        {/* Recipient avatar */}
-        <Avatar seed={recipientName} size={44} />
+        {/* Avatar + animated check overlay */}
+        <View style={styles.avatarWrap}>
+          <Avatar seed={recipientName} size={72} />
+          <Animated.View style={[styles.checkBadge, { transform: [{ scale: scaleAnim }] }]}>
+            <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+          </Animated.View>
+        </View>
 
-        {/* Animated check circle */}
-        <Animated.View style={[styles.checkCircle, { transform: [{ scale: iconScale }], marginTop: 16 }]}>
-          <Ionicons name="checkmark" size={48} color="#4ADE80" />
-        </Animated.View>
-
-        <Animated.View style={[styles.textArea, { opacity: contentOpacity }]}>
-          <Text style={styles.title}>Delivered</Text>
+        <Animated.View style={[styles.textWrap, { opacity: fadeAnim }]}>
           <Text style={styles.amount}>{symbol}{receiveAmount.toLocaleString()}</Text>
-          <Text style={styles.sub}>
-            {firstName} received {symbol}{receiveAmount.toLocaleString()} via {recipientMethod}
-          </Text>
-          <Text style={styles.corridor}>{'\u{1F1F8}\u{1F1EC}'} {'\u2192'} {'\u{1F1F3}\u{1F1EC}'} Singapore {'\u2192'} Nigeria</Text>
+          <Text style={styles.deliveredLabel}>Delivered to {firstName}</Text>
+          <Text style={styles.sub}>via {recipientMethod} · {amount} {route.params?.sendCurrency || 'USDT'} sent</Text>
         </Animated.View>
       </View>
 
-      {/* Bottom CTAs */}
-      <Animated.View style={[styles.footer, { opacity: contentOpacity }]}>
-        <TouchableOpacity style={styles.receiptBtn} onPress={goReceipt} activeOpacity={0.7}>
-          <Ionicons name="document-text" size={16} color="#38BDF8" />
-          <Text style={styles.receiptText}>View receipt</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.shareBtn} onPress={() => Alert.alert('Share', `Delivery receipt for ${firstName} copied to clipboard.`)} activeOpacity={0.7}>
-          <Ionicons name="share" size={16} color="#38BDF8" />
-          <Text style={styles.shareText}>Share with {firstName}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.sendAgainBtn} onPress={goHome} activeOpacity={0.7}>
-          <Ionicons name="arrow-redo" size={16} color="#FFFFFF" />
-          <Text style={styles.sendAgainText}>Send to {firstName} again</Text>
-        </TouchableOpacity>
-
-        <CTAButton title="Done" onPress={goHome} style={{ marginTop: 8 }} />
+      {/* Two CTAs only — clean */}
+      <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
+        <CTAButton title="View receipt" onPress={goReceipt} ghost />
+        <CTAButton title="Done" onPress={goDone} />
       </Animated.View>
     </SafeAreaView>
   );
@@ -101,43 +83,29 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0A0A0C' },
-  content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
+  content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
 
-  checkCircle: {
-    width: 96, height: 96, borderRadius: 48,
-    backgroundColor: 'rgba(74,222,128,0.12)',
+  avatarWrap: { position: 'relative', marginBottom: 24 },
+  checkBadge: {
+    position: 'absolute', bottom: -4, right: -4,
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: '#4ADE80',
     alignItems: 'center', justifyContent: 'center',
+    borderWidth: 3, borderColor: '#0A0A0C',
   },
 
-  textArea: { alignItems: 'center', marginTop: 24 },
-  title: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#4ADE80', letterSpacing: 0.3, textTransform: 'uppercase' },
+  textWrap: { alignItems: 'center' },
   amount: {
-    fontFamily: 'Inter_700Bold', fontSize: 42, color: '#FFFFFF',
-    marginTop: 8, letterSpacing: -0.8, fontVariant: ['tabular-nums'],
+    fontFamily: 'Inter_700Bold', fontSize: 40, color: '#FFFFFF',
+    letterSpacing: -1, fontVariant: ['tabular-nums'],
+  },
+  deliveredLabel: {
+    fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#4ADE80', marginTop: 8,
   },
   sub: {
     fontFamily: 'Inter_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.58)',
-    textAlign: 'center', marginTop: 8, lineHeight: 20,
+    textAlign: 'center', marginTop: 6,
   },
 
   footer: { paddingHorizontal: 20, paddingBottom: 24, gap: 8 },
-  receiptBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#17171A', borderRadius: 999, paddingVertical: 14,
-  },
-  receiptText: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#38BDF8' },
-  shareBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#1F1F23', borderRadius: 999, paddingVertical: 14,
-  },
-  shareText: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#38BDF8' },
-  corridor: {
-    fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.42)',
-    textAlign: 'center', marginTop: 8,
-  },
-  sendAgainBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 999, paddingVertical: 14,
-  },
-  sendAgainText: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
 });
