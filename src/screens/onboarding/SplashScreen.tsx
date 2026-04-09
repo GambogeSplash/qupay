@@ -78,7 +78,9 @@ export const SplashScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </Animated.View>
 
-        {/* CTAs */}
+        <View style={{ flex: 1 }} />
+
+        {/* CTAs — pinned to bottom */}
         <Animated.View style={[styles.bottom, { opacity: ctaFade }]}>
           <TouchableOpacity
             style={styles.cta}
@@ -103,7 +105,7 @@ export const SplashScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { flex: 1, justifyContent: 'space-between' },
+  container: { flex: 1 },
   top: { paddingHorizontal: 24, paddingTop: 12 },
 
   // Hero

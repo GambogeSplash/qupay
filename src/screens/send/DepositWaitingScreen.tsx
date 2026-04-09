@@ -69,28 +69,20 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
   const [processingStep, setProcessingStep] = useState(0);
 
   const copyBounce = useRef(new Animated.Value(1)).current;
-  const pulse = useRef(new Animated.Value(1)).current;
-  const spinAnim = useRef(new Animated.Value(0)).current;
 
-  // Pulse — faster, more visible breathing
+  // Simple state-based pulse — guaranteed to work on web + native
+  const [pulseOn, setPulseOn] = useState(true);
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.3, duration: 700, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 700, useNativeDriver: true }),
-      ]),
-    ).start();
-  }, [pulse]);
+    const interval = setInterval(() => setPulseOn((p) => !p), 800);
+    return () => clearInterval(interval);
+  }, []);
 
-  // Spinner for processing
+  // Spin angle — state-based rotation for web compatibility
+  const [spinDeg, setSpinDeg] = useState(0);
   useEffect(() => {
-    const spin = Animated.loop(
-      Animated.timing(spinAnim, { toValue: 1, duration: 1200, easing: Easing.linear, useNativeDriver: true })
-    );
-    spin.start();
-    return () => spin.stop();
-  }, [spinAnim]);
-  const spinRotate = spinAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+    const interval = setInterval(() => setSpinDeg((d) => (d + 30) % 360), 100);
+    return () => clearInterval(interval);
+  }, []);
 
   // Countdown
   useEffect(() => {
@@ -170,36 +162,36 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
           style={StyleSheet.absoluteFill}
         />
         <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }} edges={['top']}>
-        {/* Radar — dramatic animated rings with fills */}
+        {/* Radar — state-based animation (works on web + native) */}
         <View style={styles.radarWrap}>
-          {/* Outer ring — filled, pulsing scale */}
-          <Animated.View style={[styles.radarRing3, {
+          {/* Outer ring */}
+          <View style={[styles.radarRing3, {
             backgroundColor: isDone ? 'rgba(74,222,128,0.04)' : 'rgba(56,189,248,0.04)',
             borderColor: ringColor,
-            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.3, 0.8] }),
-            transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.2, 1] }) }],
+            opacity: pulseOn ? 0.8 : 0.3,
+            transform: [{ scale: pulseOn ? 1 : 1.15 }],
           }]} />
-          {/* Middle ring — filled, offset pulse */}
-          <Animated.View style={[styles.radarRing2, {
-            backgroundColor: isDone ? 'rgba(74,222,128,0.06)' : 'rgba(56,189,248,0.06)',
+          {/* Middle ring */}
+          <View style={[styles.radarRing2, {
+            backgroundColor: isDone ? 'rgba(74,222,128,0.08)' : 'rgba(56,189,248,0.08)',
             borderColor: ringColor,
-            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.4, 1] }),
-            transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.1, 1] }) }],
+            opacity: pulseOn ? 1 : 0.4,
+            transform: [{ scale: pulseOn ? 1 : 1.08 }],
           }]} />
-          {/* Inner ring — strong glow */}
-          <Animated.View style={[styles.radarRing1, {
-            backgroundColor: isDone ? 'rgba(74,222,128,0.1)' : 'rgba(56,189,248,0.1)',
+          {/* Inner ring */}
+          <View style={[styles.radarRing1, {
+            backgroundColor: isDone ? 'rgba(74,222,128,0.15)' : 'rgba(56,189,248,0.15)',
             borderColor: ringColor,
-            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.5, 1] }),
+            opacity: pulseOn ? 1 : 0.5,
           }]} />
-          {/* Center — spins when active, pops green when done */}
-          <Animated.View style={[
+          {/* Center — spins when active */}
+          <View style={[
             styles.radarCenter,
             { backgroundColor: isDone ? 'rgba(74,222,128,0.2)' : 'rgba(56,189,248,0.15)' },
-            !isDone && { transform: [{ rotate: spinRotate }] },
+            !isDone && { transform: [{ rotate: `${spinDeg}deg` }] },
           ]}>
             <Ionicons name={currentStep.icon as any} size={36} color={isDone ? '#4ADE80' : '#38BDF8'} />
-          </Animated.View>
+          </View>
         </View>
 
         {/* Status text — updates progressively */}
@@ -285,7 +277,7 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
 
         {/* Status + countdown */}
         <View style={styles.statusCard}>
-          <Animated.View style={[styles.statusDot, { opacity: pulse }]} />
+          <View style={[styles.statusDot, { opacity: pulseOn ? 1 : 0.3 }]} />
           <View style={{ flex: 1 }}>
             <Text style={styles.statusTitle}>{expired ? 'Address expired' : 'Waiting for deposit...'}</Text>
             <Text style={styles.statusSub}>
