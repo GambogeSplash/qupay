@@ -26,6 +26,9 @@ import type {
 const MOCK_API = true;
 const delay = (ms = 600) => new Promise<void>((r) => setTimeout(r, ms));
 
+// Stateful mock — tracks whether PIN has been set this session
+let mockPinSet = false;
+
 const MOCK_TOKENS: AuthTokenResponse = {
   accessToken: 'mock-access-token-xyz',
   refreshToken: 'mock-refresh-token-xyz',
@@ -37,7 +40,7 @@ const MOCK_TOKENS: AuthTokenResponse = {
     phoneNumber: '+65 9123 4567',
     emailVerified: true,
     phoneVerified: true,
-    pinSet: true,
+    pinSet: false,
   },
 } as AuthTokenResponse;
 
@@ -62,7 +65,7 @@ export async function completeRegistration(
 }
 
 export async function login(request: LoginRequest): Promise<AuthTokenResponse> {
-  if (MOCK_API) { await delay(); return MOCK_TOKENS; }
+  if (MOCK_API) { await delay(); mockPinSet = true; return MOCK_TOKENS; }
   const response = await apiClient.post<AuthTokenResponse>('/v1/auth/login', request);
   return response.data;
 }
@@ -104,13 +107,13 @@ export async function completePasswordReset(
 }
 
 export async function getProfile(): Promise<UserProfileResponse> {
-  if (MOCK_API) { await delay(300); return MOCK_TOKENS.user as unknown as UserProfileResponse; }
+  if (MOCK_API) { await delay(300); return { ...MOCK_TOKENS.user, pinSet: mockPinSet } as unknown as UserProfileResponse; }
   const response = await apiClient.get<UserProfileResponse>('/v1/users/me');
   return response.data;
 }
 
 export async function setPin(request: SetPinRequest): Promise<void> {
-  if (MOCK_API) { await delay(); return; }
+  if (MOCK_API) { await delay(); mockPinSet = true; return; }
   await apiClient.post('/v1/users/me/pin', request);
 }
 
