@@ -39,12 +39,19 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
   }, []);
 
   const goReceipt = () => {
+    // Navigate to receipt first, then reset send stack in background
     const root = navigation.getParent()?.getParent();
     if (root) {
-      navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Recipient' }] }));
+      root.navigate('ActivityTab', {
+        screen: 'TransferDetail',
+        params: { transferId: '1', status: 'delivered' },
+      });
+      // Reset send stack after a delay so it's clean when user returns
       setTimeout(() => {
-        root.navigate('ActivityTab', { screen: 'TransferDetail', params: { transferId: '1', status: 'delivered' } });
-      }, 100);
+        try {
+          navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Recipient' }] }));
+        } catch {}
+      }, 500);
     }
   };
 
