@@ -191,20 +191,21 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
       )}
 
-      {/* Quick chips — shown when amount is 0 */}
-      {sendNum === 0 && (
-        <View style={styles.quickRow}>
-          {[25, 50, 100, 250].map((v) => (
-            <TouchableOpacity key={v} style={styles.quickPill} activeOpacity={0.7} onPress={() => setQuick(v)}>
-              <Text style={styles.quickText}>${v}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+      {/* Quick chips — always visible for fast amount entry */}
+      <View style={styles.quickRow}>
+        {[25, 50, 100, 250].map((v) => (
+          <TouchableOpacity
+            key={v}
+            style={[styles.quickPill, sendNum === v && styles.quickPillActive]}
+            activeOpacity={0.7}
+            onPress={() => setQuick(v)}
+          >
+            <Text style={[styles.quickText, sendNum === v && styles.quickTextActive]}>${v}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-      <View style={{ flex: 1 }} />
-
-      {/* Continue CTA — above numpad so it's always visible */}
+      {/* Continue CTA — right below the card area */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={[styles.cta, !canNext && styles.ctaDisabled]}
@@ -215,6 +216,8 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={[styles.ctaText, !canNext && styles.ctaTextDisabled]}>Continue</Text>
         </TouchableOpacity>
       </View>
+
+      <View style={{ flex: 1 }} />
 
       {/* Custom numpad */}
       <View style={styles.numpad}>
@@ -323,7 +326,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#17171A', borderRadius: 999,
     paddingHorizontal: 16, paddingVertical: 8,
   },
+  quickPillActive: { backgroundColor: 'rgba(56,189,248,0.15)' },
   quickText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFFF' },
+  quickTextActive: { color: '#38BDF8' },
 
   numpad: { paddingTop: 4, paddingBottom: 4 },
   numRow: { flexDirection: 'row' },
