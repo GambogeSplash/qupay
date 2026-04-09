@@ -2,8 +2,8 @@
 // Local Profile layout: soft mint glow backdrop, big identity hero (circular avatar
 // + name + handle + email), lifetime stats card, sectioned link cards with
 // icon-circle rows, red soft sign-out pill, version footer.
-import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Switch, Alert } from 'react-native';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Switch, Alert, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -62,6 +62,13 @@ const Divider: React.FC = () => <View style={styles.divider} />;
 export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
   const nav = useNavigation<any>();
   const [notifOn, setNotifOn] = useState(true);
+  const sectionAnims = useRef([0,1,2,3,4].map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    sectionAnims.forEach((anim, i) => {
+      Animated.timing(anim, { toValue: 1, duration: 350, delay: i * 80, useNativeDriver: true }).start();
+    });
+  }, []);
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
 
@@ -98,6 +105,7 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
 
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
         {/* Identity hero */}
+        <Animated.View style={{ opacity: sectionAnims[0], transform: [{ translateY: sectionAnims[0].interpolate({ inputRange: [0,1], outputRange: [15,0] }) }] }}>
         <View style={styles.identity}>
           <View style={styles.bigAvatar}>
             <Avatar seed={displayName || 'qupay user'} initials={initials} size={96} />
@@ -115,8 +123,10 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
             <Text style={styles.verifiedText}>Verified · Phone, ID, Address</Text>
           </View>
         </View>
+        </Animated.View>
 
         {/* Lifetime stats card */}
+        <Animated.View style={{ opacity: sectionAnims[1], transform: [{ translateY: sectionAnims[1].interpolate({ inputRange: [0,1], outputRange: [15,0] }) }] }}>
         <View style={styles.statsRow}>
           <Stat label="Total sent" value={`$${userProfile.totalSent.toLocaleString()}`} emphasis />
           <View style={styles.statDivider} />
@@ -124,8 +134,10 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
           <View style={styles.statDivider} />
           <Stat label="Member" value="Nov '25" />
         </View>
+        </Animated.View>
 
         {/* Account section */}
+        <Animated.View style={{ opacity: sectionAnims[2], transform: [{ translateY: sectionAnims[2].interpolate({ inputRange: [0,1], outputRange: [15,0] }) }] }}>
         <Text style={styles.sectionLabel}>Account</Text>
         <View style={styles.linksCard}>
           <LinkRow
@@ -142,8 +154,10 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
             onPress={() => go('Recipients')}
           />
         </View>
+        </Animated.View>
 
         {/* Security section */}
+        <Animated.View style={{ opacity: sectionAnims[3], transform: [{ translateY: sectionAnims[3].interpolate({ inputRange: [0,1], outputRange: [15,0] }) }] }}>
         <Text style={styles.sectionLabel}>Security</Text>
         <View style={styles.linksCard}>
           <LinkRow
@@ -160,8 +174,10 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
             rightSwitch={{ value: notifOn, onChange: setNotifOn }}
           />
         </View>
+        </Animated.View>
 
         {/* More */}
+        <Animated.View style={{ opacity: sectionAnims[4], transform: [{ translateY: sectionAnims[4].interpolate({ inputRange: [0,1], outputRange: [15,0] }) }] }}>
         <Text style={styles.sectionLabel}>More</Text>
         <View style={styles.linksCard}>
           <LinkRow icon="gift" label="Earn rewards" sub="Streaks, referrals & bonuses" onPress={() => Alert.alert('Earn', 'Earn screen coming soon — check Profile > Invite friends for now.')} />
@@ -173,6 +189,7 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
             onPress={() => go('InviteFriends')}
           />
         </View>
+        </Animated.View>
 
         {/* Support section */}
         <Text style={styles.sectionLabel}>Support</Text>

@@ -236,7 +236,11 @@ function MainTabs() {
             case 'ActivityTab': iconName = 'time'; break;
             case 'ProfileTab': iconName = 'person'; break;
           }
-          return <Ionicons name={iconName} size={20} color={color} />;
+          return (
+            <View style={{ transform: [{ scale: focused ? 1.15 : 1 }] }}>
+              <Ionicons name={iconName} size={20} color={color} />
+            </View>
+          );
         },
       })}
     >

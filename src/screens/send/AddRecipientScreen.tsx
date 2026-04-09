@@ -1,8 +1,8 @@
 // AddRecipientScreen — country → bank detection → account entry.
 // Flow: pick country → enter account number → auto-detect bank OR pick bank
 // from a list with real logos. Then enter recipient name and proceed to Amount.
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert, Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
@@ -126,6 +126,15 @@ export const AddRecipientScreen: React.FC<{ navigation: any }> = ({ navigation }
   const [bankSearch, setBankSearch] = useState('');
   const [resolveError, setResolveError] = useState(false);
 
+  const bankFade = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (selectedBank) {
+      bankFade.setValue(0);
+      Animated.spring(bankFade, { toValue: 1, tension: 80, friction: 8, useNativeDriver: true }).start();
+    }
+  }, [selectedBank?.id]);
+
   // Auto-detect bank as user types account number
   useEffect(() => {
     if (!selectedCountry || accountNumber.length < 3) {
@@ -236,16 +245,18 @@ export const AddRecipientScreen: React.FC<{ navigation: any }> = ({ navigation }
         {/* Bank selection — auto-detected or manual pick */}
         <Text style={styles.fieldLabel}>Bank or provider</Text>
         {selectedBank ? (
-          <TouchableOpacity style={styles.bankSelected} onPress={() => setShowBankPicker(true)} activeOpacity={0.7}>
-            <BankLogo name={selectedBank.name} size={32} />
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={styles.bankName}>{selectedBank.name}</Text>
-              <Text style={styles.bankDetected}>
-                {accountNumber.length >= 3 ? 'Auto-detected' : 'Tap to change'}
-              </Text>
-            </View>
-            <Ionicons name="chevron-down" size={16} color="rgba(255,255,255,0.42)" />
-          </TouchableOpacity>
+          <Animated.View style={{ opacity: bankFade, transform: [{ translateX: bankFade.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }}>
+            <TouchableOpacity style={styles.bankSelected} onPress={() => setShowBankPicker(true)} activeOpacity={0.7}>
+              <BankLogo name={selectedBank.name} size={32} />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.bankName}>{selectedBank.name}</Text>
+                <Text style={styles.bankDetected}>
+                  {accountNumber.length >= 3 ? 'Auto-detected' : 'Tap to change'}
+                </Text>
+              </View>
+              <Ionicons name="chevron-down" size={16} color="rgba(255,255,255,0.42)" />
+            </TouchableOpacity>
+          </Animated.View>
         ) : (
           <TouchableOpacity style={styles.bankPicker} onPress={() => setShowBankPicker(true)} activeOpacity={0.7}>
             <Ionicons name="business" size={18} color="rgba(255,255,255,0.42)" />

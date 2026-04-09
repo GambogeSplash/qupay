@@ -67,6 +67,7 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
   const [copied, setCopied] = useState(false);
   const [processingStep, setProcessingStep] = useState(0);
 
+  const copyBounce = useRef(new Animated.Value(1)).current;
   const pulse = useRef(new Animated.Value(1)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
 
@@ -101,6 +102,8 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
     await Clipboard.setStringAsync(DEPOSIT_ADDRESS);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCopied(true);
+    copyBounce.setValue(0.85);
+    Animated.spring(copyBounce, { toValue: 1, tension: 200, friction: 8, useNativeDriver: true }).start();
     setTimeout(() => setCopied(false), 2500);
   };
 
@@ -255,10 +258,12 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
           <Text style={styles.addressLabel}>Deposit address</Text>
           <TouchableOpacity style={styles.addressRow} onPress={handleCopy} activeOpacity={0.7}>
             <Text style={styles.addressText} numberOfLines={1}>{DEPOSIT_ADDRESS}</Text>
-            <View style={styles.copyBadge}>
-              <Ionicons name={copied ? 'checkmark-circle' : 'copy'} size={16} color={copied ? '#4ADE80' : '#38BDF8'} />
-              <Text style={[styles.copyText, copied && { color: '#4ADE80' }]}>{copied ? 'Copied' : 'Copy'}</Text>
-            </View>
+            <Animated.View style={{ transform: [{ scale: copyBounce }] }}>
+              <View style={styles.copyBadge}>
+                <Ionicons name={copied ? 'checkmark-circle' : 'copy'} size={16} color={copied ? '#4ADE80' : '#38BDF8'} />
+                <Text style={[styles.copyText, copied && { color: '#4ADE80' }]}>{copied ? 'Copied' : 'Copy'}</Text>
+              </View>
+            </Animated.View>
           </TouchableOpacity>
         </View>
 
