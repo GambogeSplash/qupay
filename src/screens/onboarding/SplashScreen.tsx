@@ -1,185 +1,166 @@
-import React, { useState, useEffect, useRef } from 'react';
+// SplashScreen — first impression. Clear value prop, honest numbers, visual energy.
+import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '../../components/Icon';
-import { QupayLogo, CTAButton } from '../../components';
+import { QupayLogo } from '../../components';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Splash'>;
 
-const words = ['anyone', 'anywhere'];
-
 export const SplashScreen: React.FC<Props> = ({ navigation }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const heroFade = useRef(new Animated.Value(0)).current;
+  const statsFade = useRef(new Animated.Value(0)).current;
+  const ctaFade = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }).start(() => {
-        setCurrentIndex(prev => (prev + 1) % words.length);
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }).start();
-      });
-    }, 2500);
-
-    return () => clearInterval(interval);
-  }, [fadeAnim]);
+    Animated.stagger(200, [
+      Animated.timing(heroFade, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.timing(statsFade, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.timing(ctaFade, { toValue: 1, duration: 400, useNativeDriver: true }),
+    ]).start();
+  }, []);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={styles.safe}>
+      {/* Gradient background — sky blue top fading to dark */}
+      <LinearGradient
+        colors={['#0C4A6E', '#0A0A0C', '#0A0A0C']}
+        locations={[0, 0.45, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+
+      <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <View style={styles.content}>
-          <QupayLogo size={28} />
-          <View style={styles.spacer} />
-          <Text style={styles.headline}>
-            Quick payments,{'\n'}in any currency,{'\n'}
-            <Text style={styles.greenText}>
-              to <Animated.Text style={{ opacity: fadeAnim }}>{words[currentIndex]}</Animated.Text>
-            </Text>
-          </Text>
-          <Text style={styles.description}>
-            Send or receive money, in any currency, to & from anyone, anywhere, with just a mobile number.
-          </Text>
-          {/* Stats row */}
-          <View style={styles.statRow}>
-            <View style={styles.statItem}>
-              <Text style={styles.statVal}>54+</Text>
-              <Text style={styles.statLabel}>Countries</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statVal}>No fees</Text>
-              <Text style={styles.statLabel}>Zero cost</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statVal}>Quick</Text>
-              <Text style={styles.statLabel}>Delivery</Text>
-            </View>
-          </View>
+        {/* Top — logo */}
+        <View style={styles.top}>
+          <QupayLogo size={24} />
         </View>
 
-        <View style={styles.bottom}>
-          <CTAButton
-            title="Get Started"
+        {/* Hero — brand mark + value prop */}
+        <Animated.View style={[styles.hero, { opacity: heroFade, transform: [{ translateY: heroFade.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>
+          {/* Paper plane brand mark — large, iconic */}
+          <View style={styles.brandMark}>
+            <View style={styles.brandCircle}>
+              <Text style={styles.mascot}>{'\u{1F406}'}</Text>
+            </View>
+            <View style={styles.brandGlow} />
+          </View>
+
+          <Text style={styles.headline}>
+            Send crypto.{'\n'}They get cash.
+          </Text>
+          <Text style={styles.sub}>
+            USDT to local currency in under 2 minutes.
+          </Text>
+        </Animated.View>
+
+        {/* Stats — honest, specific numbers */}
+        <Animated.View style={[styles.statsCard, { opacity: statsFade }]}>
+          <View style={styles.statItem}>
+            <Text style={styles.statVal}>40+</Text>
+            <Text style={styles.statLabel}>Countries</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statVal}>$1.50</Text>
+            <Text style={styles.statLabel}>Flat fee</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statVal}>{'\u003C'}2 min</Text>
+            <Text style={styles.statLabel}>Delivery</Text>
+          </View>
+        </Animated.View>
+
+        {/* CTAs */}
+        <Animated.View style={[styles.bottom, { opacity: ctaFade }]}>
+          <TouchableOpacity
+            style={styles.cta}
             onPress={() => navigation.navigate('SignUp')}
-            style={styles.ctaBtn}
-          />
+            activeOpacity={0.85}
+          >
+            <Text style={styles.ctaText}>Get started</Text>
+            <Ionicons name="arrow-forward" size={18} color="#0A0A0C" />
+          </TouchableOpacity>
+
           <TouchableOpacity onPress={() => navigation.navigate('SignIn')} activeOpacity={0.7}>
             <Text style={styles.loginText}>
               Already have an account? <Text style={styles.loginLink}>Log in</Text>
             </Text>
           </TouchableOpacity>
-          <View style={styles.footer}>
-            <Ionicons name="shield-checkmark-outline" size={11} color="rgba(255,255,255,0.4)" />
-            <Text style={styles.footerText}>Licensed & regulated globally</Text>
-          </View>
-        </View>
+        </Animated.View>
       </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#0A0A0C',
+  safe: { flex: 1 },
+  container: { flex: 1, justifyContent: 'space-between' },
+  top: { paddingHorizontal: 24, paddingTop: 16 },
+
+  // Hero
+  hero: { paddingHorizontal: 24, alignItems: 'center' },
+  brandMark: { alignItems: 'center', justifyContent: 'center', marginBottom: 32 },
+  brandCircle: {
+    width: 110, height: 110, borderRadius: 55,
+    backgroundColor: '#38BDF8',
+    alignItems: 'center', justifyContent: 'center',
+    zIndex: 2,
   },
-  container: {
-    flex: 1,
-    justifyContent: 'space-between',
+  mascot: { fontSize: 52 },
+  brandGlow: {
+    position: 'absolute', width: 140, height: 140, borderRadius: 70,
+    backgroundColor: 'rgba(56,189,248,0.12)',
   },
-  content: {
-    paddingHorizontal: 28,
-    paddingTop: 40,
-  },
-  spacer: {
-    height: 36,
-  },
+
   headline: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 32,
-    lineHeight: 35,
-    letterSpacing: -0.5,
-    color: '#FFFFFF',
-    marginBottom: 12,
+    fontFamily: 'Inter_700Bold', fontSize: 34, lineHeight: 40,
+    letterSpacing: -0.8, color: '#FFFFFF', marginBottom: 12, textAlign: 'center',
   },
-  greenText: {
-    color: '#38BDF8',
+  sub: {
+    fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 23,
+    color: 'rgba(255,255,255,0.58)', textAlign: 'center', paddingHorizontal: 8,
   },
-  description: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 23,
-    color: 'rgba(255,255,255,0.6)',
-    marginBottom: 32,
+
+  // Stats
+  statsCard: {
+    flexDirection: 'row', backgroundColor: '#17171A', borderRadius: 16,
+    marginHorizontal: 24, overflow: 'hidden',
   },
-  statRow: {
-    flexDirection: 'row',
-    backgroundColor: '#1F1F23',
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 32,
-  },
-  statItem: {
-    flex: 1,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  statVal: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 18,
-    color: '#38BDF8',
-    marginBottom: 2,
-  },
+  statItem: { flex: 1, paddingVertical: 16, alignItems: 'center' },
+  statDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
+  statVal: { fontFamily: 'Inter_700Bold', fontSize: 18, color: '#38BDF8', fontVariant: ['tabular-nums'] },
   statLabel: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 9,
-    color: 'rgba(255,255,255,0.6)',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    fontFamily: 'Inter_500Medium', fontSize: 10, color: 'rgba(255,255,255,0.42)',
+    textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 2,
   },
-  bottom: {
-    paddingHorizontal: 20,
-    paddingBottom: 12,
+
+  // Steps
+  stepsRow: { flexDirection: 'row', justifyContent: 'center', gap: 24, paddingHorizontal: 24 },
+  stepItem: { alignItems: 'center', gap: 6 },
+  stepCircle: {
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: 'rgba(56,189,248,0.1)',
+    alignItems: 'center', justifyContent: 'center',
   },
-  ctaBtn: {
-    marginBottom: 16,
+  stepNum: { fontFamily: 'Inter_700Bold', fontSize: 12, color: '#38BDF8' },
+  stepLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, color: 'rgba(255,255,255,0.58)' },
+
+  // CTAs
+  bottom: { paddingHorizontal: 24, paddingBottom: 16 },
+  cta: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#38BDF8', borderRadius: 999, paddingVertical: 18, marginBottom: 14,
   },
+  ctaText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#0A0A0C' },
   loginText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.6)',
+    fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.42)',
     textAlign: 'center',
-    marginBottom: 20,
   },
-  loginLink: {
-    color: '#38BDF8',
-    fontFamily: 'Inter_600SemiBold',
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingBottom: 8,
-  },
-  footerText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 10,
-    color: 'rgba(255,255,255,0.4)',
-  },
+  loginLink: { color: '#38BDF8', fontFamily: 'Inter_600SemiBold' },
 });

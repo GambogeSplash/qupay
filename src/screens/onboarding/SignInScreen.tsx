@@ -1,15 +1,9 @@
+// SignInScreen — clean, minimal. Consistent with inner pages.
 import React, { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
-import { QupayLogo, CTAButton, FormField } from '../../components';
+import { ScreenHeader, FormField } from '../../components';
 import { login, getProfile } from '../../api/auth';
 import { isApiError } from '../../api/client';
 import { useAuthStore } from '../../store/authStore';
@@ -29,55 +23,36 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const passwordValid = password.length >= 8;
-  const allFieldsValid = emailValid && passwordValid;
+  const canSignIn = emailValid && passwordValid;
 
   const handleSignIn = useCallback(async () => {
-    if (!allFieldsValid) return;
+    if (!canSignIn) return;
     setLoading(true);
-
     try {
-      if (__DEV__) console.log('🔐 [SignIn] Starting login...');
       const response = await login({ email: email.trim(), password });
-      if (__DEV__) console.log('🔐 [SignIn] Login successful, setting tokens...');
-      
       await setTokens(response);
-      if (__DEV__) console.log('🔐 [SignIn] Tokens stored, fetching profile...');
-      
       const profile = await getProfile();
-      if (__DEV__) console.log('🔐 [SignIn] Profile fetched, pinSet:', profile.pinSet);
-      
       setUser(profile, true);
-      if (__DEV__) console.log('🔐 [SignIn] User set with lock, navigation will update automatically');
     } catch (error) {
-      if (__DEV__) console.error('🔐 [SignIn] Error:', error);
       const message = isApiError(error) ? error.message : 'Invalid email or password';
       Alert.alert('Login Failed', message);
     } finally {
       setLoading(false);
     }
-  }, [allFieldsValid, email, password, setTokens, setUser]);
+  }, [canSignIn, email, password, setTokens, setUser]);
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.form}>
-          <QupayLogo size={22} />
-          <View style={{ height: 28 }} />
-          <Text style={styles.headline}>
-            Welcome{'\n'}
-            <Text style={styles.greenText}>back</Text>
-          </Text>
-          <Text style={styles.desc}>
-            Sign in to continue sending crypto to cash instantly.
-          </Text>
+      <ScreenHeader title="" onBack={() => navigation.goBack()} />
+
+      <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <View style={styles.body}>
+          <Text style={styles.headline}>Welcome back</Text>
+          <Text style={styles.sub}>Sign in to continue</Text>
 
           <FormField
-            label="Email Address"
-            placeholder="Enter your email"
+            label="Email"
+            placeholder="you@example.com"
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -85,7 +60,6 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
             onChangeText={setEmail}
             maxLength={80}
             isValid={emailValid}
-            accessibilityLabel="Email address"
           />
 
           <FormField
@@ -98,10 +72,9 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
             onChangeText={setPassword}
             maxLength={64}
             isValid={passwordValid}
-            accessibilityLabel="Password"
             rightIcon={
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="rgba(255,255,255,0.4)" />
+                <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color="rgba(255,255,255,0.4)" />
               </TouchableOpacity>
             }
           />
@@ -113,23 +86,24 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
           >
             <Text style={styles.forgotText}>Forgot password?</Text>
           </TouchableOpacity>
-
-          <View style={{ height: 8 }} />
         </View>
       </ScrollView>
 
-      <View style={styles.bottomArea}>
-        <CTAButton
-          title="Sign In"
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={[styles.cta, !canSignIn && styles.ctaDisabled]}
           onPress={handleSignIn}
-          disabled={!allFieldsValid}
-          loading={loading}
-          style={styles.cta}
-        />
+          disabled={!canSignIn || loading}
+          activeOpacity={0.85}
+        >
+          <Text style={[styles.ctaText, !canSignIn && styles.ctaTextDisabled]}>
+            {loading ? 'Signing in...' : 'Sign in'}
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')} activeOpacity={0.7}>
           <Text style={styles.switchText}>
-            Don't have an account?{' '}
-            <Text style={styles.switchLink}>Sign Up</Text>
+            Don't have an account? <Text style={styles.switchLink}>Sign up</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -139,50 +113,30 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0A0A0C' },
-  scroll: { flex: 1 },
-  scrollContent: { paddingBottom: 20 },
-  form: { paddingHorizontal: 28, paddingTop: 36 },
+  body: { paddingHorizontal: 24, paddingTop: 16 },
+
   headline: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 26,
-    letterSpacing: -0.3,
-    color: '#FFFFFF',
-    marginBottom: 8,
-    lineHeight: 31,
+    fontFamily: 'Inter_700Bold', fontSize: 32, color: '#FFFFFF',
+    letterSpacing: -0.5, marginBottom: 8,
   },
-  greenText: { color: '#38BDF8' },
-  desc: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    lineHeight: 21,
-    color: 'rgba(255,255,255,0.6)',
-    marginBottom: 24,
+  sub: {
+    fontFamily: 'Inter_400Regular', fontSize: 15, color: 'rgba(255,255,255,0.58)',
+    marginBottom: 32, lineHeight: 22,
   },
-  forgotBtn: {
-    alignSelf: 'flex-end',
-    marginTop: -8,
-    marginBottom: 8,
+  forgotBtn: { alignSelf: 'flex-end', marginTop: -4 },
+  forgotText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: '#38BDF8' },
+
+  footer: { paddingHorizontal: 20, paddingBottom: 16 },
+  cta: {
+    backgroundColor: '#38BDF8', borderRadius: 999, paddingVertical: 18,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 14,
   },
-  forgotText: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 13,
-    color: '#38BDF8',
-  },
-  bottomArea: {
-    paddingHorizontal: 20,
-    paddingBottom: 12,
-  },
-  cta: { marginBottom: 12 },
+  ctaDisabled: { backgroundColor: '#1F1F23' },
+  ctaText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#0A0A0C' },
+  ctaTextDisabled: { color: 'rgba(255,255,255,0.25)' },
   switchText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.6)',
+    fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.42)',
     textAlign: 'center',
-    marginTop: 8,
-    paddingBottom: 8,
   },
-  switchLink: {
-    color: '#38BDF8',
-    fontFamily: 'Inter_600SemiBold',
-  },
+  switchLink: { color: '#38BDF8', fontFamily: 'Inter_600SemiBold' },
 });
