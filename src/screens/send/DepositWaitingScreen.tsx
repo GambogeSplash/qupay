@@ -113,11 +113,11 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
 
   // Radar status messages — progressive updates shown on the radar screen
   const RADAR_STEPS = [
-    { label: 'Scanning blockchain...', sub: `Looking for ${amount} ${sendCurrency} on ${network}` },
-    { label: 'Deposit detected', sub: `${amount} ${sendCurrency} confirmed on ${network}` },
-    { label: 'Converting to local currency', sub: `${recvSymbol}${receiveAmount.toLocaleString()} ${recvCurrency} being prepared` },
-    { label: `Sending to ${firstName}`, sub: `Releasing to ${recipientMethod}` },
-    { label: 'Delivered!', sub: `${firstName} received ${recvSymbol}${receiveAmount.toLocaleString()}` },
+    { label: 'Scanning blockchain...', sub: `Looking for ${amount} ${sendCurrency} on ${network}`, icon: 'search' },
+    { label: 'Deposit detected', sub: `${amount} ${sendCurrency} confirmed on ${network}`, icon: 'checkmark-circle' },
+    { label: 'Converting to local currency', sub: `${recvSymbol}${receiveAmount.toLocaleString()} ${recvCurrency} being prepared`, icon: 'swap-horizontal' },
+    { label: `Sending to ${firstName}`, sub: `Releasing to ${recipientMethod}`, icon: 'send' },
+    { label: 'Delivered!', sub: `${firstName} received ${recvSymbol}${receiveAmount.toLocaleString()}`, icon: 'checkmark' },
   ];
 
   const handleMarkSent = () => {
@@ -149,7 +149,7 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
           <Animated.View style={[styles.radarRing3, { opacity: pulse, borderColor: isDone ? 'rgba(74,222,128,0.15)' : 'rgba(56,189,248,0.1)' }]} />
           <Animated.View style={[styles.radarRing2, { opacity: pulse, borderColor: isDone ? 'rgba(74,222,128,0.25)' : 'rgba(56,189,248,0.2)', transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.1, 1] }) }] }]} />
           <View style={[styles.radarCenter, isDone && { backgroundColor: 'rgba(74,222,128,0.12)' }]}>
-            <Ionicons name={isDone ? 'checkmark' : 'search'} size={32} color={isDone ? '#4ADE80' : '#38BDF8'} />
+            <Ionicons name={currentStep.icon as any} size={32} color={isDone ? '#4ADE80' : '#38BDF8'} />
           </View>
         </View>
 

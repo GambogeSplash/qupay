@@ -1,6 +1,7 @@
 // SuccessScreen — clean delivery confirmation. Two actions: view receipt, done.
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { CTAButton, Avatar } from '../../components';
@@ -63,6 +64,13 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      {/* Gradient background — celebratory green-to-dark */}
+      <LinearGradient
+        pointerEvents="none"
+        colors={['rgba(74,222,128,0.15)', 'rgba(74,222,128,0)', '#0A0A0C']}
+        locations={[0, 0.4, 1]}
+        style={StyleSheet.absoluteFill}
+      />
       <View style={styles.content}>
         {/* Avatar + animated check overlay */}
         <View style={styles.avatarWrap}>
