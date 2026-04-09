@@ -6,6 +6,8 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { Avatar, SearchInput } from '../../components';
+import { useAuthStore } from '../../store/authStore';
+import { userProfile } from '../../data/mockData';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { HistoryStackParamList } from '../../navigation/AppNavigator';
 
@@ -70,8 +72,16 @@ const statusColor = (status: TransferStatus): string => {
 };
 
 export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
+  const user = useAuthStore((s) => s.user);
+  const displayName = user?.firstName || userProfile.name.split(' ')[0];
   const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState('');
+
+  const goProfile = () => {
+    try {
+      (navigation as any).getParent()?.getParent()?.navigate('ProfileStack');
+    } catch {}
+  };
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -101,7 +111,16 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Real search input — filters rows live by name/method/corridor */}
+      {/* Header — avatar left + title + search */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={goProfile} activeOpacity={0.8}>
+          <Avatar seed={displayName} size={36} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Activity</Text>
+        <View style={{ width: 36 }} />
+      </View>
+
+      {/* Search bar */}
       <View style={styles.searchWrap}>
         <SearchInput
           value={query}
@@ -192,6 +211,16 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0A0A0C' },
+
+  // Header
+  headerRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8,
+  },
+  headerTitle: {
+    fontFamily: 'Inter_700Bold', fontSize: 20, color: '#FFFFFF',
+    flex: 1, textAlign: 'center',
+  },
 
   // Search bar
   searchWrap: {

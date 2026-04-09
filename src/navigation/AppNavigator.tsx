@@ -17,16 +17,11 @@ import { PinResetScreen } from '../screens/onboarding/PinResetScreen';
 import { ForgotPasswordScreen } from '../screens/onboarding/ForgotPasswordScreen';
 import { ResetPasswordScreen } from '../screens/onboarding/ResetPasswordScreen';
 
-export interface DestInfo {
-  flag: string;
-  name: string;
-  code: string;
-  symbol: string;
-  rate: number;
-  providers: string;
-}
+// Activity / History
 import { HistoryScreen } from '../screens/portfolio/PortfolioScreen';
 import { TransactionDetailScreen } from '../screens/transaction/TransactionDetailScreen';
+
+// Profile (accessible via avatar, not a tab)
 import { ProfileScreen } from '../screens/settings/SettingsScreen';
 import { PersonalInfoScreen } from '../screens/settings/PersonalInfoScreen';
 import { WalletsScreen } from '../screens/settings/WalletsScreen';
@@ -35,11 +30,16 @@ import { RateAlertsScreen } from '../screens/settings/RateAlertsScreen';
 import { InviteFriendsScreen } from '../screens/settings/InviteFriendsScreen';
 import { HelpSupportScreen } from '../screens/settings/HelpSupportScreen';
 import { CurrencyLanguageScreen } from '../screens/settings/CurrencyLanguageScreen';
+
+// Send flow
 import { RecipientScreen } from '../screens/send/RecipientScreen';
 import { AmountScreen } from '../screens/send/AmountScreen';
 import { ConfirmScreen } from '../screens/send/ConfirmScreen';
 import { DepositWaitingScreen } from '../screens/send/DepositWaitingScreen';
 import { SuccessScreen } from '../screens/send/SuccessScreen';
+
+// Earn
+import { EarnScreen } from '../screens/earn/EarnScreen';
 
 // ─── Param lists ───
 export type OnboardingStackParamList = {
@@ -136,6 +136,7 @@ export type RootStackParamList = {
   PinVerify: undefined;
   PinReset: { cooldownSeconds: number };
   Main: undefined;
+  ProfileStack: undefined;
 };
 
 // ─── Navigators ───
@@ -213,14 +214,14 @@ function MainTabs() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: '#0A0A0C',
-          borderTopColor: 'rgba(255,255,245,0.08)',
+          borderTopColor: 'rgba(255,255,255,0.06)',
           borderTopWidth: 1,
           height: 88,
           paddingTop: 8,
           paddingBottom: 28,
         },
         tabBarActiveTintColor: '#38BDF8',
-        tabBarInactiveTintColor: 'rgba(255,255,245,0.4)',
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.4)',
         tabBarLabelStyle: {
           fontFamily: 'Inter_600SemiBold',
           fontSize: 9,
@@ -228,36 +229,30 @@ function MainTabs() {
           textTransform: 'uppercase' as const,
         },
         tabBarIcon: ({ focused, color }) => {
-          let iconName: keyof typeof Ionicons.glyphMap = 'ellipse';
+          let iconName = 'ellipse';
           switch (route.name) {
-            case 'HistoryTab':
-              iconName = focused ? 'time' : 'time-outline';
-              break;
-            case 'SendTab':
-              iconName = focused ? 'send' : 'send-outline';
-              break;
-            case 'ProfileTab':
-              iconName = focused ? 'person' : 'person-outline';
-              break;
+            case 'SendTab': iconName = 'send'; break;
+            case 'ActivityTab': iconName = 'time'; break;
+            case 'EarnTab': iconName = 'gift'; break;
           }
           return <Ionicons name={iconName} size={20} color={color} />;
         },
       })}
     >
       <Tab.Screen
-        name="HistoryTab"
-        component={HistoryStackNavigator}
-        options={{ tabBarLabel: 'HISTORY' }}
-      />
-      <Tab.Screen
         name="SendTab"
         component={SendTabNavigator}
         options={{ tabBarLabel: 'SEND' }}
       />
       <Tab.Screen
-        name="ProfileTab"
-        component={ProfileStackNavigator}
-        options={{ tabBarLabel: 'PROFILE' }}
+        name="ActivityTab"
+        component={HistoryStackNavigator}
+        options={{ tabBarLabel: 'ACTIVITY' }}
+      />
+      <Tab.Screen
+        name="EarnTab"
+        component={EarnScreen}
+        options={{ tabBarLabel: 'EARN' }}
       />
     </Tab.Navigator>
   );
@@ -295,7 +290,13 @@ export const AppNavigator: React.FC = () => {
       ) : !hasPin ? (
         <RootStack.Screen name="PinSetup" component={PinSetupScreen} />
       ) : (
-        <RootStack.Screen name="Main" component={MainTabs} />
+        <>
+          <RootStack.Screen name="Main" component={MainTabs} />
+          {/* Profile stack — accessible via avatar tap, not a tab */}
+          <RootStack.Group screenOptions={{ presentation: 'modal', animation: 'slide_from_right' }}>
+            <RootStack.Screen name="ProfileStack" component={ProfileStackNavigator} />
+          </RootStack.Group>
+        </>
       )}
     </RootStack.Navigator>
   );
