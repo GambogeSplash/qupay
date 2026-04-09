@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { CTAButton, Avatar } from '../../components';
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
@@ -40,23 +40,19 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
   }, []);
 
   const goReceipt = () => {
-    // Navigate to receipt first, then reset send stack in background
-    const root = navigation.getParent()?.getParent();
-    if (root) {
-      root.navigate('ActivityTab', {
+    // navigation = SendFlowStack navigator
+    // navigation.getParent() = Tab navigator (this is what we need)
+    const tabs = navigation.getParent();
+    if (tabs) {
+      tabs.navigate('ActivityTab', {
         screen: 'TransferDetail',
         params: { transferId: '1', status: 'delivered' },
       });
-      // Reset send stack after a delay so it's clean when user returns
-      setTimeout(() => {
-        try {
-          navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Recipient' }] }));
-        } catch {}
-      }, 500);
     }
   };
 
   const goDone = () => {
+    // Reset send stack to beginning and switch to send tab
     navigation.dispatch(
       CommonActions.reset({ index: 0, routes: [{ name: 'Recipient' }] })
     );
