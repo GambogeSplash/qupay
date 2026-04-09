@@ -250,15 +250,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: 'rgba(56,189,248,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(56,189,248,0.2)',
-    borderRadius: 20,
+    borderRadius: 16,
     paddingVertical: 6,
     paddingHorizontal: 14,
   },
   thEtaDone: {
     backgroundColor: '#38BDF8',
-    borderColor: '#38BDF8',
   },
   thEtaText: {
     fontFamily: 'Inter_600SemiBold',
@@ -330,8 +327,6 @@ const styles = StyleSheet.create({
   },
   stepDotActive: {
     backgroundColor: 'rgba(56,189,248,0.15)',
-    borderWidth: 1,
-    borderColor: '#38BDF8',
   },
   stepDotWait: {
     backgroundColor: '#26262A',

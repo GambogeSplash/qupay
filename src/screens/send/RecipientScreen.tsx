@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import * as Clipboard from 'expo-clipboard';
-import { ScreenHeader, GradientAvatar, CTAButton, BottomSheet } from '../../components';
+import { ScreenHeader, Avatar, CTAButton, BottomSheet } from '../../components';
 import { banks, Bank, networks, walletContacts, Network } from '../../data/mockData';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
@@ -270,7 +270,7 @@ export const RecipientScreen: React.FC<Props> = ({ navigation, route }) => {
                   onPress={() => selectWalletContact(w)}
                   activeOpacity={0.7}
                 >
-                  <GradientAvatar
+                  <Avatar seed={c.name} bankBadge={c.method}
                     initials={w.initials}
                     size={44}
                     colors={w.colors}
@@ -330,7 +330,7 @@ export const RecipientScreen: React.FC<Props> = ({ navigation, route }) => {
                   activeOpacity={0.7}
                 >
                   <View style={styles.resolvedCard}>
-                    <GradientAvatar
+                    <Avatar seed={c.name} bankBadge={c.method}
                       initials={resolvedContact.initials}
                       size={36}
                       colors={resolvedContact.colors}
@@ -380,7 +380,7 @@ export const RecipientScreen: React.FC<Props> = ({ navigation, route }) => {
                   activeOpacity={0.7}
                 >
                   <View style={styles.ciAvWrap}>
-                    <GradientAvatar
+                    <Avatar seed={c.name} bankBadge={c.method}
                       initials={c.initials}
                       size={44}
                       colors={c.colors}
@@ -604,9 +604,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 16,
     backgroundColor: 'rgba(56,189,248,0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(56,189,248,0.15)',
-    borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 16,
   },
@@ -642,8 +639,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#1F1F23',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -663,9 +658,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: 'rgba(56,189,248,0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(56,189,248,0.25)',
-    borderRadius: 20,
     paddingVertical: 6,
     paddingHorizontal: 12,
   },
@@ -684,8 +676,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 16,
     backgroundColor: '#1F1F23',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 16,
     padding: 16,
   },
@@ -693,7 +683,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(239,68,68,0.5)',
   },
   walletInputCardValid: {
-    borderColor: 'rgba(56,189,248,0.4)',
+    
   },
   walletInputHeader: {
     flexDirection: 'row',
@@ -727,8 +717,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#FFFFFF',
     backgroundColor: '#17171A',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 14,
@@ -828,13 +816,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 16,
     backgroundColor: '#1F1F23',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   sendInputCardActive: {
-    borderColor: 'rgba(56,189,248,0.4)',
+    
   },
   sicField: {
     flexDirection: 'row',
@@ -869,9 +855,6 @@ const styles = StyleSheet.create({
   miniSpin: {
     width: 14,
     height: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(56,189,248,0.2)',
-    borderTopColor: '#38BDF8',
     borderRadius: 7,
   },
   resolvingText: {
@@ -992,9 +975,6 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     paddingHorizontal: 16,
     backgroundColor: 'rgba(56,189,248,0.07)',
-    borderWidth: 1,
-    borderColor: 'rgba(56,189,248,0.15)',
-    borderRadius: 12,
   },
   addBankIcon: {
     width: 36,
@@ -1040,15 +1020,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     backgroundColor: '#1F1F23',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     marginBottom: 16,
   },
   bankDropdownSelected: {
-    borderColor: 'rgba(56,189,248,0.4)',
+    
   },
   bankDropdownText: {
     flex: 1,
@@ -1067,9 +1045,7 @@ const styles = StyleSheet.create({
   },
   bankChip: {
     backgroundColor: '#1F1F23',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 20,
+    borderRadius: 16,
     paddingVertical: 7,
     paddingHorizontal: 14,
   },
@@ -1087,8 +1063,6 @@ const styles = StyleSheet.create({
   },
   bankInput: {
     backgroundColor: '#1F1F23',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -1106,8 +1080,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     backgroundColor: '#1F1F23',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 14,

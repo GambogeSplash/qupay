@@ -125,9 +125,7 @@ const styles = StyleSheet.create({
   statRow: {
     flexDirection: 'row',
     backgroundColor: '#1F1F23',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 32,
   },
