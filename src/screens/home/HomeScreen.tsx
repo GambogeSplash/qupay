@@ -1,7 +1,7 @@
 // HomeScreen — gradient hero with balance, corridor picker, animated send entry,
 // recent contacts carousel, recent activity preview.
 import React, { useState, useCallback, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl, Animated, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '../../components/Icon';
@@ -80,7 +80,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               <Text style={styles.headerName}>{displayName} {'\u{1F44B}'}</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.bellBtn} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.bellBtn} activeOpacity={0.7} onPress={() => Alert.alert('Notifications', 'No new notifications. We\'ll notify you when transfers are delivered.')}>
             <Ionicons name="notifications" size={22} color="rgba(255,255,255,0.58)" />
           </TouchableOpacity>
         </View>

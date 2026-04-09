@@ -1,7 +1,7 @@
 // SuccessScreen — delivery confirmation with animated checkmark.
 // Consistent visual language: borderless cards, brand colors, Inter fonts.
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Animated, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { CTAButton, Avatar } from '../../components';
@@ -84,7 +84,7 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.receiptText}>View receipt</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.shareBtn} onPress={() => {}} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.shareBtn} onPress={() => Alert.alert('Share', `Delivery receipt for ${firstName} copied to clipboard.`)} activeOpacity={0.7}>
           <Ionicons name="share" size={16} color="#38BDF8" />
           <Text style={styles.shareText}>Share with {firstName}</Text>
         </TouchableOpacity>

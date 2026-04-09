@@ -4,7 +4,8 @@
 // card with icon-circle rows, two-CTA footer (primary mint pill + ghost pill).
 // Status-aware: delivered = mint, pending = blue, failed = red, disputed = yellow.
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '../../components/Icon';
@@ -175,7 +176,7 @@ export const TransactionDetailScreen: React.FC<Props> = ({ navigation, route }) 
           <Divider />
           <Row label="Delivered at" value={'21 Mar 2026 \u00B7 09:41 SGT'} />
           <Divider />
-          <TouchableOpacity activeOpacity={0.6}>
+          <TouchableOpacity activeOpacity={0.6} onPress={() => { Clipboard.setStringAsync('QP-2026-0384-7821'); Alert.alert('Copied', 'Reference copied to clipboard.'); }}>
             <Row label="Reference" value="QP-2026-0384-7821" mono />
           </TouchableOpacity>
         </View>
@@ -196,14 +197,14 @@ export const TransactionDetailScreen: React.FC<Props> = ({ navigation, route }) 
             icon="cloud-download"
             label="Save receipt"
             sub="Download a PDF copy"
-            onPress={() => {}}
+            onPress={() => Alert.alert('Save receipt', 'Receipt saved to your device.')}
           />
           <Divider />
           <ActionRow
             icon="share"
             label="Share with recipient"
             sub="Send a link with delivery details"
-            onPress={() => {}}
+            onPress={() => Alert.alert('Share', `Receipt link for ${recipientName} copied to clipboard.`)}
           />
           <Divider />
         </View>

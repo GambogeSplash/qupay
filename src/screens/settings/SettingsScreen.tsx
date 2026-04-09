@@ -62,7 +62,6 @@ const Divider: React.FC = () => <View style={styles.divider} />;
 export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
   const nav = useNavigation<any>();
   const [notifOn, setNotifOn] = useState(true);
-  const [biometricOn, setBiometricOn] = useState(true);
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
 
@@ -137,20 +136,6 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
           />
           <Divider />
           <LinkRow
-            icon="card"
-            label="Wallets & cards"
-            sub="Linked payout sources"
-            onPress={() => go('Wallets')}
-          />
-          <Divider />
-          <LinkRow
-            icon="business"
-            label="Linked banks"
-            sub="3 banks saved"
-            onPress={() => go('Wallets')}
-          />
-          <Divider />
-          <LinkRow
             icon="people"
             label="Recipients"
             sub="Saved beneficiaries"
@@ -169,13 +154,6 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
           />
           <Divider />
           <LinkRow
-            icon="shield-checkmark"
-            label="Biometrics"
-            sub="Face ID for quick approvals"
-            rightSwitch={{ value: biometricOn, onChange: setBiometricOn }}
-          />
-          <Divider />
-          <LinkRow
             icon="notifications"
             label="Notifications"
             sub="Push · SMS"
@@ -183,16 +161,9 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
           />
         </View>
 
-        {/* Preferences section */}
-        <Text style={styles.sectionLabel}>Preferences</Text>
+        {/* More */}
+        <Text style={styles.sectionLabel}>More</Text>
         <View style={styles.linksCard}>
-          <LinkRow
-            icon="options"
-            label="Currency & language"
-            sub="USD · English"
-            onPress={() => go('CurrencyLanguage')}
-          />
-          <Divider />
           <LinkRow
             icon="trending-up"
             label="Rate alerts"
