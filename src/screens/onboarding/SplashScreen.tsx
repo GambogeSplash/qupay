@@ -58,27 +58,25 @@ export const SplashScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.sub}>
             USDT to local currency in under 2 minutes.
           </Text>
-        </Animated.View>
 
-        {/* Stats — honest, specific numbers */}
-        <Animated.View style={[styles.statsCard, { opacity: statsFade }]}>
-          <View style={styles.statItem}>
-            <Text style={styles.statVal}>40+</Text>
-            <Text style={styles.statLabel}>Countries</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statVal}>$1.50</Text>
-            <Text style={styles.statLabel}>Flat fee</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statVal}>{'\u003C'}2 min</Text>
-            <Text style={styles.statLabel}>Delivery</Text>
+          {/* Stats — inside hero so it all centers together */}
+          <View style={styles.statsCard}>
+            <View style={styles.statItem}>
+              <Text style={styles.statVal}>40+</Text>
+              <Text style={styles.statLabel}>Countries</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statVal}>$1.50</Text>
+              <Text style={styles.statLabel}>Flat fee</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statVal}>{'\u003C'}2 min</Text>
+              <Text style={styles.statLabel}>Delivery</Text>
+            </View>
           </View>
         </Animated.View>
-
-        <View style={{ flex: 1 }} />
 
         {/* CTAs — pinned to bottom */}
         <Animated.View style={[styles.bottom, { opacity: ctaFade }]}>
@@ -108,8 +106,8 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   top: { paddingHorizontal: 24, paddingTop: 12 },
 
-  // Hero
-  hero: { paddingHorizontal: 24, alignItems: 'center' },
+  // Hero — centered in the middle of the screen
+  hero: { flex: 1, paddingHorizontal: 24, alignItems: 'center', justifyContent: 'center' },
   brandMark: { alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
   brandCircle: {
     width: 110, height: 110, borderRadius: 55,
@@ -129,13 +127,13 @@ const styles = StyleSheet.create({
   sub: {
     fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 23,
     color: 'rgba(255,255,255,0.58)', textAlign: 'center', paddingHorizontal: 8,
-    marginBottom: 4,
+    marginBottom: 20,
   },
 
   // Stats
   statsCard: {
     flexDirection: 'row', backgroundColor: '#17171A', borderRadius: 16,
-    marginHorizontal: 24, overflow: 'hidden',
+    overflow: 'hidden', alignSelf: 'stretch',
   },
   statItem: { flex: 1, paddingVertical: 16, alignItems: 'center' },
   statDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
