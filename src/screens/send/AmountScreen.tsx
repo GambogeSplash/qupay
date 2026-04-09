@@ -4,20 +4,20 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
-import { ScreenHeader, Numpad, BottomSheet } from '../../components';
+import { Numpad, BottomSheet, CryptoIcon } from '../../components';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<SendFlowParamList, 'Amount'>;
 
 const currencies = [
-  { code: 'USDT', name: 'Tether', icon: '\u{1FA99}', color: '#26A17B', symbol: '' },
-  { code: 'NGN', name: 'Nigerian Naira', icon: '\u{1F1F3}\u{1F1EC}', color: '#008751', symbol: '\u20A6' },
-  { code: 'GHS', name: 'Ghanaian Cedi', icon: '\u{1F1EC}\u{1F1ED}', color: '#CE1126', symbol: '\u20B5' },
-  { code: 'KES', name: 'Kenyan Shilling', icon: '\u{1F1F0}\u{1F1EA}', color: '#006600', symbol: 'KSh' },
-  { code: 'INR', name: 'Indian Rupee', icon: '\u{1F1EE}\u{1F1F3}', color: '#FF9933', symbol: '\u20B9' },
-  { code: 'PHP', name: 'Philippine Peso', icon: '\u{1F1F5}\u{1F1ED}', color: '#0038A8', symbol: '\u20B1' },
-  { code: 'PKR', name: 'Pakistani Rupee', icon: '\u{1F1F5}\u{1F1F0}', color: '#01411C', symbol: 'Rs' },
+  { code: 'USDT', name: 'Tether (Polygon)', flag: '', color: '#26A17B', symbol: '' },
+  { code: 'NGN', name: 'Nigerian Naira', flag: '\u{1F1F3}\u{1F1EC}', color: '#008751', symbol: '\u20A6' },
+  { code: 'GHS', name: 'Ghanaian Cedi', flag: '\u{1F1EC}\u{1F1ED}', color: '#CE1126', symbol: '\u20B5' },
+  { code: 'KES', name: 'Kenyan Shilling', flag: '\u{1F1F0}\u{1F1EA}', color: '#006600', symbol: 'KSh' },
+  { code: 'INR', name: 'Indian Rupee', flag: '\u{1F1EE}\u{1F1F3}', color: '#FF9933', symbol: '\u20B9' },
+  { code: 'PHP', name: 'Philippine Peso', flag: '\u{1F1F5}\u{1F1ED}', color: '#0038A8', symbol: '\u20B1' },
+  { code: 'PKR', name: 'Pakistani Rupee', flag: '\u{1F1F5}\u{1F1F0}', color: '#01411C', symbol: 'Rs' },
 ];
 
 const usdtRates: Record<string, number> = {
@@ -74,7 +74,10 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <ScreenHeader title="Send" onBack={() => navigation.goBack()} />
+      {/* No back button — tab handles navigation */}
+      <View style={styles.headerRow}>
+        <Text style={styles.headerTitle}>Send</Text>
+      </View>
 
       {/* Amount display area — both amounts always visible above numpad */}
       <View style={styles.displayArea}>
@@ -86,8 +89,8 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
               {amountStr || '0'}
             </Text>
             <View style={styles.currBadge}>
-              <Text style={styles.currIcon}>{sendCurrency.icon}</Text>
-              <Text style={styles.currCode}>{sendCurrency.code}</Text>
+              <CryptoIcon token="USDT" network="Polygon" size={24} ringColor="#1F1F23" />
+              <Text style={styles.currCode}>USDT</Text>
             </View>
           </View>
           {/* Balance + MAX */}
@@ -121,7 +124,7 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
               {numAmount > 0 ? `${receiveCurrency.symbol}${receiveAmount.toLocaleString()}` : '0'}
             </Text>
             <TouchableOpacity style={styles.recvCurrBadge} onPress={() => setShowRecvPicker(true)} activeOpacity={0.7}>
-              <Text style={styles.currIcon}>{receiveCurrency.icon}</Text>
+              <Text style={styles.currFlag}>{receiveCurrency.flag}</Text>
               <Text style={styles.currCode}>{receiveCurrency.code}</Text>
               <Ionicons name="chevron-down" size={12} color="rgba(255,255,255,0.42)" />
             </TouchableOpacity>
@@ -179,7 +182,7 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <View style={[styles.cpIconWrap, { backgroundColor: c.color + '20' }]}>
-              <Text style={{ fontSize: 18 }}>{c.icon}</Text>
+              <Text style={{ fontSize: 18 }}>{c.flag}</Text>
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.cpName}>{c.code}</Text>
@@ -196,6 +199,10 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0A0A0C' },
+
+  // Header
+  headerRow: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 12 },
+  headerTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, color: '#FFFFFF' },
 
   // Display area — grows to fill space above numpad
   displayArea: { flex: 1, paddingHorizontal: 20, paddingTop: 8, justifyContent: 'center' },
@@ -216,7 +223,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1F1F23', borderRadius: 999,
     paddingHorizontal: 12, paddingVertical: 8,
   },
-  currIcon: { fontSize: 16 },
+  currFlag: { fontSize: 16 },
   currCode: { fontFamily: 'Inter_700Bold', fontSize: 13, color: '#FFFFFF' },
   balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   balanceText: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.42)', fontVariant: ['tabular-nums'] },
