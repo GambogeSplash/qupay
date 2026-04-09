@@ -135,12 +135,6 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardLabel}>You send</Text>
-          <View style={styles.cardHeaderRight}>
-            <Text style={styles.cardAvailable}>{WALLET_BALANCE} USDT available</Text>
-            <TouchableOpacity style={styles.maxPill} onPress={setMax} activeOpacity={0.7}>
-              <Text style={styles.maxText}>MAX</Text>
-            </TouchableOpacity>
-          </View>
         </View>
         <View style={styles.cardRow}>
           <Animated.Text style={[styles.cardAmount, { transform: [{ scale: amountPulse }] }]} numberOfLines={1}>
