@@ -206,19 +206,6 @@ export const TransactionDetailScreen: React.FC<Props> = ({ navigation, route }) 
             onPress={() => {}}
           />
           <Divider />
-          <ActionRow
-            icon="trending-up"
-            label="Watch this rate"
-            sub="Get notified when USD/NGN hits your target"
-            onPress={() => {}}
-          />
-          <Divider />
-          <ActionRow
-            icon="time"
-            label="Make this recurring"
-            sub={`Send 200 USDT to ${firstName} every month`}
-            onPress={() => {}}
-          />
         </View>
       </ScrollView>
 
