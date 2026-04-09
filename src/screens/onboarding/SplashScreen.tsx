@@ -127,12 +127,13 @@ const styles = StyleSheet.create({
   sub: {
     fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 23,
     color: 'rgba(255,255,255,0.58)', textAlign: 'center', paddingHorizontal: 8,
+    marginBottom: 4,
   },
 
   // Stats
   statsCard: {
     flexDirection: 'row', backgroundColor: '#17171A', borderRadius: 16,
-    marginHorizontal: 24, overflow: 'hidden', marginTop: 8,
+    marginHorizontal: 24, overflow: 'hidden',
   },
   statItem: { flex: 1, paddingVertical: 16, alignItems: 'center' },
   statDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.06)' },

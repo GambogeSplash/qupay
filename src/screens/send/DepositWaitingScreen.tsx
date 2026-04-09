@@ -4,6 +4,7 @@
 // detection → processing steps → navigate to Success.
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import * as Clipboard from 'expo-clipboard';
@@ -156,8 +157,19 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
     const currentStep = RADAR_STEPS[processingStep] || RADAR_STEPS[0];
     const isDone = processingStep >= 4;
     const ringColor = isDone ? '#4ADE80' : '#38BDF8';
+    // Gradient shifts: blue (scanning) → purple (converting) → green (delivered)
+    const gradientTop = processingStep <= 1 ? 'rgba(56,189,248,0.12)' :
+                         processingStep <= 3 ? 'rgba(139,92,246,0.12)' :
+                         'rgba(74,222,128,0.15)';
     return (
-      <SafeAreaView style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]} edges={['top']}>
+      <View style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]}>
+        <LinearGradient
+          pointerEvents="none"
+          colors={[gradientTop, '#0A0A0C', '#0A0A0C']}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }} edges={['top']}>
         {/* Radar — dramatic animated rings with fills */}
         <View style={styles.radarWrap}>
           {/* Outer ring — filled, pulsing scale */}
@@ -216,6 +228,7 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
           <Text style={styles.radarSummaryRecipient}>to {recipientName} via {recipientMethod}</Text>
         </View>
       </SafeAreaView>
+      </View>
     );
   }
 
