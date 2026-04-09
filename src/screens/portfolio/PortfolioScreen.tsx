@@ -1,8 +1,8 @@
 // HistoryScreen — heavily influenced by /Users/fubara/qupay/src/screens/activity/ActivityScreen.tsx
 // Local Activity layout: big title header, total-sent stat card, pill filter chips,
 // date-grouped sections wrapped in P.card containers, status icon+text rows.
-import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, RefreshControl, Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
@@ -73,6 +73,10 @@ const statusColor = (status: TransferStatus): string => {
 export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState('');
+  const listFade = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(listFade, { toValue: 1, duration: 400, delay: 200, useNativeDriver: true }).start();
+  }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -137,6 +141,7 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
               />
             }
           >
+            <Animated.View style={{ opacity: listFade }}>
             {grouped.map((g) => (
               <View key={g.bucket} style={{ marginTop: 12 }}>
                 <Text style={styles.dateLabel}>{g.bucket}</Text>
@@ -185,6 +190,7 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
               </View>
             ))}
+            </Animated.View>
           </ScrollView>
         </>
       )}

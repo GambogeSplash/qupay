@@ -1,7 +1,7 @@
 // ConfirmScreen — clean review + slide-to-send with rate-lock countdown.
 // Two paths: fiat-out (USDT→NGN) shows deposit address, crypto-out shows recipient wallet.
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import * as Clipboard from 'expo-clipboard';
@@ -44,6 +44,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
   const network = recipientNetwork || 'Polygon';
 
   // Rate-lock countdown
+  const urgentPulse = useRef(new Animated.Value(1)).current;
   const [countdown, setCountdown] = useState(RATE_LOCK_SECONDS);
   const rateExpired = countdown <= 0;
   const rateUrgent = countdown <= 5 && countdown > 0;
@@ -57,6 +58,19 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (countdown <= 10 && countdown > 0) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(urgentPulse, { toValue: 1.05, duration: 400, useNativeDriver: true }),
+          Animated.timing(urgentPulse, { toValue: 1, duration: 400, useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      urgentPulse.setValue(1);
+    }
+  }, [countdown <= 10]);
 
   const refreshRate = () => setCountdown(RATE_LOCK_SECONDS);
 
@@ -144,19 +158,21 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
 
         {/* Rate-lock countdown */}
-        <TouchableOpacity
-          style={[
-            styles.ratePill,
-            rateExpired ? styles.ratePillExpired : rateUrgent ? styles.ratePillUrgent : null,
-          ]}
-          onPress={rateExpired ? refreshRate : undefined}
-          activeOpacity={rateExpired ? 0.7 : 1}
-        >
-          <View style={[styles.rateDot, { backgroundColor: rateExpired ? '#EF4444' : rateUrgent ? '#FFD60A' : '#4ADE80' }]} />
-          <Text style={[styles.rateText, rateExpired ? styles.rateTextExpired : rateUrgent ? styles.rateTextUrgent : null]}>
-            {rateExpired ? 'Rate expired · Tap to refresh' : `Rate locked · ${countdown}s`}
-          </Text>
-        </TouchableOpacity>
+        <Animated.View style={{ transform: [{ scale: urgentPulse }] }}>
+          <TouchableOpacity
+            style={[
+              styles.ratePill,
+              rateExpired ? styles.ratePillExpired : rateUrgent ? styles.ratePillUrgent : null,
+            ]}
+            onPress={rateExpired ? refreshRate : undefined}
+            activeOpacity={rateExpired ? 0.7 : 1}
+          >
+            <View style={[styles.rateDot, { backgroundColor: rateExpired ? '#EF4444' : rateUrgent ? '#FFD60A' : '#4ADE80' }]} />
+            <Text style={[styles.rateText, rateExpired ? styles.rateTextExpired : rateUrgent ? styles.rateTextUrgent : null]}>
+              {rateExpired ? 'Rate expired · Tap to refresh' : `Rate locked · ${countdown}s`}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
 
       </ScrollView>
 

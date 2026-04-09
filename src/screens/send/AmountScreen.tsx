@@ -3,8 +3,8 @@
 // Custom 4x3 numpad always visible, both amounts update live.
 // Recipient locked from upstream (PickRecipient). Includes: inline fee,
 // balance + MAX, quick chips, KYC/balance validation pills.
-import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '../../components/Icon';
 import { Avatar, CryptoIcon, BottomSheet } from '../../components';
@@ -61,6 +61,8 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
   const [showCoinPicker, setShowCoinPicker] = useState(false);
   const WALLET_BALANCE = selectedCoin.balance;
 
+  const amountPulse = useRef(new Animated.Value(1)).current;
+
   const [sendStr, setSendStr] = useState('0');
   const sendNum = parseFloat(sendStr) || 0;
   const receiveNum = sendNum * liveRate;
@@ -81,6 +83,10 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
       if (sendStr.length >= 8) return;
       setSendStr((a) => (a === '0' ? k : a + k));
     }
+    Animated.sequence([
+      Animated.timing(amountPulse, { toValue: 1.03, duration: 80, useNativeDriver: true }),
+      Animated.timing(amountPulse, { toValue: 1, duration: 80, useNativeDriver: true }),
+    ]).start();
   };
 
   const setQuick = (n: number) => setSendStr(String(n));
@@ -137,9 +143,9 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
         </View>
         <View style={styles.cardRow}>
-          <Text style={styles.cardAmount} numberOfLines={1}>
+          <Animated.Text style={[styles.cardAmount, { transform: [{ scale: amountPulse }] }]} numberOfLines={1}>
             <Text style={styles.dollar}>$</Text>{sendStr}
-          </Text>
+          </Animated.Text>
           <TouchableOpacity style={styles.sourceBadge} onPress={() => setShowCoinPicker(true)} activeOpacity={0.7}>
             <CryptoIcon token={selectedCoin.token} network={selectedCoin.network} size={22} ringColor="#17171A" />
             <Text style={styles.sourceText}>{selectedCoin.token}</Text>
