@@ -3,7 +3,7 @@
 // Usage stays identical:  <Icon name="search" size={22} color="#fff" />
 import React from 'react';
 import {
-  Search, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, ChevronUp,
+  Search, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronLeft, ChevronUp, Bird,
   ArrowRight, ArrowLeft, ArrowDown, ArrowUp, ArrowUpRight, ArrowDownLeft,
   AlertCircle, AlertTriangle, X, XCircle, Wallet, Building2, ShieldCheck, Shield,
   QrCode, Send, Bell, BellOff, Lock, Unlock, Info, Zap, Clipboard, MessageCircle,
@@ -226,6 +226,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   'thumbs-up-outline': ThumbsUp,
   'flame': Flame,
   'flame-outline': Flame,
+  'bird': Bird,
+  'bird-outline': Bird,
   'ribbon': Award,
   'ribbon-outline': Award,
   'medal': Award,

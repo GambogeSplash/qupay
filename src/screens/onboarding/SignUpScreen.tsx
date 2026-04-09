@@ -170,13 +170,20 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
       <ScreenHeader title="" onBack={() => setStep('phone')} />
       <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.body}>
-          <Text style={styles.headline}>A few more{'\n'}details</Text>
-          <Text style={styles.sub}>This helps us verify your identity and keep your transfers secure</Text>
+          {/* Progress dots */}
+          <View style={styles.progressDots}>
+            <View style={styles.dotDone} />
+            <View style={styles.dotActive} />
+          </View>
 
+          <Text style={styles.headline}>Almost there</Text>
+          <Text style={styles.sub}>So we know who you are</Text>
+
+          {/* Personal */}
+          <Text style={styles.sectionLabel}>Your name</Text>
           <View style={styles.nameRow}>
             <View style={{ flex: 1 }}>
               <FormField
-                label="First name"
                 placeholder="First name"
                 autoCapitalize="words"
                 value={firstName}
@@ -187,7 +194,6 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             <View style={{ flex: 1 }}>
               <FormField
-                label="Last name"
                 placeholder="Last name"
                 autoCapitalize="words"
                 value={lastName}
@@ -198,9 +204,10 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
 
+          {/* Security */}
+          <Text style={[styles.sectionLabel, { marginTop: 20 }]}>Login details</Text>
           <FormField
-            label="Email"
-            placeholder="you@example.com"
+            placeholder="Email address"
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -211,8 +218,7 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
           />
 
           <FormField
-            label="Password"
-            placeholder="Min 8 characters"
+            placeholder="Create a password"
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             autoCorrect={false}
@@ -280,6 +286,17 @@ const styles = StyleSheet.create({
   phonePrefix: { fontFamily: 'Inter_600SemiBold', fontSize: 15, color: 'rgba(255,255,255,0.58)' },
   phoneInput: {
     flex: 1, fontFamily: 'Inter_500Medium', fontSize: 18, color: '#FFFFFF', padding: 0,
+  },
+
+  // Progress dots
+  progressDots: { flexDirection: 'row', gap: 6, marginBottom: 24 },
+  dotDone: { width: 24, height: 4, borderRadius: 2, backgroundColor: '#38BDF8' },
+  dotActive: { width: 24, height: 4, borderRadius: 2, backgroundColor: 'rgba(56,189,248,0.3)' },
+
+  // Section labels
+  sectionLabel: {
+    fontFamily: 'Inter_600SemiBold', fontSize: 12, color: 'rgba(255,255,255,0.42)',
+    textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10,
   },
 
   // Name row

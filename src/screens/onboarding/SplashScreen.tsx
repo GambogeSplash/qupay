@@ -48,7 +48,7 @@ export const SplashScreen: React.FC<Props> = ({ navigation }) => {
               opacity: heroFade.interpolate({ inputRange: [0, 1], outputRange: [0, 0.5] }),
             }]} />
             <View style={styles.brandCircle}>
-              <Ionicons name="flash" size={52} color="#FFFFFF" />
+              <Ionicons name="bird" size={52} color="#FFFFFF" />
             </View>
           </View>
 
@@ -104,11 +104,11 @@ export const SplashScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   container: { flex: 1, justifyContent: 'space-between' },
-  top: { paddingHorizontal: 24, paddingTop: 16 },
+  top: { paddingHorizontal: 24, paddingTop: 12 },
 
   // Hero
   hero: { paddingHorizontal: 24, alignItems: 'center' },
-  brandMark: { alignItems: 'center', justifyContent: 'center', marginBottom: 32 },
+  brandMark: { alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
   brandCircle: {
     width: 110, height: 110, borderRadius: 55,
     backgroundColor: '#38BDF8',
@@ -116,8 +116,8 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   brandGlow: {
-    position: 'absolute', width: 140, height: 140, borderRadius: 70,
-    backgroundColor: 'rgba(56,189,248,0.12)',
+    position: 'absolute', width: 150, height: 150, borderRadius: 75,
+    backgroundColor: 'rgba(56,189,248,0.08)',
   },
 
   headline: {
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   // Stats
   statsCard: {
     flexDirection: 'row', backgroundColor: '#17171A', borderRadius: 16,
-    marginHorizontal: 24, overflow: 'hidden',
+    marginHorizontal: 24, overflow: 'hidden', marginTop: 8,
   },
   statItem: { flex: 1, paddingVertical: 16, alignItems: 'center' },
   statDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
