@@ -12,7 +12,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<SendFlowParamList, 'DepositWaiting'>;
-type Stage = 'address' | 'processing';
+type Stage = 'address' | 'detecting' | 'processing';
 
 const ADDRESS_TTL = 15 * 60; // 15 min
 const DEPOSIT_ADDRESS = '0x4c2A9f8E3d7B6a1C0e5F2d8A9b4C7e6F3a1D5b';
@@ -111,21 +111,44 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
     return () => clearTimeout(autoDetect);
   }, [stage]);
 
-  // Demo: user taps "I sent it" or auto-detected → processing → success
+  // User taps "I sent it" → detecting radar → processing steps → success
   const handleMarkSent = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    setStage('processing');
-    // Simulate 3-step processing
-    setTimeout(() => { setProcessingStep(1); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 2000);
-    setTimeout(() => { setProcessingStep(2); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 4000);
+    setStage('detecting');
+    // Radar detects after 3s → processing
     setTimeout(() => {
-      setProcessingStep(3);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      navigation.navigate('Success', {
-        recipientName, recipientMethod, amount, receiveAmount, recvCurrency, sendCurrency,
-      });
-    }, 6000);
+      setStage('processing');
+      // Processing steps
+      setTimeout(() => { setProcessingStep(1); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 2000);
+      setTimeout(() => { setProcessingStep(2); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); }, 4000);
+      setTimeout(() => {
+        setProcessingStep(3);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        navigation.navigate('Success', {
+          recipientName, recipientMethod, amount, receiveAmount, recvCurrency, sendCurrency,
+        });
+      }, 6000);
+    }, 3000);
   };
+
+  // ─── Detecting stage — radar animation ───
+  if (stage === 'detecting') {
+    return (
+      <SafeAreaView style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]} edges={['top']}>
+        {/* Radar pulse rings */}
+        <View style={styles.radarWrap}>
+          <Animated.View style={[styles.radarRing3, { opacity: pulse }]} />
+          <Animated.View style={[styles.radarRing2, { opacity: pulse, transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.1, 1] }) }] }]} />
+          <View style={styles.radarCenter}>
+            <Ionicons name="search" size={32} color="#38BDF8" />
+          </View>
+        </View>
+        <Text style={styles.detectingTitle}>Detecting deposit...</Text>
+        <Text style={styles.detectingSub}>Scanning {network} for your {sendCurrency} transfer</Text>
+      </SafeAreaView>
+    );
+  }
 
   // ─── Processing stage ───
   if (stage === 'processing') {
@@ -176,7 +199,7 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24, alignItems: 'center' }}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Compact caution banner */}
         <View style={styles.cautionBanner}>
           <Ionicons name="alert-circle" size={16} color="#FFD60A" />
@@ -185,27 +208,31 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
           </Text>
         </View>
 
-        {/* Instruction */}
-        <Text style={styles.instrTitle}>
-          Send <Text style={{ color: '#38BDF8' }}>{amount} {sendCurrency}</Text>
-        </Text>
-        <Text style={styles.instrSub}>to the address below</Text>
-
-        {/* Network pill */}
-        <View style={styles.networkPill}>
-          <Ionicons name="globe" size={14} color="#FFFFFF" />
-          <Text style={styles.networkText}>{network}</Text>
+        {/* QR card — consistent with app card style */}
+        <View style={styles.qrCard}>
+          <Text style={styles.qrCardTitle}>Scan to deposit</Text>
+          <Text style={styles.qrCardSub}>
+            Send exactly {amount} {sendCurrency} on {network}
+          </Text>
+          <View style={styles.qrCenter}>
+            <FakeQR />
+          </View>
+          {/* Network badge */}
+          <View style={styles.networkPill}>
+            <Ionicons name="globe" size={13} color="#FFFFFF" />
+            <Text style={styles.networkText}>{network}</Text>
+          </View>
         </View>
 
-        {/* QR code */}
-        <FakeQR />
-
-        {/* Address with copy */}
+        {/* Address card */}
         <View style={styles.addressCard}>
           <Text style={styles.addressLabel}>Deposit address</Text>
           <TouchableOpacity style={styles.addressRow} onPress={handleCopy} activeOpacity={0.7}>
             <Text style={styles.addressText} numberOfLines={1}>{DEPOSIT_ADDRESS}</Text>
-            <Ionicons name={copied ? 'checkmark-circle' : 'copy'} size={18} color={copied ? '#4ADE80' : '#38BDF8'} />
+            <View style={styles.copyBadge}>
+              <Ionicons name={copied ? 'checkmark-circle' : 'copy'} size={16} color={copied ? '#4ADE80' : '#38BDF8'} />
+              <Text style={[styles.copyText, copied && { color: '#4ADE80' }]}>{copied ? 'Copied' : 'Copy'}</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -215,7 +242,7 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
           <View style={{ flex: 1 }}>
             <Text style={styles.statusTitle}>{expired ? 'Address expired' : 'Waiting for deposit...'}</Text>
             <Text style={styles.statusSub}>
-              {expired ? 'Go back and generate a fresh address.' : `Send ${amount} ${sendCurrency} on ${network}`}
+              {expired ? 'Go back and generate a fresh address.' : `Open your wallet and send ${amount} ${sendCurrency}`}
             </Text>
           </View>
           {!expired && (
@@ -226,11 +253,11 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
           )}
         </View>
 
-        {/* Demo helper */}
+        {/* I sent it CTA */}
         {!expired && (
-          <TouchableOpacity style={styles.demoBtn} onPress={handleMarkSent} activeOpacity={0.7}>
-            <Ionicons name="flash" size={14} color="rgba(255,255,255,0.42)" />
-            <Text style={styles.demoBtnText}>I sent the deposit (demo)</Text>
+          <TouchableOpacity style={styles.sentCta} onPress={handleMarkSent} activeOpacity={0.85}>
+            <Ionicons name="checkmark-circle" size={18} color="#0A0A0C" />
+            <Text style={styles.sentCtaText}>I've sent {amount} {sendCurrency}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -260,18 +287,41 @@ const styles = StyleSheet.create({
     color: 'rgba(255,214,10,0.8)', lineHeight: 17,
   },
 
-  // Address stage
-  instrTitle: { fontFamily: 'Inter_700Bold', fontSize: 26, color: '#FFFFFF', marginTop: 8, letterSpacing: -0.3 },
-  instrSub: { fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.58)', marginTop: 4 },
+  // Radar detecting
+  radarWrap: { width: 160, height: 160, alignItems: 'center', justifyContent: 'center', marginBottom: 32 },
+  radarRing3: {
+    position: 'absolute', width: 160, height: 160, borderRadius: 80,
+    borderWidth: 1, borderColor: 'rgba(56,189,248,0.1)',
+  },
+  radarRing2: {
+    position: 'absolute', width: 110, height: 110, borderRadius: 55,
+    borderWidth: 1, borderColor: 'rgba(56,189,248,0.2)',
+  },
+  radarCenter: {
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: 'rgba(56,189,248,0.12)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  detectingTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, color: '#FFFFFF', marginBottom: 8 },
+  detectingSub: { fontFamily: 'Inter_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.58)' },
+
+  // Address stage — consistent card layout
+  qrCard: {
+    backgroundColor: '#17171A', borderRadius: 16,
+    marginHorizontal: 20, padding: 20, alignItems: 'center', marginBottom: 12,
+  },
+  qrCardTitle: { fontFamily: 'Inter_700Bold', fontSize: 18, color: '#FFFFFF' },
+  qrCardSub: { fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.58)', marginTop: 4, marginBottom: 16 },
+  qrCenter: { marginBottom: 16 },
   networkPill: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: '#8247E5', borderRadius: 999,
-    paddingHorizontal: 14, paddingVertical: 8, marginTop: 16,
+    paddingHorizontal: 12, paddingVertical: 6,
   },
-  networkText: { fontFamily: 'Inter_700Bold', fontSize: 13, color: '#FFFFFF' },
+  networkText: { fontFamily: 'Inter_600SemiBold', fontSize: 12, color: '#FFFFFF' },
   qrBox: {
-    backgroundColor: '#FFFFFF', borderRadius: 20, padding: 16,
-    marginTop: 20, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14,
+    alignItems: 'center', justifyContent: 'center',
   },
   qrGrid: { flexDirection: 'row', flexWrap: 'wrap', width: 195, height: 195 },
   qrCell: { width: 15, height: 15 },
@@ -279,18 +329,22 @@ const styles = StyleSheet.create({
   addressCard: {
     backgroundColor: '#17171A', borderRadius: 16,
     paddingHorizontal: 16, paddingVertical: 14,
-    marginHorizontal: 20, marginTop: 16, width: '100%',
-    paddingLeft: 36, paddingRight: 36,
+    marginHorizontal: 20, marginBottom: 12,
   },
-  addressLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.58)', marginBottom: 6 },
-  addressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  addressLabel: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.58)', marginBottom: 8 },
+  addressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   addressText: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 12, color: '#FFFFFF', fontVariant: ['tabular-nums'] },
+  copyBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: 'rgba(56,189,248,0.12)', borderRadius: 999,
+    paddingHorizontal: 10, paddingVertical: 6,
+  },
+  copyText: { fontFamily: 'Inter_600SemiBold', fontSize: 11, color: '#38BDF8' },
   statusCard: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: '#17171A', borderRadius: 16,
-    paddingHorizontal: 14, paddingVertical: 14,
-    marginHorizontal: 20, marginTop: 12, width: '100%',
-    paddingLeft: 36, paddingRight: 36,
+    paddingHorizontal: 16, paddingVertical: 14,
+    marginHorizontal: 20, marginBottom: 12,
   },
   statusDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#38BDF8' },
   statusTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
@@ -301,11 +355,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8, paddingVertical: 4,
   },
   countdownText: { fontFamily: 'Inter_600SemiBold', fontSize: 11, color: '#38BDF8', fontVariant: ['tabular-nums'] },
-  demoBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    paddingVertical: 14, marginTop: 8,
+  sentCta: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#38BDF8', borderRadius: 999, paddingVertical: 18,
+    marginHorizontal: 20,
   },
-  demoBtnText: { fontFamily: 'Inter_500Medium', fontSize: 13, color: 'rgba(255,255,255,0.42)' },
+  sentCtaText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#0A0A0C' },
 
   // Processing stage
   processingTitle: { fontFamily: 'Inter_700Bold', fontSize: 24, color: '#FFFFFF', letterSpacing: -0.3 },

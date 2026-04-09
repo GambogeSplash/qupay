@@ -41,17 +41,16 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const goHome = () => {
     navigation.dispatch(
-      CommonActions.reset({ index: 0, routes: [{ name: 'Amount' }] })
+      CommonActions.reset({ index: 0, routes: [{ name: 'Recipient' }] })
     );
   };
 
   const goReceipt = () => {
-    // Navigate to History tab → TransferDetail
     const root = navigation.getParent()?.getParent();
     if (root) {
-      navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Amount' }] }));
+      navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Recipient' }] }));
       setTimeout(() => {
-        root.navigate('HistoryTab', { screen: 'TransferDetail', params: { transferId: '1', status: 'delivered' } });
+        root.navigate('ActivityTab', { screen: 'TransferDetail', params: { transferId: '1', status: 'delivered' } });
       }, 100);
     }
   };
