@@ -70,18 +70,13 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
     await logout();
   }, [logout]);
 
-  // Stub handler — most profile rows reference screens that don't exist yet
-  // in the clone's ProfileStack. Until those routes are added, surface a soft
-  // ack so the user knows the touch registered (rather than appearing inert).
-  const stub = (label: string) =>
-    Alert.alert(label, 'This screen is not built yet. Coming soon.');
+  const go = (screen: string) => nav.navigate(screen as never);
 
-  // Real navigations to screens that DO exist at the root level
   const goPinReset = () => {
     try {
       nav.getParent()?.navigate('PinReset' as never);
     } catch {
-      stub('Transaction PIN');
+      Alert.alert('Transaction PIN', 'Navigate to PinReset failed.');
     }
   };
 
@@ -135,21 +130,21 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
             icon="person"
             label="Personal info"
             sub={displayPhone || 'Add your details'}
-            onPress={() => stub('Personal info')}
+            onPress={() => go('PersonalInfo')}
           />
           <Divider />
           <LinkRow
             icon="card"
             label="Wallets & cards"
             sub="Linked payout sources"
-            onPress={() => stub('Wallets & cards')}
+            onPress={() => go('Wallets')}
           />
           <Divider />
           <LinkRow
             icon="people"
             label="Recipients"
             sub="Saved beneficiaries"
-            onPress={() => stub('Recipients')}
+            onPress={() => go('Recipients')}
           />
         </View>
 
@@ -185,21 +180,21 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
             icon="options"
             label="Currency & language"
             sub="USD · English"
-            onPress={() => stub('Currency & language')}
+            onPress={() => go('CurrencyLanguage')}
           />
           <Divider />
           <LinkRow
             icon="trending-up"
             label="Rate alerts"
             sub="Get notified when your target hits"
-            onPress={() => stub('Rate alerts')}
+            onPress={() => go('RateAlerts')}
           />
           <Divider />
           <LinkRow
             icon="gift"
             label="Invite friends"
             sub="Earn $5 when they send their first transfer"
-            onPress={() => stub('Invite friends')}
+            onPress={() => go('InviteFriends')}
           />
         </View>
 
@@ -210,14 +205,14 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
             icon="chatbubble-ellipses"
             label="Help & support"
             sub="Avg. response < 3 mins"
-            onPress={() => stub('Help & support')}
+            onPress={() => go('HelpSupport')}
           />
           <Divider />
           <LinkRow
             icon="help-circle"
             label="FAQs"
             sub="Common questions"
-            onPress={() => stub('FAQs')}
+            onPress={() => go('HelpSupport')}
           />
         </View>
 

@@ -28,6 +28,13 @@ export interface DestInfo {
 import { HistoryScreen } from '../screens/portfolio/PortfolioScreen';
 import { TransactionDetailScreen } from '../screens/transaction/TransactionDetailScreen';
 import { ProfileScreen } from '../screens/settings/SettingsScreen';
+import { PersonalInfoScreen } from '../screens/settings/PersonalInfoScreen';
+import { WalletsScreen } from '../screens/settings/WalletsScreen';
+import { RecipientsScreen as RecipientsProfileScreen } from '../screens/settings/RecipientsScreen';
+import { RateAlertsScreen } from '../screens/settings/RateAlertsScreen';
+import { InviteFriendsScreen } from '../screens/settings/InviteFriendsScreen';
+import { HelpSupportScreen } from '../screens/settings/HelpSupportScreen';
+import { CurrencyLanguageScreen } from '../screens/settings/CurrencyLanguageScreen';
 import { RecipientScreen } from '../screens/send/RecipientScreen';
 import { AmountScreen } from '../screens/send/AmountScreen';
 import { ConfirmScreen } from '../screens/send/ConfirmScreen';
@@ -58,6 +65,13 @@ export type HistoryStackParamList = {
 
 export type ProfileStackParamList = {
   Profile: undefined;
+  PersonalInfo: undefined;
+  Wallets: undefined;
+  Recipients: undefined;
+  RateAlerts: undefined;
+  InviteFriends: undefined;
+  HelpSupport: undefined;
+  CurrencyLanguage: undefined;
 };
 
 export type SendFlowParamList = {
@@ -165,6 +179,13 @@ function ProfileStackNavigator() {
       screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
     >
       <ProfileStackNav.Screen name="Profile" component={ProfileScreen} />
+      <ProfileStackNav.Screen name="PersonalInfo" component={PersonalInfoScreen} />
+      <ProfileStackNav.Screen name="Wallets" component={WalletsScreen} />
+      <ProfileStackNav.Screen name="Recipients" component={RecipientsProfileScreen} />
+      <ProfileStackNav.Screen name="RateAlerts" component={RateAlertsScreen} />
+      <ProfileStackNav.Screen name="InviteFriends" component={InviteFriendsScreen} />
+      <ProfileStackNav.Screen name="HelpSupport" component={HelpSupportScreen} />
+      <ProfileStackNav.Screen name="CurrencyLanguage" component={CurrencyLanguageScreen} />
     </ProfileStackNav.Navigator>
   );
 }
