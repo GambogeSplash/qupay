@@ -2,7 +2,7 @@ import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../components/Icon';
 import { useAuthStore } from '../store/authStore';
 import type { InitiateRegistrationRequest } from '../types/auth';
 
@@ -190,14 +190,14 @@ function MainTabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#111118',
+          backgroundColor: '#0A0A0C',
           borderTopColor: 'rgba(255,255,245,0.08)',
           borderTopWidth: 1,
           height: 88,
           paddingTop: 8,
           paddingBottom: 28,
         },
-        tabBarActiveTintColor: '#00E5A0',
+        tabBarActiveTintColor: '#38BDF8',
         tabBarInactiveTintColor: 'rgba(255,255,245,0.4)',
         tabBarLabelStyle: {
           fontFamily: 'Inter_600SemiBold',
@@ -244,7 +244,7 @@ function MainTabs() {
 function LoadingScreen() {
   return (
     <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color="#00E5A0" />
+      <ActivityIndicator size="large" color="#38BDF8" />
     </View>
   );
 }
@@ -282,7 +282,7 @@ export const AppNavigator: React.FC = () => {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#111118',
+    backgroundColor: '#0A0A0C',
     alignItems: 'center',
     justifyContent: 'center',
   },

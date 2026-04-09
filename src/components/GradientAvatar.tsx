@@ -11,7 +11,7 @@ interface GradientAvatarProps {
   borderColor?: string;
 }
 
-const DEFAULT_COLORS: readonly [string, string] = ['#1a6fff', '#00e5a0'];
+const DEFAULT_COLORS: readonly [string, string] = ['#1a6fff', '#38BDF8'];
 
 export const GradientAvatar: React.FC<GradientAvatarProps> = ({
   initials,
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   initials: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     color: '#fff',
   },
 });

@@ -9,7 +9,7 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/Icon';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { ScreenHeader, GradientAvatar, CTAButton, BottomSheet } from '../../components';
@@ -119,7 +119,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
               <View style={styles.rsWalletRow}>
                 <Text style={styles.rsWalletAddr}>{truncateAddress(recipientWalletAddress || '')}</Text>
                 <View style={styles.rsNetworkBadge}>
-                  <Ionicons name={(networkIconMap[recipientNetwork || ''] || 'layers-outline') as any} size={10} color="#00E5A0" />
+                  <Ionicons name={(networkIconMap[recipientNetwork || ''] || 'layers-outline') as any} size={10} color="#38BDF8" />
                   <Text style={styles.rsNetworkText}>{recipientNetwork}</Text>
                 </View>
               </View>
@@ -128,7 +128,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
             )}
           </View>
           <View style={styles.vtag}>
-            <Ionicons name="checkmark" size={10} color="#00E5A0" />
+            <Ionicons name="checkmark" size={10} color="#38BDF8" />
             <Text style={styles.vtagText}>Verified</Text>
           </View>
         </View>
@@ -161,7 +161,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
           <View style={styles.feeRow}>
             <Text style={styles.feeLabel}>Delivery</Text>
             <View style={styles.deliveryPill}>
-              <Ionicons name="flash" size={11} color="#00E5A0" />
+              <Ionicons name="flash" size={11} color="#38BDF8" />
               <Text style={styles.deliveryText}>~2 min via {isCryptoOut ? recipientNetwork : recipientMethod}</Text>
             </View>
           </View>
@@ -174,7 +174,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
               <View style={styles.wcHeader}>
                 <View style={styles.wcHeaderLeft}>
                   <View style={styles.wcIcon}>
-                    <Ionicons name="wallet-outline" size={18} color="#00E5A0" />
+                    <Ionicons name="wallet-outline" size={18} color="#38BDF8" />
                   </View>
                   <View>
                     <Text style={styles.wcTitle}>Recipient Wallet</Text>
@@ -189,7 +189,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
               <View style={styles.wcNetworkRow}>
                 <Text style={styles.wcNetworkLabel}>Network</Text>
                 <View style={styles.wcNetworkPill}>
-                  <Ionicons name={(networkIconMap[recipientNetwork || ''] || 'layers-outline') as any} size={14} color="#00E5A0" />
+                  <Ionicons name={(networkIconMap[recipientNetwork || ''] || 'layers-outline') as any} size={14} color="#38BDF8" />
                   <Text style={styles.wcNetworkName}>{recipientNetwork}</Text>
                 </View>
               </View>
@@ -204,7 +204,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
                 <Ionicons
                   name={copied ? 'checkmark-circle' : 'copy-outline'}
                   size={16}
-                  color={copied ? '#00E5A0' : '#FFFFF5'}
+                  color={copied ? '#38BDF8' : '#FFFFFF'}
                 />
                 <Text style={[styles.copyText, copied && styles.copyTextGreen]}>
                   {copied ? 'Copied!' : 'Copy address'}
@@ -213,7 +213,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
 
               {/* Info */}
               <View style={styles.infoRow}>
-                <Ionicons name="information-circle-outline" size={14} color="#00E5A0" />
+                <Ionicons name="information-circle-outline" size={14} color="#38BDF8" />
                 <Text style={styles.infoText}>
                   Funds will be sent as USDT on {recipientNetwork} to the recipient's wallet
                 </Text>
@@ -236,20 +236,20 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
               <View style={styles.paymentMethod}>
                 <View style={styles.pmLeft}>
                   <View style={styles.pmIconWrap}>
-                    <Ionicons name="business" size={16} color="#FFFFF5" />
+                    <Ionicons name="business" size={16} color="#FFFFFF" />
                   </View>
                   <View>
                     <Text style={styles.pmTitle}>GTBank</Text>
                     <Text style={styles.pmSub}>Account ending ****4521</Text>
                   </View>
                 </View>
-                <Ionicons name="checkmark-circle" size={20} color="#00E5A0" />
+                <Ionicons name="checkmark-circle" size={20} color="#38BDF8" />
               </View>
 
               <View style={styles.paymentMethodAlt}>
                 <View style={styles.pmLeft}>
-                  <View style={[styles.pmIconWrap, { backgroundColor: 'rgba(255,255,245,0.08)' }]}>
-                    <Ionicons name="card" size={16} color="rgba(255,255,245,0.5)" />
+                  <View style={[styles.pmIconWrap, { backgroundColor: 'rgba(255,255,255,0.08)' }]}>
+                    <Ionicons name="card" size={16} color="rgba(255,255,255,0.5)" />
                   </View>
                   <View>
                     <Text style={styles.pmTitleAlt}>Debit Card</Text>
@@ -267,7 +267,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
               <View style={styles.dcHeader}>
                 <View style={styles.dcHeaderLeft}>
                   <View style={styles.dcIcon}>
-                    <Ionicons name="wallet-outline" size={18} color="#00E5A0" />
+                    <Ionicons name="wallet-outline" size={18} color="#38BDF8" />
                   </View>
                   <View>
                     <Text style={styles.dcTitle}>Deposit Address</Text>
@@ -289,7 +289,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
                   <Text style={styles.networkIcon}>{selectedNetwork.icon}</Text>
                   <Text style={styles.networkName}>{selectedNetwork.name}</Text>
                   <Text style={styles.networkGas}>{selectedNetwork.gas} gas</Text>
-                  <Ionicons name="chevron-down" size={12} color="rgba(255,255,245,0.5)" />
+                  <Ionicons name="chevron-down" size={12} color="rgba(255,255,255,0.5)" />
                 </View>
               </TouchableOpacity>
 
@@ -304,7 +304,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
                   <Text style={styles.addrHint}>Tap to show QR code</Text>
                 </View>
                 <View style={styles.qrMini}>
-                  <Ionicons name="qr-code-outline" size={28} color="#00E5A0" />
+                  <Ionicons name="qr-code-outline" size={28} color="#38BDF8" />
                 </View>
               </TouchableOpacity>
 
@@ -313,7 +313,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
                 <Ionicons
                   name={copied ? 'checkmark-circle' : 'copy-outline'}
                   size={16}
-                  color={copied ? '#00E5A0' : '#FFFFF5'}
+                  color={copied ? '#38BDF8' : '#FFFFFF'}
                 />
                 <Text style={[styles.copyText, copied && styles.copyTextGreen]}>
                   {copied ? 'Copied!' : 'Copy address'}
@@ -322,7 +322,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
 
               {/* Warning */}
               <View style={styles.warnRow}>
-                <Ionicons name="alert-circle-outline" size={14} color="#FFD460" />
+                <Ionicons name="alert-circle-outline" size={14} color="#FFD60A" />
                 <Text style={styles.warnText}>
                   Only send {sendCurrency} on {selectedNetwork.name}. Sending other tokens or using a different network may result in loss of funds.
                 </Text>
@@ -359,7 +359,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
               <Text style={styles.cpName}>{n.name}</Text>
               <Text style={styles.cpSub}>Gas {n.gas}</Text>
             </View>
-            {selectedNetwork.id === n.id && <Ionicons name="checkmark" size={18} color="#00E5A0" />}
+            {selectedNetwork.id === n.id && <Ionicons name="checkmark" size={18} color="#38BDF8" />}
           </TouchableOpacity>
         ))}
         <View style={{ height: 40 }} />
@@ -389,7 +389,7 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
             <Text style={styles.qrAddr} selectable>{selectedNetwork.address}</Text>
           </View>
           <TouchableOpacity style={styles.qrCopyBtn} onPress={handleCopy} activeOpacity={0.7}>
-            <Ionicons name={copied ? 'checkmark-circle' : 'copy-outline'} size={16} color="#111118" />
+            <Ionicons name={copied ? 'checkmark-circle' : 'copy-outline'} size={16} color="#0A0A0C" />
             <Text style={styles.qrCopyText}>{copied ? 'Copied!' : 'Copy address'}</Text>
           </TouchableOpacity>
           <Text style={styles.qrWarn}>
@@ -403,57 +403,57 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   scroll: { flex: 1 },
   recipStrip: {
-    marginHorizontal: 24, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10,
-    paddingVertical: 10, paddingHorizontal: 14, backgroundColor: '#222236',
-    borderWidth: 1, borderColor: 'rgba(255,255,245,0.08)', borderRadius: 12,
+    marginHorizontal: 20, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 10, paddingHorizontal: 14, backgroundColor: '#1F1F23',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 12,
   },
   rsInfo: { flex: 1 },
-  rsName: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFF5' },
-  rsSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.6)' },
+  rsName: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFFF' },
+  rsSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.6)' },
   rsWalletRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2,
   },
   rsWalletAddr: {
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontSize: 10, color: 'rgba(255,255,245,0.5)',
+    fontSize: 10, color: 'rgba(255,255,255,0.5)',
   },
   rsNetworkBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,229,160,0.1)', borderRadius: 6,
+    backgroundColor: 'rgba(56,189,248,0.1)', borderRadius: 6,
     paddingVertical: 2, paddingHorizontal: 6,
   },
   rsNetworkText: {
-    fontFamily: 'Inter_600SemiBold', fontSize: 9, color: '#00E5A0',
+    fontFamily: 'Inter_600SemiBold', fontSize: 9, color: '#38BDF8',
   },
   vtag: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: 'rgba(0,229,160,0.12)', borderRadius: 20, paddingVertical: 3, paddingHorizontal: 8,
+    backgroundColor: 'rgba(56,189,248,0.12)', borderRadius: 20, paddingVertical: 3, paddingHorizontal: 8,
   },
-  vtagText: { fontFamily: 'Inter_600SemiBold', fontSize: 10, color: '#00E5A0' },
+  vtagText: { fontFamily: 'Inter_600SemiBold', fontSize: 10, color: '#38BDF8' },
   swapCard: {
-    marginHorizontal: 24, marginBottom: 16, backgroundColor: '#222236',
-    borderWidth: 1, borderColor: 'rgba(255,255,245,0.08)', borderRadius: 14, padding: 16,
+    marginHorizontal: 20, marginBottom: 16, backgroundColor: '#1F1F23',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 16,
   },
   swapRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
   swapDivider: {
-    height: 1, backgroundColor: 'rgba(255,255,245,0.08)', marginVertical: 12,
+    height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 12,
   },
   swapLabel: {
-    fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,245,0.6)',
+    fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.6)',
   },
   swapValue: {
-    fontFamily: 'Inter_600SemiBold', fontSize: 15, color: '#FFFFF5',
+    fontFamily: 'Inter_600SemiBold', fontSize: 15, color: '#FFFFFF',
   },
   swapValueGreen: {
-    fontFamily: 'Inter_600SemiBold', fontSize: 15, color: '#00E5A0',
+    fontFamily: 'Inter_600SemiBold', fontSize: 15, color: '#38BDF8',
   },
   metaRows: {
-    marginHorizontal: 24, marginBottom: 16, gap: 8,
+    marginHorizontal: 20, marginBottom: 16, gap: 8,
   },
   feeRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -462,15 +462,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 4,
   },
   deliveryText: {
-    fontFamily: 'Inter_600SemiBold', fontSize: 12, color: '#00E5A0',
+    fontFamily: 'Inter_600SemiBold', fontSize: 12, color: '#38BDF8',
   },
-  feeLabel: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,245,0.6)' },
-  feeValue: { fontFamily: 'Inter_500Medium', fontSize: 12, color: '#FFFFF5', fontVariant: ['tabular-nums'] },
-  feePct: { fontFamily: 'Inter_400Regular', fontSize: 11, color: '#00E5A0' },
+  feeLabel: { fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.6)' },
+  feeValue: { fontFamily: 'Inter_500Medium', fontSize: 12, color: '#FFFFFF', fontVariant: ['tabular-nums'] },
+  feePct: { fontFamily: 'Inter_400Regular', fontSize: 11, color: '#38BDF8' },
   // Wallet card for crypto-out
   walletCard: {
-    marginHorizontal: 24, marginBottom: 16, backgroundColor: '#1A1A2E',
-    borderWidth: 1.5, borderColor: 'rgba(0,229,160,0.2)', borderRadius: 20, overflow: 'hidden',
+    marginHorizontal: 20, marginBottom: 16, backgroundColor: '#17171A',
+    borderWidth: 1, borderColor: 'rgba(56,189,248,0.2)', borderRadius: 20, overflow: 'hidden',
   },
   wcHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -478,41 +478,41 @@ const styles = StyleSheet.create({
   },
   wcHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   wcIcon: {
-    width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(0,229,160,0.12)',
+    width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(56,189,248,0.12)',
     alignItems: 'center', justifyContent: 'center',
   },
-  wcTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#FFFFF5' },
-  wcSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.5)', marginTop: 1 },
+  wcTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#FFFFFF' },
+  wcSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 1 },
   wcNetworkRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingBottom: 14,
   },
-  wcNetworkLabel: { fontFamily: 'Inter_500Medium', fontSize: 12, color: 'rgba(255,255,245,0.5)' },
+  wcNetworkLabel: { fontFamily: 'Inter_500Medium', fontSize: 12, color: 'rgba(255,255,255,0.5)' },
   wcNetworkPill: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'rgba(0,229,160,0.1)', borderWidth: 1, borderColor: 'rgba(0,229,160,0.25)',
+    backgroundColor: 'rgba(56,189,248,0.1)', borderWidth: 1, borderColor: 'rgba(56,189,248,0.25)',
     borderRadius: 20, paddingVertical: 6, paddingHorizontal: 12,
   },
-  wcNetworkName: { fontFamily: 'Inter_600SemiBold', fontSize: 12, color: '#FFFFF5' },
+  wcNetworkName: { fontFamily: 'Inter_600SemiBold', fontSize: 12, color: '#FFFFFF' },
   wcAddressBox: {
-    marginHorizontal: 16, marginBottom: 12, backgroundColor: '#111118',
-    borderWidth: 1, borderColor: 'rgba(255,255,245,0.08)', borderRadius: 14, padding: 14,
+    marginHorizontal: 16, marginBottom: 12, backgroundColor: '#0A0A0C',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 14,
   },
   wcAddrMono: {
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontSize: 12, color: '#FFFFF5', letterSpacing: 0.3, lineHeight: 20,
+    fontSize: 12, color: '#FFFFFF', letterSpacing: 0.3, lineHeight: 20,
   },
   infoRow: {
     flexDirection: 'row', gap: 8, alignItems: 'flex-start',
     marginHorizontal: 16, marginBottom: 16,
   },
   infoText: {
-    flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(0,229,160,0.7)', lineHeight: 16,
+    flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(56,189,248,0.7)', lineHeight: 16,
   },
   // Pay with card
   payWithCard: {
-    marginHorizontal: 24, marginBottom: 16, backgroundColor: '#222236',
-    borderWidth: 1, borderColor: 'rgba(255,255,245,0.08)', borderRadius: 16, padding: 16,
+    marginHorizontal: 20, marginBottom: 16, backgroundColor: '#1F1F23',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 16, padding: 16,
   },
   pwHeader: {
     flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16,
@@ -521,16 +521,16 @@ const styles = StyleSheet.create({
     width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(26,111,255,0.15)',
     alignItems: 'center', justifyContent: 'center',
   },
-  pwTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#FFFFF5' },
-  pwSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.5)', marginTop: 1 },
+  pwTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#FFFFFF' },
+  pwSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 1 },
   paymentMethod: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: 'rgba(0,229,160,0.08)', borderWidth: 1.5, borderColor: 'rgba(0,229,160,0.3)',
+    backgroundColor: 'rgba(56,189,248,0.08)', borderWidth: 1, borderColor: 'rgba(56,189,248,0.3)',
     borderRadius: 12, padding: 14, marginBottom: 10,
   },
   paymentMethodAlt: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: 'rgba(255,255,245,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,245,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12, padding: 14,
   },
   pmLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
@@ -538,17 +538,17 @@ const styles = StyleSheet.create({
     width: 36, height: 36, borderRadius: 10, backgroundColor: '#008751',
     alignItems: 'center', justifyContent: 'center',
   },
-  pmTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFF5' },
-  pmSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.5)', marginTop: 1 },
-  pmTitleAlt: { fontFamily: 'Inter_500Medium', fontSize: 13, color: 'rgba(255,255,245,0.6)' },
-  pmSubAlt: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.35)', marginTop: 1 },
+  pmTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFFF' },
+  pmSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 1 },
+  pmTitleAlt: { fontFamily: 'Inter_500Medium', fontSize: 13, color: 'rgba(255,255,255,0.6)' },
+  pmSubAlt: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 1 },
   pmRadio: {
-    width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: 'rgba(255,255,245,0.2)',
+    width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
   },
   // Deposit card for crypto-in (existing)
   depositCard: {
-    marginHorizontal: 24, marginBottom: 16, backgroundColor: '#1A1A2E',
-    borderWidth: 1.5, borderColor: 'rgba(0,229,160,0.2)', borderRadius: 20, overflow: 'hidden',
+    marginHorizontal: 20, marginBottom: 16, backgroundColor: '#17171A',
+    borderWidth: 1, borderColor: 'rgba(56,189,248,0.2)', borderRadius: 20, overflow: 'hidden',
   },
   dcHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -556,89 +556,89 @@ const styles = StyleSheet.create({
   },
   dcHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dcIcon: {
-    width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(0,229,160,0.12)',
+    width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(56,189,248,0.12)',
     alignItems: 'center', justifyContent: 'center',
   },
-  dcTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#FFFFF5' },
-  dcSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.5)', marginTop: 1 },
+  dcTitle: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#FFFFFF' },
+  dcSubtitle: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 1 },
   networkRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingBottom: 14,
   },
-  networkLabel: { fontFamily: 'Inter_500Medium', fontSize: 12, color: 'rgba(255,255,245,0.5)' },
+  networkLabel: { fontFamily: 'Inter_500Medium', fontSize: 12, color: 'rgba(255,255,255,0.5)' },
   networkPill: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: '#222236', borderWidth: 1, borderColor: 'rgba(255,255,245,0.08)',
+    backgroundColor: '#1F1F23', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 20, paddingVertical: 6, paddingHorizontal: 12,
   },
   networkIcon: { fontSize: 12 },
-  networkName: { fontFamily: 'Inter_600SemiBold', fontSize: 12, color: '#FFFFF5' },
-  networkGas: { fontFamily: 'Inter_400Regular', fontSize: 10, color: 'rgba(255,255,245,0.4)' },
+  networkName: { fontFamily: 'Inter_600SemiBold', fontSize: 12, color: '#FFFFFF' },
+  networkGas: { fontFamily: 'Inter_400Regular', fontSize: 10, color: 'rgba(255,255,255,0.4)' },
   addressBox: {
     marginHorizontal: 16, marginBottom: 12, flexDirection: 'row', alignItems: 'center',
-    justifyContent: 'space-between', backgroundColor: '#111118',
-    borderWidth: 1, borderColor: 'rgba(255,255,245,0.08)', borderRadius: 14, padding: 14,
+    justifyContent: 'space-between', backgroundColor: '#0A0A0C',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 14,
   },
   addrLeft: { flex: 1 },
   addrMono: {
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontSize: 15, color: '#FFFFF5', letterSpacing: 0.5,
+    fontSize: 15, color: '#FFFFFF', letterSpacing: 0.5,
   },
-  addrHint: { fontFamily: 'Inter_400Regular', fontSize: 10, color: 'rgba(255,255,245,0.35)', marginTop: 3 },
+  addrHint: { fontFamily: 'Inter_400Regular', fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 3 },
   qrMini: {
-    width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(0,229,160,0.08)',
-    borderWidth: 1, borderColor: 'rgba(0,229,160,0.2)', alignItems: 'center', justifyContent: 'center',
+    width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(56,189,248,0.08)',
+    borderWidth: 1, borderColor: 'rgba(56,189,248,0.2)', alignItems: 'center', justifyContent: 'center',
   },
   copyBtn: {
     marginHorizontal: 16, marginBottom: 12, flexDirection: 'row', alignItems: 'center',
-    justifyContent: 'center', gap: 8, backgroundColor: '#222236',
-    borderWidth: 1, borderColor: 'rgba(255,255,245,0.08)', borderRadius: 12,
+    justifyContent: 'center', gap: 8, backgroundColor: '#1F1F23',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 12,
     paddingVertical: 12,
   },
-  copyText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFF5' },
-  copyTextGreen: { color: '#00E5A0' },
+  copyText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFFF' },
+  copyTextGreen: { color: '#38BDF8' },
   warnRow: {
     flexDirection: 'row', gap: 8, alignItems: 'flex-start',
     marginHorizontal: 16, marginBottom: 16,
   },
   warnText: {
-    flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,212,96,0.7)', lineHeight: 16,
+    flex: 1, fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,214,10,0.7)', lineHeight: 16,
   },
-  ctaWrap: { paddingHorizontal: 24, paddingBottom: 24 },
+  ctaWrap: { paddingHorizontal: 20, paddingBottom: 24 },
   ctaNote: {
-    fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.4)',
+    fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.4)',
     textAlign: 'center', marginTop: 10,
   },
   cpItem: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingVertical: 12, paddingHorizontal: 24,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,245,0.08)',
+    paddingVertical: 12, paddingHorizontal: 20,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)',
   },
-  cpItemSel: { backgroundColor: 'rgba(0,229,160,0.08)' },
+  cpItemSel: { backgroundColor: 'rgba(56,189,248,0.08)' },
   cpInfo: { flex: 1 },
-  cpName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFF5' },
-  cpSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.6)' },
+  cpName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
+  cpSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.6)' },
   cpLogo: { width: 36, height: 36, borderRadius: 18 },
-  qrSheet: { alignItems: 'center', paddingHorizontal: 24 },
+  qrSheet: { alignItems: 'center', paddingHorizontal: 20 },
   qrBox: {
-    width: 220, height: 220, backgroundColor: '#FFFFF5', borderRadius: 16,
+    width: 220, height: 220, backgroundColor: '#FFFFFF', borderRadius: 16,
     padding: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 20,
   },
   qrGrid: { flexDirection: 'row', flexWrap: 'wrap', width: 195, height: 195 },
   qrCell: { width: 15, height: 15 },
-  qrCellFilled: { backgroundColor: '#111118' },
+  qrCellFilled: { backgroundColor: '#0A0A0C' },
   qrInfo: { alignItems: 'center', marginBottom: 16 },
-  qrNetwork: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFF5', marginBottom: 6 },
+  qrNetwork: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#FFFFFF', marginBottom: 6 },
   qrAddr: {
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontSize: 11, color: 'rgba(255,255,245,0.6)', textAlign: 'center', lineHeight: 18,
+    fontSize: 11, color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 18,
   },
   qrCopyBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#00E5A0', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 32, marginBottom: 12,
+    backgroundColor: '#38BDF8', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 32, marginBottom: 12,
   },
-  qrCopyText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#111118' },
+  qrCopyText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#0A0A0C' },
   qrWarn: {
-    fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.4)', textAlign: 'center',
+    fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.4)', textAlign: 'center',
   },
 });

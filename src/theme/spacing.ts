@@ -1,18 +1,19 @@
-// Qupay spacing — Phantom-inspired: generous, clean, breathing room
+// Qupay spacing — reskinned to match /Users/fubara/qupay literal-clone tokens
+// Source of truth: /Users/fubara/qupay/src/qupay/tokens.ts (R)
+// Tighter radii than the original Phantom-soft set (measured from screenshots).
 const BASE = 4;
 
 export const spacing = (multiplier: number) => BASE * multiplier;
 
-// Phantom uses softer radius than most crypto apps
-// Cards: 16-20px, buttons: 14-16px, inputs: 12px, chips: pill
+// Radii — measured from local screenshots (tighter than Phantom defaults)
 export const borderRadius = {
   xs: 6,
   sm: 10,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 28,
-  pill: 999,
+  md: 12,    // chips, search inputs
+  lg: 14,    // action squares (Send/Swap/Receive/Buy)
+  xl: 16,    // outer cards, list cards
+  xxl: 24,   // bottom sheet top corners, QR frame
+  pill: 999, // primary CTA, account pills
 };
 
 export const shadows = {
@@ -37,15 +38,16 @@ export const shadows = {
     shadowRadius: 4,
     elevation: 2,
   },
+  // CTA glow recolored to brand purple (local design uses purple CTAs, not green)
   ctaGlow: {
-    shadowColor: '#00E5A0',
+    shadowColor: '#38BDF8',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 24,
     elevation: 8,
   },
   purpleGlow: {
-    shadowColor: '#AB9FF2',
+    shadowColor: '#38BDF8',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 16,

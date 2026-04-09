@@ -25,15 +25,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20, // local screens use 20pt gutters
     paddingTop: 18,
     paddingBottom: 12,
   },
   title: {
     flex: 1,
     fontFamily: 'Inter_700Bold',
-    fontSize: 16,
-    color: '#FFFFF5',
+    fontSize: 22, // T.screenTitle
+    color: '#FFFFFF',
   },
   spacer: {
     width: 36,

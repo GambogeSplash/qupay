@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/Icon';
 import { CTAButton } from '../../components';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
@@ -115,7 +115,7 @@ export const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
         <View style={styles.trackHero}>
           <View style={styles.thFlags}>
             <Text style={styles.flagLg}>{'\u{1F1F8}\u{1F1EC}'}</Text>
-            <Ionicons name="arrow-forward" size={18} color="#00E5A0" />
+            <Ionicons name="arrow-forward" size={18} color="#38BDF8" />
             <Text style={styles.flagLg}>{recipientFlag}</Text>
           </View>
           <Text style={styles.thAmount}>
@@ -137,7 +137,7 @@ export const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
         <View style={styles.progressWrap}>
           <View style={styles.progressTrack}>
             <LinearGradient
-              colors={['#00E5A0', '#00bfff']}
+              colors={['#38BDF8', '#0284C7']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={[styles.progressFill, { width: `${Math.min(progress, 100)}%` as any }]}
@@ -204,11 +204,11 @@ export const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 18,
     paddingBottom: 6,
   },
@@ -216,14 +216,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'Inter_700Bold',
     fontSize: 16,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     textAlign: 'center',
   },
   scroll: { flex: 1 },
   trackHero: {
     alignItems: 'center',
     paddingVertical: 28,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   thFlags: {
     flexDirection: 'row',
@@ -233,54 +233,54 @@ const styles = StyleSheet.create({
   },
   flagLg: { fontSize: 28 },
   thAmount: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 36,
     letterSpacing: -1,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     marginBottom: 4,
   },
   thSub: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginBottom: 10,
   },
   thEta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(0,229,160,0.12)',
+    backgroundColor: 'rgba(56,189,248,0.12)',
     borderWidth: 1,
-    borderColor: 'rgba(0,229,160,0.2)',
+    borderColor: 'rgba(56,189,248,0.2)',
     borderRadius: 20,
     paddingVertical: 6,
     paddingHorizontal: 14,
   },
   thEtaDone: {
-    backgroundColor: '#00E5A0',
-    borderColor: '#00E5A0',
+    backgroundColor: '#38BDF8',
+    borderColor: '#38BDF8',
   },
   thEtaText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 12,
-    color: '#00E5A0',
+    color: '#38BDF8',
   },
   thEtaTextDone: {
-    color: '#060a07',
+    color: '#0A0A0C',
   },
   ldot: {
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: '#00E5A0',
+    backgroundColor: '#38BDF8',
   },
   progressWrap: {
-    marginHorizontal: 24,
+    marginHorizontal: 20,
     marginBottom: 20,
   },
   progressTrack: {
     height: 8,
-    backgroundColor: '#2A2A42',
+    backgroundColor: '#26262A',
     borderRadius: 4,
     overflow: 'hidden',
     marginBottom: 6,
@@ -292,12 +292,12 @@ const styles = StyleSheet.create({
   progressPct: {
     fontFamily: 'Inter_500Medium',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     textAlign: 'right',
     fontVariant: ['tabular-nums'],
   },
   stepsContainer: {
-    marginHorizontal: 24,
+    marginHorizontal: 20,
     marginBottom: 16,
   },
   step: {
@@ -312,10 +312,10 @@ const styles = StyleSheet.create({
     top: 28,
     width: 2,
     height: '100%',
-    backgroundColor: 'rgba(255,255,245,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   stepLineDone: {
-    backgroundColor: '#00E5A0',
+    backgroundColor: '#38BDF8',
   },
   stepDot: {
     width: 28,
@@ -326,28 +326,28 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   stepDotDone: {
-    backgroundColor: '#00E5A0',
+    backgroundColor: '#38BDF8',
   },
   stepDotActive: {
-    backgroundColor: 'rgba(0,229,160,0.15)',
-    borderWidth: 2,
-    borderColor: '#00E5A0',
+    backgroundColor: 'rgba(56,189,248,0.15)',
+    borderWidth: 1,
+    borderColor: '#38BDF8',
   },
   stepDotWait: {
-    backgroundColor: '#2A2A42',
+    backgroundColor: '#26262A',
   },
   stepDotCheckText: {
     fontFamily: 'Inter_700Bold',
     fontSize: 11,
-    color: '#060a07',
+    color: '#0A0A0C',
   },
   stepDotNum: {
     fontFamily: 'Inter_700Bold',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.4)',
+    color: 'rgba(255,255,255,0.4)',
   },
   stepDotNumActive: {
-    color: '#00E5A0',
+    color: '#38BDF8',
   },
   stepBody: {
     flex: 1,
@@ -357,24 +357,24 @@ const styles = StyleSheet.create({
   stepLabel: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     marginBottom: 2,
   },
   stepDesc: {
     fontFamily: 'Inter_400Regular',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     lineHeight: 17,
   },
   stepTime: {
     fontFamily: 'Inter_500Medium',
     fontSize: 10,
-    color: 'rgba(255,255,245,0.4)',
+    color: 'rgba(255,255,255,0.4)',
     marginTop: 3,
     fontVariant: ['tabular-nums'],
   },
   ctaWrap: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 24,
   },
 });

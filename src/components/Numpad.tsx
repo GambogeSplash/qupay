@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from './Icon';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'];
 
@@ -29,7 +29,7 @@ export const Numpad: React.FC<NumpadProps> = ({ onKey, size = 'default' }) => {
           accessibilityRole="button"
         >
           {key === 'del' ? (
-            <Ionicons name="backspace-outline" size={isCompact ? 20 : 24} color="#FFFFF5" />
+            <Ionicons name="backspace-outline" size={isCompact ? 20 : 24} color="#FFFFFF" />
           ) : (
             <Text style={[styles.numKeyText, isCompact && styles.numKeyTextCompact]}>
               {key}
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   numKeyText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 28,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
   },
   numKeyTextCompact: {
     fontSize: 24,

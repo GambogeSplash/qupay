@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/Icon';
 import { ScreenHeader, CTAButton, BottomSheet } from '../../components';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
@@ -85,14 +85,14 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
                 onChangeText={setAmount}
                 keyboardType="numeric"
                 placeholder="0"
-                placeholderTextColor="rgba(255,255,245,0.25)"
+                placeholderTextColor="rgba(255,255,255,0.25)"
               />
               <TouchableOpacity style={styles.sendCurrPill} onPress={() => setShowSendPicker(true)} activeOpacity={0.7}>
                 <View style={[styles.cpIconWrapSmall, { backgroundColor: selectedSendCurrency.color + '20' }]}>
                   <Text style={styles.currFlagIcon}>{selectedSendCurrency.icon}</Text>
                 </View>
                 <Text style={styles.currText}>{selectedSendCurrency.code}</Text>
-                <Ionicons name="chevron-down" size={14} color="rgba(255,255,245,0.5)" />
+                <Ionicons name="chevron-down" size={14} color="rgba(255,255,255,0.5)" />
               </TouchableOpacity>
             </View>
           </View>
@@ -124,7 +124,7 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
                   <Text style={styles.currFlagIcon}>{selectedReceiveCurrency.icon}</Text>
                 </View>
                 <Text style={styles.currText}>{selectedReceiveCurrency.code}</Text>
-                <Ionicons name="chevron-down" size={14} color="rgba(255,255,245,0.5)" />
+                <Ionicons name="chevron-down" size={14} color="rgba(255,255,255,0.5)" />
               </TouchableOpacity>
             </View>
           </View>
@@ -154,7 +154,7 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.cpName}>{c.code}</Text>
               <Text style={styles.cpSub}>{c.name}</Text>
             </View>
-            {selectedSendCurrency.code === c.code && <Ionicons name="checkmark" size={18} color="#00E5A0" />}
+            {selectedSendCurrency.code === c.code && <Ionicons name="checkmark" size={18} color="#38BDF8" />}
           </TouchableOpacity>
         ))}
         <View style={{ height: 40 }} />
@@ -175,7 +175,7 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.cpName}>{c.code}</Text>
               <Text style={styles.cpSub}>{c.name}</Text>
             </View>
-            {selectedReceiveCurrency.code === c.code && <Ionicons name="checkmark" size={18} color="#00E5A0" />}
+            {selectedReceiveCurrency.code === c.code && <Ionicons name="checkmark" size={18} color="#38BDF8" />}
           </TouchableOpacity>
         ))}
         <View style={{ height: 40 }} />
@@ -185,53 +185,53 @@ export const AmountScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   scroll: { flex: 1 },
   amountCard: {
-    marginHorizontal: 24, marginTop: 8, marginBottom: 12, backgroundColor: '#222236',
-    borderWidth: 1, borderColor: 'rgba(255,255,245,0.08)', borderRadius: 20, overflow: 'hidden',
+    marginHorizontal: 20, marginTop: 8, marginBottom: 12, backgroundColor: '#1F1F23',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 20, overflow: 'hidden',
   },
   acSection: { paddingVertical: 20, paddingHorizontal: 20 },
-  acSectionRecv: { paddingVertical: 16, paddingHorizontal: 20, paddingBottom: 20, backgroundColor: '#2A2A42' },
+  acSectionRecv: { paddingVertical: 16, paddingHorizontal: 20, paddingBottom: 20, backgroundColor: '#26262A' },
   acLabel: {
     fontFamily: 'Inter_600SemiBold', fontSize: 10, letterSpacing: 1,
-    textTransform: 'uppercase', color: 'rgba(255,255,245,0.6)', marginBottom: 8,
+    textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', marginBottom: 8,
   },
   acRowSpaced: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  amountInput: { flex: 1, fontFamily: 'Inter_800ExtraBold', fontSize: 36, color: '#FFFFF5', minWidth: 60, maxWidth: '55%' },
-  recvAmount: { flex: 1, fontFamily: 'Inter_800ExtraBold', fontSize: 32, color: '#00E5A0' },
+  amountInput: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: 36, color: '#FFFFFF', minWidth: 60, maxWidth: '55%' },
+  recvAmount: { flex: 1, fontFamily: 'Inter_700Bold', fontSize: 32, color: '#38BDF8' },
   sendCurrPill: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#2A2A42', borderWidth: 1.5, borderColor: 'rgba(0,229,160,0.3)',
+    backgroundColor: '#26262A', borderWidth: 1, borderColor: 'rgba(56,189,248,0.3)',
     borderRadius: 24, paddingVertical: 10, paddingHorizontal: 14,
     minWidth: 125,
   },
   recvCurrPill: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: '#333350', borderWidth: 1.5, borderColor: 'rgba(0,229,160,0.25)',
+    backgroundColor: '#333350', borderWidth: 1, borderColor: 'rgba(56,189,248,0.25)',
     borderRadius: 24, paddingVertical: 8, paddingHorizontal: 12,
     minWidth: 125,
   },
   cpIconWrapSmall: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   currFlagIcon: { fontSize: 16 },
-  currText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#FFFFF5' },
+  currText: { fontFamily: 'Inter_700Bold', fontSize: 14, color: '#FFFFFF' },
   rateDivider: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, gap: 10 },
-  rateLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,245,0.08)' },
+  rateLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.08)' },
   ratePill: {
-    backgroundColor: '#111118', borderWidth: 1, borderColor: 'rgba(0,229,160,0.25)',
+    backgroundColor: '#0A0A0C', borderWidth: 1, borderColor: 'rgba(56,189,248,0.25)',
     borderRadius: 24, paddingVertical: 5, paddingHorizontal: 12,
   },
-  ratePillText: { fontFamily: 'Inter_600SemiBold', fontSize: 11, color: '#00E5A0', fontVariant: ['tabular-nums'] },
-  ctaWrap: { paddingHorizontal: 24, paddingBottom: 24 },
+  ratePillText: { fontFamily: 'Inter_600SemiBold', fontSize: 11, color: '#38BDF8', fontVariant: ['tabular-nums'] },
+  ctaWrap: { paddingHorizontal: 20, paddingBottom: 24 },
   cpItem: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingVertical: 12, paddingHorizontal: 24,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,245,0.08)',
+    paddingVertical: 12, paddingHorizontal: 20,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)',
   },
-  cpItemSel: { backgroundColor: 'rgba(0,229,160,0.08)' },
+  cpItemSel: { backgroundColor: 'rgba(56,189,248,0.08)' },
   cpIconWrap: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   cpIcon: { fontSize: 18 },
   cpInfo: { flex: 1 },
-  cpName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFF5' },
-  cpSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.6)' },
+  cpName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' },
+  cpSub: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.6)' },
 });

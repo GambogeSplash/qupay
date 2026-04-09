@@ -1,14 +1,68 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Switch } from 'react-native';
+// SettingsScreen — heavily influenced by /qupay/src/screens/profile/QupayProfileScreen.tsx
+// Local Profile layout: soft mint glow backdrop, big identity hero (circular avatar
+// + name + handle + email), lifetime stats card, sectioned link cards with
+// icon-circle rows, red soft sign-out pill, version footer.
+import React, { useCallback, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Switch, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { QupayLogo, GradientAvatar, CTAButton } from '../../components';
+import { Ionicons } from '../../components/Icon';
+import { Avatar } from '../../components';
 import { userProfile } from '../../data/mockData';
 import { useAuthStore } from '../../store/authStore';
 
-export const ProfileScreen: React.FC<{ navigation?: any }> = ({ navigation }) => {
+const Stat: React.FC<{ label: string; value: string; emphasis?: boolean }> = ({
+  label,
+  value,
+  emphasis,
+}) => (
+  <View style={styles.stat}>
+    <Text style={[styles.statValue, emphasis && styles.statValueEmphasis]}>{value}</Text>
+    <Text style={styles.statLabel}>{label}</Text>
+  </View>
+);
+
+const LinkRow: React.FC<{
+  icon: string;
+  label: string;
+  sub: string;
+  onPress?: () => void;
+  rightSwitch?: { value: boolean; onChange: (v: boolean) => void };
+}> = ({ icon, label, sub, onPress, rightSwitch }) => (
+  <TouchableOpacity
+    style={styles.link}
+    activeOpacity={rightSwitch ? 1 : 0.6}
+    onPress={onPress}
+    disabled={!!rightSwitch}
+  >
+    <View style={styles.linkIcon}>
+      <Ionicons name={icon} size={18} color="#38BDF8" />
+    </View>
+    <View style={{ flex: 1 }}>
+      <Text style={styles.linkLabel}>{label}</Text>
+      <Text style={styles.linkSub}>{sub}</Text>
+    </View>
+    {rightSwitch ? (
+      <Switch
+        value={rightSwitch.value}
+        onValueChange={rightSwitch.onChange}
+        trackColor={{ false: '#26262A', true: '#38BDF8' }}
+        thumbColor="#FFFFFF"
+        ios_backgroundColor="#26262A"
+      />
+    ) : (
+      <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.42)" />
+    )}
+  </TouchableOpacity>
+);
+
+const Divider: React.FC = () => <View style={styles.divider} />;
+
+export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
+  const nav = useNavigation<any>();
   const [notifOn, setNotifOn] = useState(true);
+  const [biometricOn, setBiometricOn] = useState(true);
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
 
@@ -16,251 +70,319 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = ({ navigation }) =>
     await logout();
   }, [logout]);
 
+  // Stub handler — most profile rows reference screens that don't exist yet
+  // in the clone's ProfileStack. Until those routes are added, surface a soft
+  // ack so the user knows the touch registered (rather than appearing inert).
+  const stub = (label: string) =>
+    Alert.alert(label, 'This screen is not built yet. Coming soon.');
+
+  // Real navigations to screens that DO exist at the root level
+  const goPinReset = () => {
+    try {
+      nav.getParent()?.navigate('PinReset' as never);
+    } catch {
+      stub('Transaction PIN');
+    }
+  };
+
   const displayName = user ? `${user.firstName} ${user.lastName}` : userProfile.name;
   const displayEmail = user?.email || userProfile.email;
   const displayPhone = user?.phoneNumber || userProfile.phone;
+  const handle = '@' + (displayName?.split(' ')[0] || 'you').toLowerCase();
   const initials = user
     ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
     : userProfile.initials;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <QupayLogo size={22} />
-        </View>
+      {/* Soft mint glow backdrop */}
+      <LinearGradient
+        pointerEvents="none"
+        colors={['rgba(56,189,248,0.16)', 'rgba(56,189,248,0)']}
+        style={styles.glow}
+      />
 
-        {/* Profile hero */}
-        <View style={styles.heroWrap}>
-          <LinearGradient
-            colors={['#1A1A2E', '#111118']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.hero}
-          >
-            <View style={styles.phTop}>
-              <GradientAvatar
-                initials={initials}
-                size={60}
-                borderWidth={2}
-                borderColor="rgba(255,255,255,0.1)"
-                fontSize={20}
-              />
-              <View style={styles.phInfo}>
-                <Text style={styles.phName}>{displayName}</Text>
-                <Text style={styles.phEmail}>{displayEmail}</Text>
-                <Text style={styles.phPhone}>{displayPhone}</Text>
-              </View>
-            </View>
-            <View style={styles.phStats}>
-              <View style={styles.phStat}>
-                <Text style={styles.phVal}>{userProfile.totalTransfers}</Text>
-                <Text style={styles.phLabel}>Transfers</Text>
-              </View>
-              <View style={styles.phStatDivider} />
-              <View style={styles.phStat}>
-                <Text style={[styles.phVal, styles.phValGreen]}>${userProfile.totalSent.toLocaleString()}</Text>
-                <Text style={styles.phLabel}>Total Sent</Text>
-              </View>
-              <View style={styles.phStatDivider} />
-              <View style={styles.phStat}>
-                <Text style={styles.phVal}>Nov '25</Text>
-                <Text style={styles.phLabel}>Member</Text>
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+        {/* Identity hero */}
+        <View style={styles.identity}>
+          <View style={styles.bigAvatar}>
+            <Avatar seed={displayName || 'qupay user'} initials={initials} size={96} />
+          </View>
+          <Text style={styles.name}>{displayName}</Text>
+          <Text style={styles.handle}>{handle}</Text>
+          <Text style={styles.email}>{displayEmail}</Text>
 
-        {/* Settings */}
-        <Text style={styles.sectionLabel}>Settings</Text>
-        <View style={styles.card}>
-          <TouchableOpacity style={styles.row} activeOpacity={0.7}>
-            <View style={[styles.rowIcon, { backgroundColor: 'rgba(0,229,160,0.07)' }]}>
-              <Ionicons name="lock-closed-outline" size={18} color="#00E5A0" />
-            </View>
-            <View style={styles.rowBody}>
-              <Text style={styles.rowTitle}>Transaction PIN</Text>
-              <Text style={styles.rowSub}>Change your 4-digit PIN</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,245,0.4)" />
-          </TouchableOpacity>
-
-          <View style={[styles.row, styles.rowLast]}>
-            <View style={[styles.rowIcon, { backgroundColor: 'rgba(255,212,96,0.1)' }]}>
-              <Ionicons name="notifications-outline" size={18} color="#FFD460" />
-            </View>
-            <View style={styles.rowBody}>
-              <Text style={styles.rowTitle}>Notifications</Text>
-              <Text style={styles.rowSub}>Push {'\u00B7'} SMS</Text>
-            </View>
-            <Switch
-              value={notifOn}
-              onValueChange={setNotifOn}
-              trackColor={{ false: '#2A2A42', true: '#00E5A0' }}
-              thumbColor="#fff"
-              ios_backgroundColor="#2A2A42"
-            />
+          {/* Verified pill */}
+          <View style={styles.verifiedPill}>
+            <Ionicons name="shield-checkmark" size={13} color="#38BDF8" />
+            <Text style={styles.verifiedText}>Verified · Phone, ID, Address</Text>
           </View>
         </View>
 
-        {/* Support */}
-        <Text style={styles.sectionLabel}>Support</Text>
-        <View style={styles.card}>
-          <TouchableOpacity style={[styles.row, styles.rowLast]} activeOpacity={0.7}>
-            <View style={[styles.rowIcon, { backgroundColor: '#2A2A42' }]}>
-              <Ionicons name="chatbubble-ellipses-outline" size={18} color="rgba(255,255,245,0.6)" />
-            </View>
-            <View style={styles.rowBody}>
-              <Text style={styles.rowTitle}>Help & Support</Text>
-              <Text style={styles.rowSub}>Avg. response &lt;3 mins</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,245,0.4)" />
-          </TouchableOpacity>
+        {/* Lifetime stats card */}
+        <View style={styles.statsRow}>
+          <Stat label="Total sent" value={`$${userProfile.totalSent.toLocaleString()}`} emphasis />
+          <View style={styles.statDivider} />
+          <Stat label="Transfers" value={String(userProfile.totalTransfers)} />
+          <View style={styles.statDivider} />
+          <Stat label="Member" value="Nov '25" />
         </View>
 
-        {/* Log Out */}
-        <CTAButton
-          title="Log Out"
-          onPress={handleLogout}
-          danger
-          style={styles.logoutBtn}
-        />
+        {/* Account section */}
+        <Text style={styles.sectionLabel}>Account</Text>
+        <View style={styles.linksCard}>
+          <LinkRow
+            icon="person"
+            label="Personal info"
+            sub={displayPhone || 'Add your details'}
+            onPress={() => stub('Personal info')}
+          />
+          <Divider />
+          <LinkRow
+            icon="card"
+            label="Wallets & cards"
+            sub="Linked payout sources"
+            onPress={() => stub('Wallets & cards')}
+          />
+          <Divider />
+          <LinkRow
+            icon="people"
+            label="Recipients"
+            sub="Saved beneficiaries"
+            onPress={() => stub('Recipients')}
+          />
+        </View>
 
-        <Text style={styles.versionText}>Qupay v1.0.0</Text>
-        <View style={{ height: 20 }} />
+        {/* Security section */}
+        <Text style={styles.sectionLabel}>Security</Text>
+        <View style={styles.linksCard}>
+          <LinkRow
+            icon="lock-closed"
+            label="Transaction PIN"
+            sub="Change your 4-digit PIN"
+            onPress={goPinReset}
+          />
+          <Divider />
+          <LinkRow
+            icon="shield-checkmark"
+            label="Biometrics"
+            sub="Face ID for quick approvals"
+            rightSwitch={{ value: biometricOn, onChange: setBiometricOn }}
+          />
+          <Divider />
+          <LinkRow
+            icon="notifications"
+            label="Notifications"
+            sub="Push · SMS"
+            rightSwitch={{ value: notifOn, onChange: setNotifOn }}
+          />
+        </View>
+
+        {/* Preferences section */}
+        <Text style={styles.sectionLabel}>Preferences</Text>
+        <View style={styles.linksCard}>
+          <LinkRow
+            icon="options"
+            label="Currency & language"
+            sub="USD · English"
+            onPress={() => stub('Currency & language')}
+          />
+          <Divider />
+          <LinkRow
+            icon="trending-up"
+            label="Rate alerts"
+            sub="Get notified when your target hits"
+            onPress={() => stub('Rate alerts')}
+          />
+          <Divider />
+          <LinkRow
+            icon="gift"
+            label="Invite friends"
+            sub="Earn $5 when they send their first transfer"
+            onPress={() => stub('Invite friends')}
+          />
+        </View>
+
+        {/* Support section */}
+        <Text style={styles.sectionLabel}>Support</Text>
+        <View style={styles.linksCard}>
+          <LinkRow
+            icon="chatbubble-ellipses"
+            label="Help & support"
+            sub="Avg. response < 3 mins"
+            onPress={() => stub('Help & support')}
+          />
+          <Divider />
+          <LinkRow
+            icon="help-circle"
+            label="FAQs"
+            sub="Common questions"
+            onPress={() => stub('FAQs')}
+          />
+        </View>
+
+        {/* Sign out pill */}
+        <TouchableOpacity
+          style={styles.signOutBtn}
+          activeOpacity={0.7}
+          onPress={handleLogout}
+        >
+          <Ionicons name="log-out" size={18} color="#EF4444" />
+          <Text style={styles.signOutText}>Sign out</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.versionText}>Qupay · v1.0 · Built non-custodially</Text>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
-  scroll: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 18,
-    paddingBottom: 4,
-  },
-  heroWrap: {
-    marginHorizontal: 24,
-    marginTop: 8,
-    marginBottom: 20,
-    borderRadius: 20,
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
+  glow: { position: 'absolute', top: 0, left: 0, right: 0, height: 360 },
+
+  // Identity hero
+  identity: { alignItems: 'center', paddingTop: 24, paddingBottom: 20 },
+  bigAvatar: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(0,229,160,0.12)',
   },
-  hero: { padding: 22 },
-  phTop: {
+  name: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 26,
+    color: '#FFFFFF',
+    marginTop: 16,
+    letterSpacing: -0.3,
+  },
+  handle: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 14,
+    color: '#38BDF8',
+    marginTop: 4,
+  },
+  email: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.58)',
+    marginTop: 2,
+  },
+  verifiedPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    marginBottom: 18,
+    gap: 5,
+    backgroundColor: 'rgba(56,189,248,0.12)',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginTop: 12,
   },
-  phInfo: { flex: 1 },
-  phName: {
-    fontFamily: 'Inter_800ExtraBold',
-    fontSize: 19,
-    letterSpacing: -0.3,
-    color: '#FFFFF5',
-  },
-  phEmail: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: 'rgba(255,255,245,0.6)',
-    marginTop: 2,
-  },
-  phPhone: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: 'rgba(255,255,245,0.4)',
-    marginTop: 1,
-  },
-  phStats: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,245,0.06)',
-    paddingTop: 14,
-  },
-  phStat: { flex: 1, alignItems: 'center' },
-  phStatDivider: {
-    width: 1,
-    backgroundColor: 'rgba(255,255,245,0.06)',
-  },
-  phVal: {
-    fontFamily: 'Inter_800ExtraBold',
-    fontSize: 17,
-    color: '#FFFFF5',
-  },
-  phValGreen: { color: '#00E5A0' },
-  phLabel: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 9,
-    color: 'rgba(255,255,245,0.6)',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    marginTop: 2,
-  },
-  sectionLabel: {
+  verifiedText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    color: 'rgba(255,255,245,0.6)',
-    marginHorizontal: 24,
-    marginBottom: 10,
+    color: '#38BDF8',
   },
-  card: {
-    marginHorizontal: 24,
-    marginBottom: 16,
-    backgroundColor: '#222236',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
-    borderRadius: 20,
-    overflow: 'hidden',
+
+  // Lifetime stats
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#17171A',
+    borderRadius: 16,
+    paddingVertical: 16,
+    marginHorizontal: 20,
+    marginTop: 8,
   },
-  row: {
+  stat: { flex: 1, alignItems: 'center' },
+  statDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  statValue: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 18,
+    color: '#FFFFFF',
+  },
+  statValueEmphasis: { color: '#38BDF8' },
+  statLabel: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.58)',
+    marginTop: 4,
+  },
+
+  // Section headers
+  sectionLabel: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.58)',
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 8,
+  },
+
+  // Link cards
+  linksCard: {
+    backgroundColor: '#17171A',
+    borderRadius: 16,
+    marginHorizontal: 20,
+    paddingHorizontal: 12,
+  },
+  link: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,245,0.08)',
+    paddingVertical: 12,
   },
-  rowLast: { borderBottomWidth: 0 },
-  rowIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 13,
+  linkIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(56,189,248,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rowBody: { flex: 1 },
-  rowTitle: {
-    fontFamily: 'Inter_500Medium',
+  linkLabel: {
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
   },
-  rowSub: {
+  linkSub: {
     fontFamily: 'Inter_400Regular',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.6)',
-    marginTop: 1,
+    color: 'rgba(255,255,255,0.58)',
+    marginTop: 2,
   },
-  logoutBtn: {
-    marginHorizontal: 24,
-    marginTop: 4,
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    marginLeft: 48,
+  },
+
+  // Sign out
+  signOutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(239,68,68,0.08)',
+    borderRadius: 999,
+    paddingVertical: 14,
+    marginHorizontal: 20,
+    marginTop: 24,
+  },
+  signOutText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: '#EF4444',
   },
   versionText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.2)',
+    color: 'rgba(255,255,255,0.42)',
     textAlign: 'center',
-    paddingVertical: 12,
+    marginTop: 16,
   },
 });

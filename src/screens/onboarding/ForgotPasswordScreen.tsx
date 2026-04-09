@@ -93,28 +93,28 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 20 },
   form: { paddingHorizontal: 28, paddingTop: 36 },
   headline: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 26,
     letterSpacing: -0.3,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     marginBottom: 8,
     lineHeight: 31,
   },
-  greenText: { color: '#00E5A0' },
+  greenText: { color: '#38BDF8' },
   desc: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
     lineHeight: 21,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginBottom: 24,
   },
   bottomArea: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 12,
     gap: 12,
   },

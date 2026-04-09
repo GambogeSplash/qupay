@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from './Icon';
 
 interface FormFieldProps extends TextInputProps {
   label?: string;
@@ -35,7 +35,7 @@ export const FormField: React.FC<FormFieldProps> = ({
       >
         <TextInput
           style={[styles.input, style]}
-          placeholderTextColor="rgba(255,255,245,0.4)"
+          placeholderTextColor="rgba(255,255,255,0.4)"
           onFocus={(e) => {
             setFocused(true);
             inputProps.onFocus?.(e);
@@ -47,10 +47,10 @@ export const FormField: React.FC<FormFieldProps> = ({
           {...inputProps}
         />
         {isValid && showCheck && !rightIcon && !hasError && (
-          <Ionicons name="checkmark" size={16} color="#00E5A0" />
+          <Ionicons name="checkmark" size={16} color="#38BDF8" />
         )}
         {hasError && !rightIcon && (
-          <Ionicons name="alert-circle" size={16} color="#FF6B6B" />
+          <Ionicons name="alert-circle" size={16} color="#EF4444" />
         )}
         {rightIcon}
       </View>
@@ -65,25 +65,27 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginBottom: 8,
   },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#222236',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,245,0.08)',
-    borderRadius: 12,
+    backgroundColor: '#1F1F23', // P.cardInner
+    // Local inputs sit on dark surfaces with no visible border by default —
+    // borders only appear on focus / validation states
+    borderWidth: 1,
+    borderColor: 'transparent',
+    borderRadius: 12, // R.md
     paddingHorizontal: 16,
     gap: 8,
     marginBottom: 4,
   },
   fieldFocused: {
-    borderColor: 'rgba(0,229,160,0.4)',
+    borderColor: 'rgba(56,189,248,0.4)',
   },
   fieldValid: {
-    borderColor: 'rgba(0,229,160,0.5)',
+    borderColor: 'rgba(56,189,248,0.5)',
   },
   fieldError: {
     borderColor: 'rgba(255,107,107,0.6)',
@@ -92,13 +94,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'Inter_500Medium',
     fontSize: 16,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     paddingVertical: 14,
   },
   errorText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: '#FF6B6B',
+    color: '#EF4444',
     marginBottom: 12,
     marginTop: 2,
   },

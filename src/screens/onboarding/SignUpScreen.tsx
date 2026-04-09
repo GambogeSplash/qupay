@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/Icon';
 import { QupayLogo, CTAButton, FormField, BottomSheet, Toast } from '../../components';
 import { countries } from '../../data/mockData';
 import { initiateRegistration } from '../../api/auth';
@@ -194,7 +194,7 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             >
               <Text style={styles.prefixFlag}>{selectedCountry.flag}</Text>
               <Text style={styles.prefixCode}>{selectedCountry.code}</Text>
-              <Ionicons name="chevron-down" size={12} color="rgba(255,255,245,0.4)" />
+              <Ionicons name="chevron-down" size={12} color="rgba(255,255,255,0.4)" />
             </TouchableOpacity>
             <View
               style={[
@@ -207,7 +207,7 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
               <TextInput
                 style={styles.phoneInput}
                 placeholder="Enter number"
-                placeholderTextColor="rgba(255,255,245,0.4)"
+                placeholderTextColor="rgba(255,255,255,0.4)"
                 keyboardType="phone-pad"
                 value={phone}
                 onChangeText={(text) => {
@@ -223,10 +223,10 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
                 accessibilityLabel="Phone number"
               />
               {phoneValid && !getFieldError('phone') && (
-                <Ionicons name="checkmark" size={16} color="#00E5A0" />
+                <Ionicons name="checkmark" size={16} color="#38BDF8" />
               )}
               {getFieldError('phone') && (
-                <Ionicons name="alert-circle" size={16} color="#FF6B6B" />
+                <Ionicons name="alert-circle" size={16} color="#EF4444" />
               )}
             </View>
           </View>
@@ -249,7 +249,7 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             accessibilityLabel="Password"
             rightIcon={
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="rgba(255,255,245,0.4)" />
+                <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="rgba(255,255,255,0.4)" />
               </TouchableOpacity>
             }
           />
@@ -269,7 +269,7 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             accessibilityLabel="Confirm password"
             rightIcon={
               <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Ionicons name={showConfirmPassword ? "eye-off" : "eye"} size={20} color="rgba(255,255,245,0.4)" />
+                <Ionicons name={showConfirmPassword ? "eye-off" : "eye"} size={20} color="rgba(255,255,255,0.4)" />
               </TouchableOpacity>
             }
           />
@@ -323,7 +323,7 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.countrySub}>{c.reg} {'\u00B7'} {c.code}</Text>
             </View>
             {selectedCountry.code === c.code && (
-              <Ionicons name="checkmark" size={18} color="#00E5A0" />
+              <Ionicons name="checkmark" size={18} color="#38BDF8" />
             )}
           </TouchableOpacity>
         ))}
@@ -334,24 +334,24 @@ export const SignUpScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 20 },
   form: { paddingHorizontal: 28, paddingTop: 36 },
   headline: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 26,
     letterSpacing: -0.3,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     marginBottom: 8,
     lineHeight: 31,
   },
-  greenText: { color: '#00E5A0' },
+  greenText: { color: '#38BDF8' },
   desc: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
     lineHeight: 21,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginBottom: 24,
   },
   nameRow: {
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 0.8,
     textTransform: 'uppercase',
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginBottom: 8,
   },
   phoneGroup: {
@@ -378,9 +378,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#222236',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,245,0.08)',
+    backgroundColor: '#1F1F23',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     paddingHorizontal: 14,
   },
@@ -388,24 +388,24 @@ const styles = StyleSheet.create({
   prefixCode: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
   },
   phoneField: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#222236',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,245,0.08)',
+    backgroundColor: '#1F1F23',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     paddingHorizontal: 16,
     gap: 8,
   },
   phoneFieldFocused: {
-    borderColor: 'rgba(0,229,160,0.4)',
+    borderColor: 'rgba(56,189,248,0.4)',
   },
   phoneFieldOk: {
-    borderColor: 'rgba(0,229,160,0.5)',
+    borderColor: 'rgba(56,189,248,0.5)',
   },
   phoneFieldError: {
     borderColor: 'rgba(255,107,107,0.6)',
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
   phoneError: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: '#FF6B6B',
+    color: '#EF4444',
     marginBottom: 12,
     marginTop: -6,
   },
@@ -421,35 +421,35 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'Inter_500Medium',
     fontSize: 16,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     paddingVertical: 14,
     letterSpacing: 1,
   },
   bottomArea: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 12,
   },
   cta: { marginBottom: 12 },
   termsText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',
     paddingBottom: 8,
   },
   termsLink: {
-    color: '#00E5A0',
+    color: '#38BDF8',
     fontFamily: 'Inter_600SemiBold',
   },
   switchText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',
     marginTop: 16,
   },
   switchLink: {
-    color: '#00E5A0',
+    color: '#38BDF8',
     fontFamily: 'Inter_600SemiBold',
   },
   countryItem: {
@@ -457,24 +457,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
     paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,245,0.08)',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
   },
   countryItemSel: {
-    backgroundColor: 'rgba(0,229,160,0.08)',
+    backgroundColor: 'rgba(56,189,248,0.08)',
   },
   countryFlag: { fontSize: 24 },
   countryInfo: { flex: 1 },
   countryName: {
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
   },
   countrySub: {
     fontFamily: 'Inter_400Regular',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginTop: 1,
   },
 });

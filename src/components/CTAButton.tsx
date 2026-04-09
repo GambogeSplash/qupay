@@ -7,7 +7,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { shadows } from '../theme/spacing';
+// shadows intentionally not imported — local CTAs don't use a glow.
 
 interface CTAButtonProps {
   title: string;
@@ -58,7 +58,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
         accessibilityState={{ disabled: disabled || loading }}
       >
         {loading ? (
-          <ActivityIndicator size="small" color="rgba(255,255,245,0.6)" />
+          <ActivityIndicator size="small" color="rgba(255,255,255,0.6)" />
         ) : (
           <Text style={[styles.ghostText, textStyle]}>{title}</Text>
         )}
@@ -68,7 +68,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
 
   return (
     <TouchableOpacity
-      style={[styles.cta, shadows.ctaGlow, disabled && styles.disabled, style]}
+      style={[styles.cta, disabled && styles.disabled, style]}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.85}
@@ -77,7 +77,7 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
       accessibilityState={{ disabled: disabled || loading }}
     >
       {loading ? (
-        <ActivityIndicator size="small" color="#060a07" />
+        <ActivityIndicator size="small" color="#0A0A0C" />
       ) : (
         <Text style={[styles.ctaText, textStyle]}>{title}</Text>
       )}
@@ -87,9 +87,9 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
 
 const styles = StyleSheet.create({
   cta: {
-    backgroundColor: '#00E5A0',
-    borderRadius: 16,
-    paddingVertical: 17,
+    backgroundColor: '#38BDF8',
+    borderRadius: 999, // local CTAs are pill-shaped (R.pill)
+    paddingVertical: 16,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
@@ -97,41 +97,40 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   ctaText: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_600SemiBold', // T.ctaPurple — semibold, not extraBold
     fontSize: 16,
-    color: '#060a07',
+    color: '#0A0A0C',
   },
   ghost: {
-    backgroundColor: '#222236',
-    borderRadius: 16,
-    paddingVertical: 17,
+    backgroundColor: '#1F1F23', // P.cardInner
+    borderRadius: 999,
+    paddingVertical: 16,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
+    // No border on dark surfaces in local design
   },
   ghostText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 14,
-    color: 'rgba(255,255,245,0.6)',
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.58)',
   },
   danger: {
-    backgroundColor: 'rgba(255,77,106,0.1)',
-    borderRadius: 14,
+    backgroundColor: 'rgba(239,68,68,0.1)',
+    borderRadius: 999,
     paddingVertical: 15,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,77,106,0.25)',
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.25)',
     flexDirection: 'row',
     gap: 8,
   },
   dangerText: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 15,
-    color: '#FF4D6A',
+    color: '#EF4444',
   },
   disabled: {
     opacity: 0.4,

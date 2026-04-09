@@ -115,28 +115,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
   },
   sheet: {
-    backgroundColor: '#19192A',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
-    borderBottomWidth: 0,
+    backgroundColor: '#17171A', // P.card
+    borderTopLeftRadius: 24,    // R.xxl in local
+    borderTopRightRadius: 24,
+    // No border on dark surfaces
     maxHeight: '88%',
   },
   handle: {
     width: 36,
     height: 4,
-    backgroundColor: 'rgba(255,255,245,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.2)', // P.sheetHandle
     borderRadius: 2,
     alignSelf: 'center',
     marginTop: 12,
   },
   title: {
-    fontFamily: 'Inter_800ExtraBold',
-    fontSize: 18,
-    color: '#FFFFF5',
-    paddingHorizontal: 24,
-    paddingTop: 16,
+    fontFamily: 'Inter_700Bold',
+    fontSize: 22, // T.screenTitle / sectionTitle
+    color: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingTop: 20,
     paddingBottom: 12,
   },
   content: {

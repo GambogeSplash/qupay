@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/Icon';
 import { QupayLogo, CTAButton, FormField } from '../../components';
 import { login, getProfile } from '../../api/auth';
 import { isApiError } from '../../api/client';
@@ -101,7 +101,7 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
             accessibilityLabel="Password"
             rightIcon={
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="rgba(255,255,245,0.4)" />
+                <Ionicons name={showPassword ? "eye-off" : "eye"} size={20} color="rgba(255,255,255,0.4)" />
               </TouchableOpacity>
             }
           />
@@ -138,24 +138,24 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 20 },
   form: { paddingHorizontal: 28, paddingTop: 36 },
   headline: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 26,
     letterSpacing: -0.3,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     marginBottom: 8,
     lineHeight: 31,
   },
-  greenText: { color: '#00E5A0' },
+  greenText: { color: '#38BDF8' },
   desc: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
     lineHeight: 21,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginBottom: 24,
   },
   forgotBtn: {
@@ -166,23 +166,23 @@ const styles = StyleSheet.create({
   forgotText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 13,
-    color: '#00E5A0',
+    color: '#38BDF8',
   },
   bottomArea: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 12,
   },
   cta: { marginBottom: 12 },
   switchText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',
     marginTop: 8,
     paddingBottom: 8,
   },
   switchLink: {
-    color: '#00E5A0',
+    color: '#38BDF8',
     fontFamily: 'Inter_600SemiBold',
   },
 });

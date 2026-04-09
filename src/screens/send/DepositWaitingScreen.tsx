@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/Icon';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { SendFlowParamList } from '../../navigation/AppNavigator';
@@ -156,9 +156,9 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
             )}
             <View style={[styles.scanIcon, detected && styles.scanIconDone]}>
               {detected ? (
-                <Ionicons name="checkmark" size={32} color="#00E5A0" />
+                <Ionicons name="checkmark" size={32} color="#38BDF8" />
               ) : (
-                <Ionicons name={isCryptoOut ? 'card-outline' : 'radio-outline'} size={32} color="#00E5A0" />
+                <Ionicons name={isCryptoOut ? 'card-outline' : 'radio-outline'} size={32} color="#38BDF8" />
               )}
             </View>
           </View>
@@ -193,7 +193,7 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
                   step.state === 'done' && styles.stepDotDone,
                 ]}>
                   {step.state === 'done' && (
-                    <Ionicons name="checkmark" size={12} color="#111118" />
+                    <Ionicons name="checkmark" size={12} color="#0A0A0C" />
                   )}
                   {step.state === 'active' && (
                     <View style={styles.stepDotPulse} />
@@ -230,61 +230,61 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   container: { flex: 1, justifyContent: 'space-between' },
-  top: { alignItems: 'center', paddingTop: 48, paddingHorizontal: 24 },
+  top: { alignItems: 'center', paddingTop: 48, paddingHorizontal: 20 },
   scanWrap: { width: 100, height: 100, alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
   pulseRing: {
     position: 'absolute', width: 100, height: 100, borderRadius: 50,
-    borderWidth: 2, borderColor: '#00E5A0',
+    borderWidth: 1, borderColor: '#38BDF8',
   },
   scanIcon: {
     width: 72, height: 72, borderRadius: 36,
-    backgroundColor: 'rgba(0,229,160,0.08)', borderWidth: 2, borderColor: 'rgba(0,229,160,0.3)',
+    backgroundColor: 'rgba(56,189,248,0.08)', borderWidth: 1, borderColor: 'rgba(56,189,248,0.3)',
     alignItems: 'center', justifyContent: 'center',
   },
   scanIconDone: {
-    backgroundColor: 'rgba(0,229,160,0.15)', borderColor: '#00E5A0',
+    backgroundColor: 'rgba(56,189,248,0.15)', borderColor: '#38BDF8',
   },
   title: {
-    fontFamily: 'Inter_800ExtraBold', fontSize: 22, letterSpacing: -0.3,
-    color: '#FFFFF5', marginBottom: 6,
+    fontFamily: 'Inter_700Bold', fontSize: 22, letterSpacing: -0.3,
+    color: '#FFFFFF', marginBottom: 6,
   },
   subtitle: {
-    fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,245,0.6)',
+    fontFamily: 'Inter_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.6)',
     textAlign: 'center', lineHeight: 20, marginBottom: 16,
   },
   amountBadge: {
-    backgroundColor: 'rgba(0,229,160,0.07)', borderWidth: 1, borderColor: 'rgba(0,229,160,0.15)',
+    backgroundColor: 'rgba(56,189,248,0.07)', borderWidth: 1, borderColor: 'rgba(56,189,248,0.15)',
     borderRadius: 20, paddingVertical: 8, paddingHorizontal: 18,
   },
-  amountBadgeText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#00E5A0' },
+  amountBadgeText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#38BDF8' },
   timeline: { paddingHorizontal: 32, paddingVertical: 8 },
   timelineStep: { position: 'relative' },
   connector: {
     position: 'absolute', left: 10, top: -8, width: 2, height: 16,
-    backgroundColor: 'rgba(255,255,245,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
-  connectorActive: { backgroundColor: 'rgba(0,229,160,0.4)' },
+  connectorActive: { backgroundColor: 'rgba(56,189,248,0.4)' },
   stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, paddingVertical: 10 },
   stepDot: {
     width: 22, height: 22, borderRadius: 11, marginTop: 1,
-    borderWidth: 2, borderColor: 'rgba(255,255,245,0.1)', backgroundColor: 'transparent',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'transparent',
     alignItems: 'center', justifyContent: 'center',
   },
-  stepDotActive: { borderColor: '#00E5A0', backgroundColor: 'rgba(0,229,160,0.12)' },
-  stepDotDone: { borderColor: '#00E5A0', backgroundColor: '#00E5A0' },
-  stepDotPulse: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#00E5A0' },
+  stepDotActive: { borderColor: '#38BDF8', backgroundColor: 'rgba(56,189,248,0.12)' },
+  stepDotDone: { borderColor: '#38BDF8', backgroundColor: '#38BDF8' },
+  stepDotPulse: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#38BDF8' },
   stepText: { flex: 1 },
   stepLabel: {
-    fontFamily: 'Inter_500Medium', fontSize: 14, color: 'rgba(255,255,245,0.3)',
+    fontFamily: 'Inter_500Medium', fontSize: 14, color: 'rgba(255,255,255,0.3)',
   },
-  stepLabelActive: { color: '#FFFFF5', fontFamily: 'Inter_600SemiBold' },
-  stepLabelDone: { color: '#00E5A0', fontFamily: 'Inter_600SemiBold' },
-  stepDesc: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,245,0.4)', marginTop: 2 },
-  bottom: { paddingHorizontal: 24, paddingBottom: 36 },
+  stepLabelActive: { color: '#FFFFFF', fontFamily: 'Inter_600SemiBold' },
+  stepLabelDone: { color: '#38BDF8', fontFamily: 'Inter_600SemiBold' },
+  stepDesc: { fontFamily: 'Inter_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
+  bottom: { paddingHorizontal: 20, paddingBottom: 36 },
   bottomNote: {
-    fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,245,0.35)',
+    fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.35)',
     textAlign: 'center', lineHeight: 18,
   },
 });

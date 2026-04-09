@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/Icon';
 import { CTAButton } from '../../components';
 import { userProfile } from '../../data/mockData';
 import { CommonActions } from '@react-navigation/native';
@@ -81,7 +81,7 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
         <View style={styles.content}>
           {/* Success icon */}
           <Animated.View style={[styles.sucIcon, { transform: [{ scale: iconScale }] }]}>
-            <Ionicons name="checkmark" size={32} color="#00E5A0" />
+            <Ionicons name="checkmark" size={32} color="#38BDF8" />
           </Animated.View>
 
           <Animated.View style={{ opacity: contentOpacity, alignItems: 'center', alignSelf: 'stretch' }}>
@@ -96,7 +96,7 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
             /* On-chain confirmation card for crypto-out */
             <View style={styles.cryptoCard}>
               <View style={styles.cryptoIcon}>
-                <Ionicons name="checkmark-circle" size={20} color="#00E5A0" />
+                <Ionicons name="checkmark-circle" size={20} color="#38BDF8" />
               </View>
               <View style={styles.cryptoBody}>
                 <Text style={styles.cryptoTitle}>Transaction confirmed</Text>
@@ -108,7 +108,7 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
                   <Text style={styles.cryptoAddr}>{truncateAddress(recipientWalletAddress || '')}</Text>
                 </View>
                 <View style={styles.cryptoTag}>
-                  <Ionicons name="checkmark" size={10} color="#00E5A0" />
+                  <Ionicons name="checkmark" size={10} color="#38BDF8" />
                   <Text style={styles.cryptoTagText}>On-chain confirmed</Text>
                 </View>
               </View>
@@ -160,42 +160,42 @@ export const SuccessScreen: React.FC<Props> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   container: { flex: 1, justifyContent: 'center' },
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     alignItems: 'center',
   },
   sucIcon: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(0,229,160,0.12)',
-    borderWidth: 2,
-    borderColor: '#00E5A0',
+    backgroundColor: 'rgba(56,189,248,0.12)',
+    borderWidth: 1,
+    borderColor: '#38BDF8',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
   },
   sucTitle: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 26,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     marginBottom: 8,
   },
   sucSub: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     lineHeight: 21,
     textAlign: 'center',
     marginBottom: 24,
   },
   // Crypto confirmation card
   cryptoCard: {
-    backgroundColor: '#222236',
+    backgroundColor: '#1F1F23',
     borderWidth: 1,
-    borderColor: 'rgba(0,229,160,0.2)',
+    borderColor: 'rgba(56,189,248,0.2)',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: 'rgba(0,229,160,0.12)',
+    backgroundColor: 'rgba(56,189,248,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -216,12 +216,12 @@ const styles = StyleSheet.create({
   cryptoTitle: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
   },
   cryptoMsg: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginTop: 2,
     lineHeight: 18,
   },
@@ -234,12 +234,12 @@ const styles = StyleSheet.create({
   cryptoAddrLabel: {
     fontFamily: 'Inter_500Medium',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.4)',
+    color: 'rgba(255,255,255,0.4)',
   },
   cryptoAddr: {
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     fontSize: 11,
-    color: '#00E5A0',
+    color: '#38BDF8',
   },
   cryptoTag: {
     flexDirection: 'row',
@@ -250,13 +250,13 @@ const styles = StyleSheet.create({
   cryptoTagText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 10,
-    color: '#00E5A0',
+    color: '#38BDF8',
   },
   // Fiat notification card
   notifCard: {
-    backgroundColor: '#222236',
+    backgroundColor: '#1F1F23',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
+    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -278,12 +278,12 @@ const styles = StyleSheet.create({
   notifTitle: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
   },
   notifMsg: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginTop: 2,
     lineHeight: 18,
   },
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   sendAgainText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
-    color: '#00E5A0',
+    color: '#38BDF8',
     textAlign: 'center',
   },
 });

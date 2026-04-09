@@ -1,380 +1,468 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+// TransactionDetailScreen — heavily influenced by /qupay/src/screens/remittance/ReceiptScreen.tsx
+// Local Receipt layout: soft mint glow, hero check circle, 42pt amount,
+// recipient summary card, details card with row/divider pattern, quick actions
+// card with icon-circle rows, two-CTA footer (primary mint pill + ghost pill).
+// Status-aware: delivered = mint, pending = blue, failed = red, disputed = yellow.
+import React from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { ScreenHeader, StatusBadge, GradientAvatar, CTAButton } from '../../components';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '../../components/Icon';
+import { Avatar, BankLogo, CryptoIcon } from '../../components';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { HistoryStackParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<HistoryStackParamList, 'TransferDetail'>;
-
 type TransferStatus = 'delivered' | 'pending' | 'failed' | 'disputed';
 
-const getStatusConfig = (status: TransferStatus) => {
-  switch (status) {
-    case 'delivered':
-      return { label: 'Delivered', variant: 'green' as const, icon: 'checkmark', iconColor: '#00E5A0', iconBg: 'rgba(0,229,160,0.12)', iconBorder: '#00E5A0' };
-    case 'pending':
-      return { label: 'Pending', variant: 'yellow' as const, icon: 'time-outline', iconColor: '#FFD460', iconBg: 'rgba(255,212,96,0.12)', iconBorder: '#FFD460' };
-    case 'failed':
-      return { label: 'Failed', variant: 'red' as const, icon: 'close', iconColor: '#FF4D6A', iconBg: 'rgba(255,77,106,0.1)', iconBorder: '#FF4D6A' };
-    case 'disputed':
-      return { label: 'Disputed', variant: 'yellow' as const, icon: 'alert-outline', iconColor: '#FFD460', iconBg: 'rgba(255,212,96,0.12)', iconBorder: '#FFD460' };
-  }
+interface StatusConfig {
+  label: string;
+  color: string;
+  glow: [string, string];
+  icon: string;
+  showSendAgain: boolean;
+}
+
+const STATUS: Record<TransferStatus, StatusConfig> = {
+  delivered: {
+    label: 'Delivered',
+    color: '#38BDF8',
+    glow: ['rgba(56,189,248,0.18)', 'rgba(56,189,248,0)'],
+    icon: 'checkmark',
+    showSendAgain: true,
+  },
+  pending: {
+    label: 'In progress',
+    color: '#38BDF8',
+    glow: ['rgba(56,189,248,0.18)', 'rgba(56,189,248,0)'],
+    icon: 'time',
+    showSendAgain: false,
+  },
+  failed: {
+    label: 'Refunded',
+    color: '#EF4444',
+    glow: ['rgba(239,68,68,0.18)', 'rgba(239,68,68,0)'],
+    icon: 'close',
+    showSendAgain: false,
+  },
+  disputed: {
+    label: 'Disputed',
+    color: '#FFD60A',
+    glow: ['rgba(255,214,10,0.18)', 'rgba(255,214,10,0)'],
+    icon: 'alert-circle',
+    showSendAgain: false,
+  },
 };
+
+const Row: React.FC<{ label: string; value: string; mono?: boolean; emphasis?: boolean }> = ({
+  label,
+  value,
+  mono,
+  emphasis,
+}) => (
+  <View style={styles.row}>
+    <Text style={styles.rowLabel}>{label}</Text>
+    <Text
+      style={[
+        styles.rowValue,
+        mono && styles.rowValueMono,
+        emphasis && styles.rowValueEmphasis,
+      ]}
+    >
+      {value}
+    </Text>
+  </View>
+);
+
+const Divider: React.FC = () => <View style={styles.divider} />;
+
+const ActionRow: React.FC<{
+  icon: string;
+  label: string;
+  sub: string;
+  onPress: () => void;
+}> = ({ icon, label, sub, onPress }) => (
+  <TouchableOpacity style={styles.actionRow} activeOpacity={0.6} onPress={onPress}>
+    <View style={styles.actionIcon}>
+      <Ionicons name={icon} size={18} color="#38BDF8" />
+    </View>
+    <View style={{ flex: 1 }}>
+      <Text style={styles.actionLabel}>{label}</Text>
+      <Text style={styles.actionSub}>{sub}</Text>
+    </View>
+    <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.42)" />
+  </TouchableOpacity>
+);
 
 export const TransactionDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const status = (route.params?.status as TransferStatus) || 'delivered';
-  const config = getStatusConfig(status);
-  const [showDispute, setShowDispute] = useState(false);
+  const config = STATUS[status];
+
+  // Mock data — kept consistent with HistoryScreen seed
+  const recipientName = 'Emeka Johnson';
+  const firstName = recipientName.split(' ')[0];
+  const method = 'OPay';
+  const country = 'Nigeria';
+  const phone = '0812 456 7890';
+
+  const sendAgain = () => navigation.goBack();
+  const goHome = () => navigation.goBack();
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScreenHeader
-        title="Transfer"
-        onBack={() => navigation.goBack()}
-        right={<StatusBadge label={config.label} variant={config.variant} />}
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      {/* Soft glow on hero */}
+      <LinearGradient
+        pointerEvents="none"
+        colors={config.glow}
+        style={styles.glow}
       />
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Status band */}
-        <View style={styles.statusBand}>
-          <View style={[styles.statusIcon, { backgroundColor: config.iconBg, borderColor: config.iconBorder }]}>
-            <Ionicons name={config.icon as keyof typeof Ionicons.glyphMap} size={28} color={config.iconColor} />
+
+      {/* Header bar — close X only, no back arrow */}
+      <View style={styles.headerBar}>
+        <View style={styles.iconBtn} />
+        <Text style={styles.headerTitle}>Receipt</Text>
+        <TouchableOpacity style={styles.iconBtn} onPress={goHome} activeOpacity={0.7}>
+          <Ionicons name="close" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+        {/* Hero — big check circle, label, amount, sub */}
+        <View style={styles.hero}>
+          <View style={[styles.checkCircle, { backgroundColor: config.color + '22' }]}>
+            <Ionicons name={config.icon} size={48} color={config.color} />
           </View>
-          <Text style={[styles.statusLabel, { color: config.iconColor }]}>
-            {config.label.toUpperCase()}
-          </Text>
-          <Text style={styles.tdAmount}>{'\u20A6'}329,000</Text>
-          <Text style={styles.tdRecv}>200 USDT sent {'\u00B7'} 4 mins 11 secs</Text>
-          <View style={styles.tdCorridor}>
-            <Text style={styles.tdCorridorText}>
-              {'\u{1F1F8}\u{1F1EC}'} {'\u2192'} {'\u{1F1F3}\u{1F1EC}'} Singapore {'\u2192'} Nigeria
+          <Text style={[styles.heroLabel, { color: config.color }]}>{config.label}</Text>
+          <Text style={styles.heroAmount}>{'\u20A6'}329,000</Text>
+          <Text style={styles.heroSub}>to {recipientName}</Text>
+        </View>
+
+        {/* Recipient summary card with status pill on the right */}
+        <View style={styles.recipientCard}>
+          <Avatar seed={recipientName} initials="EJ" size={44} bankBadge={method} />
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={styles.recipientName}>{recipientName}</Text>
+            <Text style={styles.recipientSub}>
+              {method} {'\u00B7'} {country}
             </Text>
           </View>
-        </View>
-
-        {/* Action row */}
-        <View style={styles.actionRow}>
-          {['Save', 'WhatsApp', 'Copy link', 'PDF'].map((label) => (
-            <TouchableOpacity key={label} style={styles.actionBtn} activeOpacity={0.7}>
-              <Text style={styles.actionIcon}>
-                {label === 'Save' ? '\u{1F4BE}' : label === 'WhatsApp' ? '\u{1F4AC}' : label === 'Copy link' ? '\u{1F517}' : '\u{1F4C4}'}
-              </Text>
-              <Text style={styles.actionLabel}>{label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* No account note */}
-        <View style={styles.noAcctBand}>
-          <Text style={styles.noAcctIcon}>{'\u2139\uFE0F'}</Text>
-          <View style={styles.noAcctTextWrap}>
-            <Text style={styles.noAcctTitle}>Emeka doesn't have a Qupay account</Text>
-            <Text style={styles.noAcctBody}>
-              That's fine — they received a standard OPay credit directly to their mobile wallet. No Qupay account needed.
-            </Text>
+          <View style={[styles.statusPill, { backgroundColor: config.color + '22' }]}>
+            <View style={[styles.statusDot, { backgroundColor: config.color }]} />
+            <Text style={[styles.statusPillText, { color: config.color }]}>{config.label}</Text>
           </View>
         </View>
 
-        {/* Receipt card */}
-        <View style={styles.receiptCard}>
-          <View style={styles.receiptHeader}>
-            <GradientAvatar initials="EJ" size={40} colors={['#1a6fff', '#00e5a0']} fontSize={12} />
-            <View style={styles.rhInfo}>
-              <Text style={styles.rhName}>Emeka Johnson</Text>
-              <Text style={styles.rhSub}>OPay {'\u00B7'} 0812 456 7890 {'\u00B7'} Nigeria</Text>
-            </View>
-            <View style={[styles.rhStatus, { backgroundColor: config.iconBg }]}>
-              <Text style={[styles.rhStatusText, { color: config.iconColor }]}>
-                {status === 'delivered' ? '\u2713 Delivered' : config.label}
-              </Text>
+        {/* Details card */}
+        <View style={styles.detailsCard}>
+          {/* You sent — token icon with Polygon network badge */}
+          <View style={styles.sentRow}>
+            <Text style={styles.rowLabel}>You sent</Text>
+            <View style={styles.sentValueWrap}>
+              <CryptoIcon token="USDT" network="Polygon" size={22} ringColor="#17171A" />
+              <Text style={styles.sentValueText}>200 USDT</Text>
             </View>
           </View>
-          <View style={styles.receiptRows}>
-            <ReceiptRow label="Amount received" value={'\u20A6329,000'} valueStyle={styles.greenVal} />
-            <ReceiptRow label="You sent" value="200 USDT" />
-            <ReceiptRow label="Exchange rate" value={'\u20A61,645 / USDT'} />
-            <ReceiptRow label="Fee" value={'\u20A63,290 (0.98%)'} />
-            <ReceiptRow label="From wallet" value="Qupay Wallet" />
-            <ReceiptRow label="Network" value="Polygon" />
-            <ReceiptRow label="Date & time" value="21 Mar 2026 \u00B7 09:41 SGT" />
-            <ReceiptRow label="Reference" value="QP-2026-0384-7821" valueStyle={styles.refVal} isLast />
-          </View>
+          <Divider />
+          <Row label="They received" value={'\u20A6329,000'} emphasis />
+          <Divider />
+          <Row label="Rate" value={'1 USDT = \u20A61,645'} />
+          <Divider />
+          <Row label="Fee" value={'\u20A63,290 (0.98%)'} />
+          <Divider />
+          <Row label="Network" value="Polygon (PoS)" />
+          <Divider />
+          <Row label="Delivered in" value="4m 11s" />
+          <Divider />
+          <Row label="Delivered at" value={'21 Mar 2026 \u00B7 09:41 SGT'} />
+          <Divider />
+          <TouchableOpacity activeOpacity={0.6}>
+            <Row label="Reference" value="QP-2026-0384-7821" mono />
+          </TouchableOpacity>
         </View>
 
-        {/* Dispute section */}
-        {(status === 'delivered' || status === 'disputed') && (
-          <View style={styles.disputeSection}>
-            <TouchableOpacity
-              style={styles.disputeBtn}
-              onPress={() => setShowDispute(!showDispute)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.disputeBtnText}>Recipient says they didn't receive it</Text>
-            </TouchableOpacity>
-            {showDispute && (
-              <View style={styles.disputeOpts}>
-                {[
-                  "Recipient's account wasn't credited",
-                  'Received wrong amount',
-                  'Transfer showing as delivered but unconfirmed',
-                  'Something else',
-                ].map((opt) => (
-                  <TouchableOpacity key={opt} style={styles.disputeOpt} activeOpacity={0.7}>
-                    <Text style={styles.disputeOptText}>{opt}</Text>
-                  </TouchableOpacity>
-                ))}
-                <Text style={styles.disputeNote}>
-                  Our team resolves disputes within 2 hours. Funds are protected until resolved.
-                </Text>
-              </View>
-            )}
+        {/* Bank logo strip — cash-out provider context */}
+        <View style={styles.providerCard}>
+          <BankLogo name={method} size={36} />
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={styles.providerLabel}>Cashed out via</Text>
+            <Text style={styles.providerName}>{method} {'\u00B7'} {phone}</Text>
           </View>
-        )}
-
-        <View style={styles.bottomPad}>
-          <CTAButton title="Send again to Emeka" onPress={() => navigation.goBack()} />
+          <Ionicons name="checkmark-circle" size={18} color={config.color} />
         </View>
-        <View style={{ height: 12 }} />
+
+        {/* Quick actions card */}
+        <View style={styles.actionsCard}>
+          <ActionRow
+            icon="cloud-download"
+            label="Save receipt"
+            sub="Download a PDF copy"
+            onPress={() => {}}
+          />
+          <Divider />
+          <ActionRow
+            icon="share"
+            label="Share with recipient"
+            sub="Send a link with delivery details"
+            onPress={() => {}}
+          />
+          <Divider />
+          <ActionRow
+            icon="trending-up"
+            label="Watch this rate"
+            sub="Get notified when USD/NGN hits your target"
+            onPress={() => {}}
+          />
+          <Divider />
+          <ActionRow
+            icon="time"
+            label="Make this recurring"
+            sub={`Send 200 USDT to ${firstName} every month`}
+            onPress={() => {}}
+          />
+        </View>
       </ScrollView>
+
+      {/* Footer CTAs */}
+      <View style={styles.footer}>
+        {config.showSendAgain && (
+          <TouchableOpacity style={styles.ctaPrimary} onPress={sendAgain} activeOpacity={0.85}>
+            <Ionicons name="send" size={18} color="#0A0A0C" />
+            <Text style={styles.ctaPrimaryText}>Send to {firstName} again</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity style={styles.ctaSecondary} onPress={goHome} activeOpacity={0.85}>
+          <Text style={styles.ctaSecondaryText}>Back to home</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
 
-const ReceiptRow: React.FC<{
-  label: string;
-  value: string;
-  valueStyle?: object;
-  isLast?: boolean;
-}> = ({ label, value, valueStyle, isLast }) => (
-  <View style={[styles.rr, isLast && styles.rrLast]}>
-    <Text style={styles.rrLabel}>{label}</Text>
-    <Text style={[styles.rrValue, valueStyle]}>{value}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
-  scroll: { flex: 1 },
-  statusBand: {
-    paddingVertical: 20,
-    paddingHorizontal: 24,
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
+  glow: { position: 'absolute', top: 0, left: 0, right: 0, height: 320 },
+
+  headerBar: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
   },
-  statusIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    borderWidth: 2,
+  iconBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 17,
+    color: '#FFFFFF',
+  },
+
+  // Hero
+  hero: { alignItems: 'center', paddingTop: 8, paddingBottom: 24 },
+  checkCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
   },
-  statusLabel: {
+  heroLabel: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
-    letterSpacing: 1,
+    fontSize: 13,
+    marginTop: 16,
+    letterSpacing: 0.3,
     textTransform: 'uppercase',
-    marginBottom: 8,
   },
-  tdAmount: {
-    fontFamily: 'Inter_800ExtraBold',
-    fontSize: 36,
-    letterSpacing: -1,
-    color: '#FFFFF5',
-    marginBottom: 4,
+  heroAmount: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 42,
+    color: '#FFFFFF',
+    marginTop: 6,
+    letterSpacing: -0.8,
   },
-  tdRecv: {
+  heroSub: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: 'rgba(255,255,245,0.6)',
-    marginBottom: 16,
+    color: 'rgba(255,255,255,0.58)',
+    marginTop: 4,
   },
-  tdCorridor: {
-    backgroundColor: '#222236',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 14,
-  },
-  tdCorridorText: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
-    color: '#FFFFF5',
-  },
-  // Actions
-  actionRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginHorizontal: 24,
-    marginBottom: 16,
-  },
-  actionBtn: {
-    flex: 1,
-    paddingVertical: 13,
-    paddingHorizontal: 8,
-    backgroundColor: '#222236',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,245,0.08)',
-    borderRadius: 12,
-    alignItems: 'center',
-    gap: 6,
-  },
-  actionIcon: { fontSize: 20 },
-  actionLabel: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 10,
-    color: 'rgba(255,255,245,0.6)',
-  },
-  // No account
-  noAcctBand: {
-    marginHorizontal: 24,
-    marginBottom: 16,
-    backgroundColor: '#222236',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
-    borderRadius: 12,
-    padding: 14,
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'flex-start',
-  },
-  noAcctIcon: { fontSize: 20 },
-  noAcctTextWrap: { flex: 1 },
-  noAcctTitle: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
-    color: '#FFFFF5',
-    marginBottom: 2,
-  },
-  noAcctBody: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 11,
-    color: 'rgba(255,255,245,0.6)',
-    lineHeight: 17,
-  },
-  // Receipt card
-  receiptCard: {
-    marginHorizontal: 24,
-    marginBottom: 16,
-    backgroundColor: '#222236',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  receiptHeader: {
+
+  // Recipient summary card
+  recipientCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    padding: 14,
+    backgroundColor: '#17171A',
+    borderRadius: 16,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,245,0.08)',
+    paddingVertical: 14,
+    marginHorizontal: 20,
   },
-  rhInfo: { flex: 1 },
-  rhName: {
+  recipientName: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 14,
-    color: '#FFFFF5',
+    fontSize: 15,
+    color: '#FFFFFF',
   },
-  rhSub: {
+  recipientSub: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 11,
-    color: 'rgba(255,255,245,0.6)',
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.58)',
+    marginTop: 2,
   },
-  rhStatus: {
+  statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
+    borderRadius: 999,
+    paddingHorizontal: 9,
     paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 20,
   },
-  rhStatusText: {
-    fontFamily: 'Inter_700Bold',
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  statusPillText: {
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
   },
-  receiptRows: {},
-  rr: {
+
+  // Details card
+  detailsCard: {
+    backgroundColor: '#17171A',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    marginHorizontal: 20,
+    marginTop: 12,
+  },
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 11,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,245,0.08)',
+    paddingVertical: 12,
   },
-  rrLast: { borderBottomWidth: 0 },
-  rrLabel: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: 'rgba(255,255,245,0.6)',
-  },
-  rrValue: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 11,
-    color: '#FFFFF5',
-    textAlign: 'right',
-    fontVariant: ['tabular-nums'],
-  },
-  greenVal: {
-    color: '#00E5A0',
-    fontFamily: 'Inter_700Bold',
-    fontSize: 12,
-  },
-  refVal: {
-    fontSize: 10,
-    letterSpacing: 0.5,
-  },
-  // Dispute
-  disputeSection: {
-    marginHorizontal: 24,
-    marginBottom: 16,
-  },
-  disputeBtn: {
-    padding: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  disputeBtnText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: 'rgba(255,255,245,0.6)',
-    textAlign: 'center',
-  },
-  disputeOpts: {
-    backgroundColor: 'rgba(255,77,106,0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,77,106,0.2)',
-    borderRadius: 12,
-    padding: 14,
-  },
-  disputeOpt: {
-    padding: 12,
-    backgroundColor: '#222236',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
-    borderRadius: 9,
-    marginBottom: 8,
-  },
-  disputeOptText: {
+  rowLabel: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: '#FFFFF5',
+    color: 'rgba(255,255,255,0.58)',
   },
-  disputeNote: {
+  rowValue: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontVariant: ['tabular-nums'],
+  },
+  rowValueMono: {
+    fontFamily: 'Inter_500Medium',
+    letterSpacing: 0.3,
+  },
+  rowValueEmphasis: {
+    color: '#38BDF8',
+    fontFamily: 'Inter_700Bold',
+    fontSize: 14,
+  },
+  // "You sent" row — left label, right token icon + amount
+  sentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  sentValueWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sentValueText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontVariant: ['tabular-nums'],
+  },
+  divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
+
+  // Provider strip
+  providerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#17171A',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    marginTop: 12,
+  },
+  providerLabel: {
     fontFamily: 'Inter_400Regular',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.6)',
-    lineHeight: 17,
-    marginTop: 8,
+    color: 'rgba(255,255,255,0.58)',
   },
-  bottomPad: {
-    paddingHorizontal: 24,
-    marginBottom: 16,
+  providerName: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    color: '#FFFFFF',
+    marginTop: 1,
+  },
+
+  // Actions card
+  actionsCard: {
+    backgroundColor: '#17171A',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    marginHorizontal: 20,
+    marginTop: 12,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+  },
+  actionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(56,189,248,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionLabel: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: '#FFFFFF',
+  },
+  actionSub: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.58)',
+    marginTop: 2,
+  },
+
+  // Footer CTAs
+  footer: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    paddingTop: 12,
+    gap: 8,
+  },
+  ctaPrimary: {
+    flexDirection: 'row',
+    gap: 8,
+    backgroundColor: '#38BDF8',
+    borderRadius: 999,
+    paddingVertical: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ctaPrimaryText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 16,
+    color: '#0A0A0C',
+  },
+  ctaSecondary: {
+    backgroundColor: '#1F1F23',
+    borderRadius: 999,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  ctaSecondaryText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: '#FFFFFF',
   },
 });

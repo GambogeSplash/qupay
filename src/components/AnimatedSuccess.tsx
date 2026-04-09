@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from './Icon';
 import { useTheme, typography, spacing, borderRadius } from '../theme';
 import { useHaptics } from '../hooks/useHaptics';
 

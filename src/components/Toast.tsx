@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme, typography, spacing, borderRadius, shadows } from '../theme';
+import { Ionicons } from './Icon';
+import { useTheme, typography, spacing, borderRadius } from '../theme';
+// shadows intentionally not imported — local design has no toast shadow
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -59,7 +60,6 @@ export const Toast: React.FC<ToastProps> = ({
     <Animated.View
       style={[
         styles.container,
-        shadows.elevated,
         { backgroundColor: c.bg, transform: [{ translateY }], opacity },
       ]}
     >
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     top: spacing(14),
     left: spacing(4),
     right: spacing(4),
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.md, // R.md — local toast radius
     zIndex: 9999,
   },
   content: {

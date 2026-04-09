@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from './Icon';
 
 interface BackButtonProps {
   onPress: () => void;
@@ -15,7 +15,7 @@ export const BackButton: React.FC<BackButtonProps> = ({ onPress }) => {
       accessibilityLabel="Go back"
       accessibilityRole="button"
     >
-      <Ionicons name="arrow-back" size={18} color="#FFFFF5" />
+      <Ionicons name="arrow-back" size={18} color="#FFFFFF" />
     </TouchableOpacity>
   );
 };
@@ -25,9 +25,8 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#222236',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
+    backgroundColor: '#1F1F23', // P.cardInner
+    // No border — local back buttons sit clean on dark surfaces
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -178,22 +178,22 @@ export const OTPScreen: React.FC<Props> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   container: { flex: 1, justifyContent: 'space-between' },
   form: { paddingHorizontal: 28, paddingTop: 36 },
   headline: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 26,
     letterSpacing: -0.3,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     marginBottom: 8,
     lineHeight: 31,
   },
-  greenText: { color: '#00E5A0' },
+  greenText: { color: '#38BDF8' },
   desc: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginBottom: 24,
     lineHeight: 21,
   },
@@ -210,37 +210,37 @@ const styles = StyleSheet.create({
   otpCell: {
     flex: 1,
     height: 58,
-    backgroundColor: '#222236',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,245,0.08)',
+    backgroundColor: '#1F1F23',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   otpCellFill: {
-    borderColor: 'rgba(0,229,160,0.4)',
-    backgroundColor: 'rgba(0,229,160,0.12)',
+    borderColor: 'rgba(56,189,248,0.4)',
+    backgroundColor: 'rgba(56,189,248,0.12)',
   },
   otpCellCur: {
-    borderColor: '#00E5A0',
+    borderColor: '#38BDF8',
   },
   otpCellError: {
-    borderColor: '#FF4D6A',
+    borderColor: '#EF4444',
   },
   otpDigit: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 24,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
   },
   curLine: {
     width: 2,
     height: 24,
-    backgroundColor: '#00E5A0',
+    backgroundColor: '#38BDF8',
   },
   errorText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 13,
-    color: '#FF4D6A',
+    color: '#EF4444',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -251,20 +251,20 @@ const styles = StyleSheet.create({
   resendText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
   },
   resendLink: {
-    color: '#00E5A0',
+    color: '#38BDF8',
     fontFamily: 'Inter_600SemiBold',
   },
   resendLinkDisabled: {
-    color: 'rgba(255,255,245,0.4)',
+    color: 'rgba(255,255,255,0.4)',
   },
   resendTimer: {
-    color: 'rgba(255,255,245,0.4)',
+    color: 'rgba(255,255,255,0.4)',
   },
   bottom: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 12,
   },
 });

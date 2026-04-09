@@ -58,9 +58,9 @@ export const corridors: Corridor[] = [
 
 export const recipients: Recipient[] = [
   { id: '1', name: 'Amara Obi', initials: 'AO', color: '#1A6FFF', phone: '+234 812 345 6789', country: 'Nigeria', flag: '🇳🇬', accountType: 'mobile_money', accountLabel: 'MTN MoMo', recent: true },
-  { id: '2', name: 'Kwame Asante', initials: 'KA', color: '#00E5A0', phone: '+233 24 567 8901', country: 'Ghana', flag: '🇬🇭', accountType: 'mobile_money', accountLabel: 'MTN MoMo', recent: true },
-  { id: '3', name: 'Faith Mwangi', initials: 'FM', color: '#FFD460', phone: '+254 712 345 678', country: 'Kenya', flag: '🇰🇪', accountType: 'mobile_money', accountLabel: 'M-Pesa', recent: true },
-  { id: '4', name: 'Carlos Rivera', initials: 'CR', color: '#FF4D6A', phone: '+52 55 1234 5678', country: 'Mexico', flag: '🇲🇽', accountType: 'bank', accountLabel: 'Banorte', recent: false },
+  { id: '2', name: 'Kwame Asante', initials: 'KA', color: '#38BDF8', phone: '+233 24 567 8901', country: 'Ghana', flag: '🇬🇭', accountType: 'mobile_money', accountLabel: 'MTN MoMo', recent: true },
+  { id: '3', name: 'Faith Mwangi', initials: 'FM', color: '#FFD60A', phone: '+254 712 345 678', country: 'Kenya', flag: '🇰🇪', accountType: 'mobile_money', accountLabel: 'M-Pesa', recent: true },
+  { id: '4', name: 'Carlos Rivera', initials: 'CR', color: '#EF4444', phone: '+52 55 1234 5678', country: 'Mexico', flag: '🇲🇽', accountType: 'bank', accountLabel: 'Banorte', recent: false },
   { id: '5', name: 'Priya Sharma', initials: 'PS', color: '#9896FF', phone: '+91 98765 43210', country: 'India', flag: '🇮🇳', accountType: 'bank', accountLabel: 'HDFC Bank', recent: false },
   { id: '6', name: 'Maria Santos', initials: 'MS', color: '#00bfff', phone: '+63 917 123 4567', country: 'Philippines', flag: '🇵🇭', accountType: 'mobile_money', accountLabel: 'GCash', recent: false },
 ];
@@ -218,7 +218,7 @@ export interface WalletContact {
 }
 
 export const walletContacts: WalletContact[] = [
-  { id: 'w1', name: 'Alex Chen', initials: 'AC', colors: ['#1a6fff', '#00e5a0'], walletAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18', network: 'Polygon', networkIcon: 'triangle-outline' },
+  { id: 'w1', name: 'Alex Chen', initials: 'AC', colors: ['#1a6fff', '#38bdf8'], walletAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18', network: 'Polygon', networkIcon: 'triangle-outline' },
   { id: 'w2', name: 'Sarah Kim', initials: 'SK', colors: ['#ff9f43', '#ff4d6a'], walletAddress: '0x8Ba1f109551bD432803012645Ac136ddd64DBA72', network: 'Base', networkIcon: 'layers-outline' },
   { id: 'w3', name: 'Mike Johnson', initials: 'MJ', colors: ['#a855f7', '#1a6fff'], walletAddress: '0x1CBd3b2770909D4e10f157cABC84C7264073C9Ec', network: 'Ethereum', networkIcon: 'logo-electron' },
 ];

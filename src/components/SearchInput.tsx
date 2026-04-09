@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from './Icon';
 import { useTheme, typography, spacing, borderRadius } from '../theme';
 
 interface SearchInputProps {

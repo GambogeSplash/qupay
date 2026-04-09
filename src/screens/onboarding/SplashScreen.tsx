@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '../../components/Icon';
 import { QupayLogo, CTAButton } from '../../components';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/AppNavigator';
@@ -79,7 +79,7 @@ export const SplashScreen: React.FC<Props> = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
           <View style={styles.footer}>
-            <Ionicons name="shield-checkmark-outline" size={11} color="rgba(255,255,245,0.4)" />
+            <Ionicons name="shield-checkmark-outline" size={11} color="rgba(255,255,255,0.4)" />
             <Text style={styles.footerText}>Licensed & regulated globally</Text>
           </View>
         </View>
@@ -91,7 +91,7 @@ export const SplashScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#111118',
+    backgroundColor: '#0A0A0C',
   },
   container: {
     flex: 1,
@@ -105,28 +105,28 @@ const styles = StyleSheet.create({
     height: 36,
   },
   headline: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 32,
     lineHeight: 35,
     letterSpacing: -0.5,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     marginBottom: 12,
   },
   greenText: {
-    color: '#00E5A0',
+    color: '#38BDF8',
   },
   description: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
     lineHeight: 23,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     marginBottom: 32,
   },
   statRow: {
     flexDirection: 'row',
-    backgroundColor: '#222236',
+    backgroundColor: '#1F1F23',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,245,0.08)',
+    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 32,
@@ -139,23 +139,23 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    backgroundColor: 'rgba(255,255,245,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   statVal: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 18,
-    color: '#00E5A0',
+    color: '#38BDF8',
     marginBottom: 2,
   },
   statLabel: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 9,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
   },
   bottom: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 12,
   },
   ctaBtn: {
@@ -164,12 +164,12 @@ const styles = StyleSheet.create({
   loginText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 11,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',
     marginBottom: 20,
   },
   loginLink: {
-    color: '#00E5A0',
+    color: '#38BDF8',
     fontFamily: 'Inter_600SemiBold',
   },
   footer: {
@@ -182,6 +182,6 @@ const styles = StyleSheet.create({
   footerText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 10,
-    color: 'rgba(255,255,245,0.4)',
+    color: 'rgba(255,255,255,0.4)',
   },
 });

@@ -217,22 +217,22 @@ export const PinResetScreen: React.FC<Props> = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#111118' },
+  safe: { flex: 1, backgroundColor: '#0A0A0C' },
   container: { flex: 1, justifyContent: 'space-between' },
   header: { paddingHorizontal: 28, paddingTop: 36 },
   headline: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 26,
     letterSpacing: -0.3,
-    color: '#FFFFF5',
+    color: '#FFFFFF',
     marginBottom: 8,
     lineHeight: 31,
   },
-  greenText: { color: '#00E5A0' },
+  greenText: { color: '#38BDF8' },
   desc: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
     lineHeight: 21,
   },
   pinArea: {
@@ -247,21 +247,21 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,245,0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
     backgroundColor: 'transparent',
   },
   dotFilled: {
-    backgroundColor: '#00E5A0',
-    borderColor: '#00E5A0',
+    backgroundColor: '#38BDF8',
+    borderColor: '#38BDF8',
   },
   dotError: {
-    borderColor: '#FF4D6A',
+    borderColor: '#EF4444',
   },
   errorText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 13,
-    color: '#FF4D6A',
+    color: '#EF4444',
     marginTop: 16,
   },
   resendRow: {
@@ -270,20 +270,20 @@ const styles = StyleSheet.create({
   resendText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: 'rgba(255,255,245,0.6)',
+    color: 'rgba(255,255,255,0.6)',
   },
   resendLink: {
-    color: '#00E5A0',
+    color: '#38BDF8',
     fontFamily: 'Inter_600SemiBold',
   },
   resendLinkDisabled: {
-    color: 'rgba(255,255,245,0.4)',
+    color: 'rgba(255,255,255,0.4)',
   },
   resendTimer: {
-    color: 'rgba(255,255,245,0.4)',
+    color: 'rgba(255,255,255,0.4)',
   },
   bottom: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 12,
   },
   btnRow: {

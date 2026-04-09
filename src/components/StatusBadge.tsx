@@ -9,15 +9,15 @@ interface StatusBadgeProps {
 }
 
 const bgMap: Record<BadgeVariant, string> = {
-  green: 'rgba(0,229,160,0.12)',
-  yellow: 'rgba(255,212,96,0.1)',
-  red: 'rgba(255,77,106,0.1)',
+  green: 'rgba(56,189,248,0.12)',
+  yellow: 'rgba(255,214,10,0.1)',
+  red: 'rgba(239,68,68,0.1)',
 };
 
 const colorMap: Record<BadgeVariant, string> = {
-  green: '#00E5A0',
-  yellow: '#FFD460',
-  red: '#FF4D6A',
+  green: '#38BDF8',
+  yellow: '#FFD60A',
+  red: '#EF4444',
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ label, variant }) => {

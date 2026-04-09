@@ -15,7 +15,7 @@ export const QupayLogo: React.FC<QupayLogoProps> = ({ size = 22 }) => {
         styles.logo,
         {
           fontSize: size,
-          color: '#00E5A0',
+          color: '#38BDF8',
         },
       ]}
     >
@@ -26,7 +26,7 @@ export const QupayLogo: React.FC<QupayLogoProps> = ({ size = 22 }) => {
 
 const styles = StyleSheet.create({
   logo: {
-    fontFamily: 'Inter_800ExtraBold',
+    fontFamily: 'Inter_700Bold', // local maxes at bold (no ExtraBold)
     letterSpacing: -0.5,
   },
 });

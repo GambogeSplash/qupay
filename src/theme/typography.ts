@@ -1,13 +1,15 @@
 import { TextStyle } from 'react-native';
 
-// Qupay uses Syne for headlines, DM Sans for body, DM Mono for numbers
-// We substitute Inter_700Bold/800ExtraBold for Syne, Inter for DM Sans
+// Reskinned to match /Users/fubara/qupay tokens — local design tops out at
+// Inter_700Bold (no ExtraBold). We keep the `extraBold` key for API compat
+// but point it at Inter_700Bold so the whole system dims without per-screen
+// edits. Letter-spacing kept slightly tight to preserve display rhythm.
 export const fontFamily = {
   regular: 'Inter_400Regular',
   medium: 'Inter_500Medium',
   semiBold: 'Inter_600SemiBold',
   bold: 'Inter_700Bold',
-  extraBold: 'Inter_800ExtraBold',
+  extraBold: 'Inter_700Bold',
 };
 
 type TypographyVariant = TextStyle;
