@@ -14,10 +14,10 @@ export interface BrandLogo {
 // Bank / mobile money providers, keyed by lowercased name.
 // Add aliases (e.g., "mtn momo") so lookups are forgiving.
 export const BANK_LOGOS: Record<string, BrandLogo> = {
-  // Nigeria — fintech / neobanks
-  'opay': { uri: 'https://logo.clearbit.com/opayweb.com', bg: '#1B6DDD' },
+  // Nigeria — fintech / neobanks (verified domains for Clearbit resolution)
+  'opay': { uri: 'https://logo.clearbit.com/opayweb.com', bg: '#1DCE59' },
   'palmpay': { uri: 'https://logo.clearbit.com/palmpay.com', bg: '#7F44E8' },
-  'kuda': { uri: 'https://logo.clearbit.com/kuda.com', bg: '#40196D' },
+  'kuda': { uri: 'https://logo.clearbit.com/kudabank.com', bg: '#40196D' },
   'moniepoint': { uri: 'https://logo.clearbit.com/moniepoint.com', bg: '#0357EE' },
   'carbon': { uri: 'https://logo.clearbit.com/getcarbon.co', bg: '#0F36B6' },
   'fairmoney': { uri: 'https://logo.clearbit.com/fairmoney.io', bg: '#0066FF' },
@@ -26,10 +26,10 @@ export const BANK_LOGOS: Record<string, BrandLogo> = {
   'risevest': { uri: 'https://logo.clearbit.com/risevest.com', bg: '#1D2939' },
   'bamboo': { uri: 'https://logo.clearbit.com/investbamboo.com', bg: '#0EBC65' },
   'chipper': { uri: 'https://logo.clearbit.com/chippercash.com', bg: '#3361FF' },
-  // Nigeria — traditional banks
-  'gtbank': { uri: 'https://logo.clearbit.com/gtbank.com', bg: '#E55B13' },
-  'gtb': { uri: 'https://logo.clearbit.com/gtbank.com', bg: '#E55B13' },
-  'gtco': { uri: 'https://logo.clearbit.com/gtbank.com', bg: '#E55B13' },
+  // Nigeria — traditional banks (using gtco.com for GTBank since they rebranded)
+  'gtbank': { uri: 'https://logo.clearbit.com/gtco.com', bg: '#E55B13' },
+  'gtb': { uri: 'https://logo.clearbit.com/gtco.com', bg: '#E55B13' },
+  'gtco': { uri: 'https://logo.clearbit.com/gtco.com', bg: '#E55B13' },
   'access': { uri: 'https://logo.clearbit.com/accessbankplc.com', bg: '#003594' },
   'access bank': { uri: 'https://logo.clearbit.com/accessbankplc.com', bg: '#003594' },
   'zenith': { uri: 'https://logo.clearbit.com/zenithbank.com', bg: '#E60012' },
@@ -162,11 +162,11 @@ export type AvatarStyle =
   | 'fun-emoji'
   | 'rings';
 
-export const getAvatarUri = (seed: string, style: AvatarStyle = 'shapes'): string => {
+export const getAvatarUri = (seed: string, style: AvatarStyle = 'notionists'): string => {
   const safeSeed = encodeURIComponent(seed.trim() || 'qupay');
-  // Background colors picked from the brand palette so avatars feel consistent.
-  // The DiceBear API accepts comma-separated hex values without the leading #.
-  const bg = '38bdf8,0ea5e9,4ade80,fbbf24,f87171,a78bfa,fb923c,2dd4bf';
+  // notionists = line-art human portraits, feels personal and premium.
+  // Background colors from brand palette for variety.
+  const bg = '38bdf8,0ea5e9,4ade80,fbbf24,a78bfa,fb923c,2dd4bf,f472b6';
   return `https://api.dicebear.com/7.x/${style}/png?seed=${safeSeed}&backgroundColor=${bg}&backgroundType=gradientLinear&size=256`;
 };
 

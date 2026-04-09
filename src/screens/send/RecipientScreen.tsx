@@ -46,12 +46,8 @@ export const RecipientScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={{ width: 36 }} />
-        <Text style={styles.title}>Send</Text>
-        <View style={{ width: 36 }} />
-      </View>
+      {/* No title — clean entry, search speaks for itself */}
+      <View style={{ height: 8 }} />
 
       {/* Search bar with rotating placeholder */}
       <View style={styles.searchBar}>

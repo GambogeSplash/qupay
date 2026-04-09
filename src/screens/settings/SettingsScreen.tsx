@@ -165,13 +165,6 @@ export const ProfileScreen: React.FC<{ navigation?: any }> = () => {
         <Text style={styles.sectionLabel}>More</Text>
         <View style={styles.linksCard}>
           <LinkRow
-            icon="trending-up"
-            label="Rate alerts"
-            sub="Get notified when your target hits"
-            onPress={() => go('RateAlerts')}
-          />
-          <Divider />
-          <LinkRow
             icon="gift"
             label="Invite friends"
             sub="Earn $5 when they send their first transfer"

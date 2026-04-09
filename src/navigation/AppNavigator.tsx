@@ -38,9 +38,6 @@ import { ConfirmScreen } from '../screens/send/ConfirmScreen';
 import { DepositWaitingScreen } from '../screens/send/DepositWaitingScreen';
 import { SuccessScreen } from '../screens/send/SuccessScreen';
 
-// Home
-import { HomeScreen } from '../screens/home/HomeScreen';
-
 // New recipient flow
 import { AddRecipientScreen } from '../screens/send/AddRecipientScreen';
 
@@ -210,19 +207,10 @@ function SendTabNavigator() {
   );
 }
 
-function HomeStackNavigator() {
-  const HomeStack = createNativeStackNavigator();
-  return (
-    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
-      <HomeStack.Screen name="Home" component={HomeScreen} />
-    </HomeStack.Navigator>
-  );
-}
-
 function MainTabs() {
   return (
     <Tab.Navigator
-      initialRouteName="HomeTab"
+      initialRouteName="SendTab"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
@@ -244,7 +232,6 @@ function MainTabs() {
         tabBarIcon: ({ focused, color }) => {
           let iconName = 'ellipse';
           switch (route.name) {
-            case 'HomeTab': iconName = 'home'; break;
             case 'SendTab': iconName = 'send'; break;
             case 'ActivityTab': iconName = 'time'; break;
             case 'ProfileTab': iconName = 'person'; break;
@@ -253,7 +240,6 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ tabBarLabel: 'HOME' }} />
       <Tab.Screen name="SendTab" component={SendTabNavigator} options={{ tabBarLabel: 'SEND' }} />
       <Tab.Screen name="ActivityTab" component={HistoryStackNavigator} options={{ tabBarLabel: 'ACTIVITY' }} />
       <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ tabBarLabel: 'PROFILE' }} />

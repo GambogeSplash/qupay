@@ -191,6 +191,18 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
 
       <View style={{ flex: 1 }} />
 
+      {/* Continue CTA — above numpad so it's always visible */}
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={[styles.cta, !canNext && styles.ctaDisabled]}
+          disabled={!canNext}
+          onPress={handleContinue}
+          activeOpacity={0.85}
+        >
+          <Text style={[styles.ctaText, !canNext && styles.ctaTextDisabled]}>Continue</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Custom numpad */}
       <View style={styles.numpad}>
         {KEYS.map((row, ri) => (
@@ -206,18 +218,6 @@ export const AmountScreen: React.FC<Props> = ({ navigation, route }) => {
             ))}
           </View>
         ))}
-      </View>
-
-      {/* Continue CTA */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={[styles.cta, !canNext && styles.ctaDisabled]}
-          disabled={!canNext}
-          onPress={handleContinue}
-          activeOpacity={0.85}
-        >
-          <Text style={[styles.ctaText, !canNext && styles.ctaTextDisabled]}>Continue</Text>
-        </TouchableOpacity>
       </View>
       {/* Stablecoin + blockchain picker */}
       <BottomSheet visible={showCoinPicker} onClose={() => setShowCoinPicker(false)} title="Pay with">

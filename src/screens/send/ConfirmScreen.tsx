@@ -158,22 +158,6 @@ export const ConfirmScreen: React.FC<Props> = ({ navigation, route }) => {
           </Text>
         </TouchableOpacity>
 
-        {/* Deposit address (fiat-out only) */}
-        {!isCryptoOut && (
-          <View style={styles.depositCard}>
-            <Text style={styles.depositLabel}>Deposit {sendCurrency} to this address</Text>
-            <TouchableOpacity style={styles.addressBox} onPress={handleCopy} activeOpacity={0.7}>
-              <Text style={styles.addressMono} numberOfLines={1}>
-                {DEPOSIT_ADDRESS.slice(0, 14)}...{DEPOSIT_ADDRESS.slice(-8)}
-              </Text>
-              <Ionicons name={copied ? 'checkmark-circle' : 'copy'} size={18} color={copied ? '#4ADE80' : '#38BDF8'} />
-            </TouchableOpacity>
-            <View style={styles.warnRow}>
-              <Ionicons name="alert-circle" size={13} color="#FFD60A" />
-              <Text style={styles.warnText}>Only send {sendCurrency} on Polygon. Other tokens or networks may be lost.</Text>
-            </View>
-          </View>
-        )}
       </ScrollView>
 
       {/* CTA — generate deposit address */}

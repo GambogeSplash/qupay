@@ -101,18 +101,7 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <Text style={[styles.headerTitle, { textAlign: 'left', flex: 0 }]}>Activity</Text>
-      </View>
-
-      {/* Total sent stat card */}
-      <View style={styles.totalSentCard}>
-        <Text style={styles.totalSentLabel}>Total sent · <Text style={styles.totalSentValue}>$450.00</Text></Text>
-        <Text style={styles.totalSentCount}>5 transfers</Text>
-      </View>
-
-      {/* Search bar */}
+      {/* Search bar — no title, clean entry */}
       <View style={styles.searchWrap}>
         <SearchInput
           value={query}
