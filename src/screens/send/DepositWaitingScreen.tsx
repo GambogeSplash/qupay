@@ -71,12 +71,12 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
   const pulse = useRef(new Animated.Value(1)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
 
-  // Pulse for waiting dot
+  // Pulse — faster, more visible breathing
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.4, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.3, duration: 700, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 700, useNativeDriver: true }),
       ]),
     ).start();
   }, [pulse]);
@@ -158,32 +158,35 @@ export const DepositWaitingScreen: React.FC<Props> = ({ navigation, route }) => 
     const ringColor = isDone ? '#4ADE80' : '#38BDF8';
     return (
       <SafeAreaView style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]} edges={['top']}>
-        {/* Radar pulse rings — animated scale + opacity */}
+        {/* Radar — dramatic animated rings with fills */}
         <View style={styles.radarWrap}>
-          {/* Outer ring — slow pulse */}
+          {/* Outer ring — filled, pulsing scale */}
           <Animated.View style={[styles.radarRing3, {
+            backgroundColor: isDone ? 'rgba(74,222,128,0.04)' : 'rgba(56,189,248,0.04)',
             borderColor: ringColor,
-            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.08, 0.2] }),
-            transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.15, 1] }) }],
+            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.3, 0.8] }),
+            transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.2, 1] }) }],
           }]} />
-          {/* Middle ring — medium pulse */}
+          {/* Middle ring — filled, offset pulse */}
           <Animated.View style={[styles.radarRing2, {
+            backgroundColor: isDone ? 'rgba(74,222,128,0.06)' : 'rgba(56,189,248,0.06)',
             borderColor: ringColor,
-            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.15, 0.35] }),
-            transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.08, 1] }) }],
+            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.4, 1] }),
+            transform: [{ scale: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [1.1, 1] }) }],
           }]} />
-          {/* Inner ring — strong pulse */}
+          {/* Inner ring — strong glow */}
           <Animated.View style={[styles.radarRing1, {
+            backgroundColor: isDone ? 'rgba(74,222,128,0.1)' : 'rgba(56,189,248,0.1)',
             borderColor: ringColor,
-            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.25, 0.5] }),
+            opacity: pulse.interpolate({ inputRange: [0.4, 1], outputRange: [0.5, 1] }),
           }]} />
-          {/* Center icon — spins when not done */}
+          {/* Center — spins when active, pops green when done */}
           <Animated.View style={[
             styles.radarCenter,
-            isDone && { backgroundColor: 'rgba(74,222,128,0.15)' },
+            { backgroundColor: isDone ? 'rgba(74,222,128,0.2)' : 'rgba(56,189,248,0.15)' },
             !isDone && { transform: [{ rotate: spinRotate }] },
           ]}>
-            <Ionicons name={currentStep.icon as any} size={32} color={isDone ? '#4ADE80' : '#38BDF8'} />
+            <Ionicons name={currentStep.icon as any} size={36} color={isDone ? '#4ADE80' : '#38BDF8'} />
           </Animated.View>
         </View>
 
@@ -319,22 +322,21 @@ const styles = StyleSheet.create({
   },
 
   // Radar detecting
-  radarWrap: { width: 180, height: 180, alignItems: 'center', justifyContent: 'center', marginBottom: 32 },
+  radarWrap: { width: 220, height: 220, alignItems: 'center', justifyContent: 'center', marginBottom: 40 },
   radarRing3: {
-    position: 'absolute', width: 180, height: 180, borderRadius: 90,
-    borderWidth: 1, borderColor: 'rgba(56,189,248,0.1)',
+    position: 'absolute', width: 220, height: 220, borderRadius: 110,
+    borderWidth: 2,
   },
   radarRing2: {
-    position: 'absolute', width: 120, height: 120, borderRadius: 60,
-    borderWidth: 1.5, borderColor: 'rgba(56,189,248,0.2)',
+    position: 'absolute', width: 160, height: 160, borderRadius: 80,
+    borderWidth: 2,
   },
   radarRing1: {
-    position: 'absolute', width: 85, height: 85, borderRadius: 42.5,
-    borderWidth: 2, borderColor: 'rgba(56,189,248,0.3)',
+    position: 'absolute', width: 105, height: 105, borderRadius: 52.5,
+    borderWidth: 2.5,
   },
   radarCenter: {
-    width: 64, height: 64, borderRadius: 32,
-    backgroundColor: 'rgba(56,189,248,0.12)',
+    width: 72, height: 72, borderRadius: 36,
     alignItems: 'center', justifyContent: 'center',
   },
   detectingTitle: { fontFamily: 'Inter_700Bold', fontSize: 22, color: '#FFFFFF', marginBottom: 8, textAlign: 'center' },
